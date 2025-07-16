@@ -1,0 +1,24 @@
+    /* src/styles/global.css */
+
+    /* توجيهات Tailwind CSS الأساسية */
+/*     @tailwind base;
+    @tailwind components;
+    @tailwind utilities; */
+    /* أنماط عامة إضافية (إذا أردت، وإلا يمكن إزالتها) */
+    body {
+      margin: 0;
+      /* استخدام خط Inter كخط افتراضي */
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #f4f6f9; /* لون خلفية خفيف للتطبيق بالكامل */
+      line-height: 1.5; /* تحسين قابلية القراءة */
+    }
+
+    /* هذا الكود يساعد على تثبيت التذييل في الأسفل إذا كان المحتوى قصيرًا */
+    #root {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
