@@ -1,0 +1,2816 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+
+class UserController extends Controller
+{
+    /**
+     * Display a listing of the users.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        // عرض جميع المستخدمين، مع إمكانية التصفية أو البحث لاحقًا
+        $users = User::all();
+        return response()->json($users);
+    }
+
+    /**
+     * Store a newly created user in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'username' => 'required|string|max:50|unique:users,username',
+                'email' => 'required|string|email|max:100|unique:users,email',
+                'password' => 'required|string|min:8|confirmed',
+                'first_name' => 'nullable|string|max:50',
+                'last_name' => 'nullable|string|max:50',
+                'phone_number' => 'nullable|string|max:20',
+                'profile_picture_url' => 'nullable|url|max:255',
+                'is_admin' => 'boolean',
+                'status' => 'string|in:active,inactive,suspended',
+            ]);
+
+            $user = User::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password), // تشفير كلمة المرور
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'phone_number' => $request->phone_number,
+                'profile_picture_url' => $request->profile_picture_url,
+                'is_admin' => $request->is_admin ?? false, // القيمة الافتراضية false
+                'status' => $request->status ?? 'active', // القيمة الافتراضية active
+            ]);
+
+            // يمكنك إنشاء رمز API للمستخدم هنا إذا كنت تستخدم Sanctum للمصادقة القائمة على الرمز
+            // $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'User created successfully',
+                'user' => $user,
+                // 'token' => $token, // أرسل الرمز إذا كنت تستخدمه
+            ], 201); // 201 Created
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422); // 422 Unprocessable Entity
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while creating the user.',
+                'error' => $e->getMessage(),
+            ], 500); // 500 Internal Server Error
+        }
+    }
+
+    /**
+     * Display the specified user.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(User $user)
+    {
+        // يتم حقن نموذج المستخدم تلقائيًا (Route Model Binding)
+        return response()->json($user);
+    }
+
+    /**
+     * Update the specified user in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, User $user)
+    {
+        try {
+            $request->validate([
+                'username' => 'sometimes|required|string|max:50|unique:users,username,' . $user->user_id . ',user_id',
+                'email' => 'sometimes|required|string|email|max:100|unique:users,email,' . $user->user_id . ',user_id',
+                'password' => 'nullable|string|min:8|confirmed', // يمكن أن يكون فارغًا للتحديث
+                'first_name' => 'nullable|string|max:50',
+                'last_name' => 'nullable|string|max:50',
+                'phone_number' => 'nullable|string|max:20',
+                'profile_picture_url' => 'nullable|url|max:255',
+                'is_admin' => 'boolean',
+                'status' => 'string|in:active,inactive,suspended',
+            ]);
+
+            $userData = $request->except('password', 'password_confirmation'); // استبعاد كلمة المرور إذا لم يتم تحديثها
+
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+
+            $user->update($userData);
+
+            return response()->json([
+                'message' => 'User updated successfully',
+                'user' => $user,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the user.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified user from storage.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(User $user)
+    {
+        try {
+            $user->delete(); // يقوم بالحذف الناعم بسبب SoftDeletes trait في النموذج
+
+            return response()->json([
+                'message' => 'User deleted successfully (soft deleted)',
+            ], 204); // 204 No Content
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the user.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+/* ```
+**شرح:**
+* **`index()`:** يجلب جميع المستخدمين.
+* **`store(Request $request)`:** يتحقق من صحة البيانات المدخلة، يقوم بتشفير كلمة المرور، وينشئ مستخدمًا جديدًا.
+* **`show(User $user)`:** يستخدم Route Model Binding لجلب المستخدم المحدد تلقائيًا.
+* **`update(Request $request, User $user)`:** يتحقق من صحة البيانات (مع استثناء المستخدم الحالي من التحقق الفريد لـ `username` و `email`)، ويقوم بتحديث بيانات المستخدم. يسمح بتحديث كلمة المرور بشكل اختياري.
+* **`destroy(User $user)`:** يقوم بالحذف الناعم للمستخدم بفضل `SoftDeletes` trait في نموذج `User`.
+
+**2.1.3. تعريف المسارات لـ `Users` في `routes/api.php`:**
+
+افتح ملف `routes/api.php` وأضف السطر التالي:
+
+
+```php */
+
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\AddressController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\OrderItemController;
+use App\Http\Controllers\Api\ShoppingCartController;
+use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\ProductImageController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ProductAttributeController;
+use App\Http\Controllers\Api\DiscountController;
+use App\Http\Controllers\Api\AuthController; // لإنشاء AuthController لاحقاً
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
+
+// مسارات المصادقة (سنقوم بإنشاء AuthController لاحقًا)
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// مسارات محمية بـ Sanctum (تتطلب مصادقة)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // مسارات المستخدمين
+    Route::apiResource('users', UserController::class);
+
+    // مسارات الفئات
+    Route::apiResource('categories', CategoryController::class);
+
+    // مسارات العلامات التجارية
+    Route::apiResource('brands', BrandController::class);
+
+    // مسارات المنتجات
+    Route::apiResource('products', ProductController::class);
+
+    // مسارات العناوين
+    Route::apiResource('addresses', AddressController::class);
+
+    // مسارات الطلبات
+    Route::apiResource('orders', OrderController::class);
+
+    // مسارات عناصر الطلب
+    Route::apiResource('order-items', OrderItemController::class);
+
+    // مسارات سلة التسوق
+    Route::apiResource('shopping-cart', ShoppingCartController::class);
+
+    // مسارات المراجعات
+    Route::apiResource('reviews', ReviewController::class);
+
+    // مسارات صور المنتجات
+    Route::apiResource('product-images', ProductImageController::class);
+
+    // مسارات المدفوعات
+    Route::apiResource('payments', PaymentController::class);
+
+    // مسارات سمات المنتجات
+    Route::apiResource('product-attributes', ProductAttributeController::class);
+
+    // مسارات الخصومات
+    Route::apiResource('discounts', DiscountController::class);
+});
+```
+**شرح:**
+* `Route::apiResource('users', UserController::class);`: هذا السطر ينشئ تلقائيًا جميع مسارات RESTful API القياسية (index, store, show, update, destroy) لنموذج `User` ويربطها بـ `UserController`.
+* لقد أضفت جميع `apiResource` لجميع الموارد الأخرى أيضًا، وسننشئ Controllers الخاصة بها لاحقًا.
+* تم وضع جميع مسارات الموارد داخل `Route::middleware('auth:sanctum')->group(...)`، مما يعني أن هذه المسارات تتطلب مصادقة المستخدم عبر Sanctum.
+
+---
+
+#### **2.2. الفئات (Categories)**
+
+**2.2.1. إنشاء Controller للفئات:**
+
+```bash
+php artisan make:controller Api/CategoryController --api --model=Category
+```
+
+**2.2.2. تعديل `app/Http/Controllers/Api/CategoryController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class CategoryController extends Controller
+{
+    /**
+     * Display a listing of the categories.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        // يمكن تضمين الفئات الفرعية أو الفئة الأم
+        $categories = Category::with('parent', 'children')->get();
+        return response()->json($categories);
+    }
+
+    /**
+     * Store a newly created category in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:100',
+                'slug' => 'required|string|max:100|unique:categories,slug',
+                'description' => 'nullable|string',
+                'parent_id' => 'nullable|exists:categories,category_id', // يجب أن يكون موجودًا في جدول الفئات
+                'image_url' => 'nullable|url|max:255',
+                'status' => 'string|in:active,inactive',
+            ]);
+
+            $category = Category::create($request->all());
+
+            return response()->json([
+                'message' => 'Category created successfully',
+                'category' => $category,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while creating the category.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified category.
+     *
+     * @param  \App\Models\Category  $category
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Category $category)
+    {
+        // يمكن تضمين الفئات الفرعية أو الفئة الأم
+        $category->load('parent', 'children');
+        return response()->json($category);
+    }
+
+    /**
+     * Update the specified category in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Category  $category
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Category $category)
+    {
+        try {
+            $request->validate([
+                'name' => 'sometimes|required|string|max:100',
+                'slug' => 'sometimes|required|string|max:100|unique:categories,slug,' . $category->category_id . ',category_id',
+                'description' => 'nullable|string',
+                'parent_id' => 'nullable|exists:categories,category_id',
+                'image_url' => 'nullable|url|max:255',
+                'status' => 'string|in:active,inactive',
+            ]);
+
+            $category->update($request->all());
+
+            return response()->json([
+                'message' => 'Category updated successfully',
+                'category' => $category,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the category.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified category from storage.
+     *
+     * @param  \App\Models\Category  $category
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Category $category)
+    {
+        try {
+            // Laravel سيقوم تلقائياً بتعيين parent_id للفئات الفرعية إلى NULL بسبب onDelete('set null') في الهجرة
+            // وسيتم حذف المنتجات المرتبطة إذا كان onDelete('cascade')
+            $category->delete();
+
+            return response()->json([
+                'message' => 'Category deleted successfully',
+            ], 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the category.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+/* ```
+
+---
+
+#### **2.3. العلامات التجارية (Brands)**
+
+**2.3.1. إنشاء Controller للعلامات التجارية:**
+
+```bash
+php artisan make:controller Api/BrandController --api --model=Brand
+```
+
+**2.3.2. تعديل `app/Http/Controllers/Api/BrandController.php`:**
+
+
+```php
+ */
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Brand;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class BrandController extends Controller
+{
+    /**
+     * Display a listing of the brands.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        $brands = Brand::all();
+        return response()->json($brands);
+    }
+
+    /**
+     * Store a newly created brand in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:100',
+                'slug' => 'required|string|max:100|unique:brands,slug',
+                'description' => 'nullable|string',
+                'logo_url' => 'nullable|url|max:255',
+                'status' => 'string|in:active,inactive',
+            ]);
+
+            $brand = Brand::create($request->all());
+
+            return response()->json([
+                'message' => 'Brand created successfully',
+                'brand' => $brand,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while creating the brand.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified brand.
+     *
+     * @param  \App\Models\Brand  $brand
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Brand $brand)
+    {
+        return response()->json($brand);
+    }
+
+    /**
+     * Update the specified brand in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Brand  $brand
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Brand $brand)
+    {
+        try {
+            $request->validate([
+                'name' => 'sometimes|required|string|max:100',
+                'slug' => 'sometimes|required|string|max:100|unique:brands,slug,' . $brand->brand_id . ',brand_id',
+                'description' => 'nullable|string',
+                'logo_url' => 'nullable|url|max:255',
+                'status' => 'string|in:active,inactive',
+            ]);
+
+            $brand->update($request->all());
+
+            return response()->json([
+                'message' => 'Brand updated successfully',
+                'brand' => $brand,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the brand.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified brand from storage.
+     *
+     * @param  \App\Models\Brand  $brand
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Brand $brand)
+    {
+        try {
+            // المنتجات المرتبطة سيتم تعيين brand_id لها إلى NULL بسبب onDelete('set null') في الهجرة
+            $brand->delete();
+
+            return response()->json([
+                'message' => 'Brand deleted successfully',
+            ], 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the brand.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+```
+
+---
+
+#### **2.4. المنتجات (Products)**
+
+**2.4.1. إنشاء Controller للمنتجات:**
+
+```bash
+php artisan make:controller Api/ProductController --api --model=Product
+```
+
+**2.4.2. تعديل `app/Http/Controllers/Api/ProductController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class ProductController extends Controller
+{
+    /**
+     * Display a listing of the products.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request)
+    {
+        // يمكن تضمين العلاقات (category, brand, images, attributes)
+        // يمكن إضافة تصفية وبحث وفرز هنا
+        $products = Product::with(['category', 'brand', 'images', 'attributes'])
+                           ->when($request->category_id, function ($query, $categoryId) {
+                               return $query->where('category_id', $categoryId);
+                           })
+                           ->when($request->brand_id, function ($query, $brandId) {
+                               return $query->where('brand_id', $brandId);
+                           })
+                           ->when($request->search, function ($query, $search) {
+                               return $query->where('name', 'like', '%' . $search . '%')
+                                            ->orWhere('description', 'like', '%' . $search . '%');
+                           })
+                           ->paginate(10); // تقسيم النتائج
+
+        return response()->json($products);
+    }
+
+    /**
+     * Store a newly created product in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'slug' => 'required|string|max:255|unique:products,slug',
+                'description' => 'nullable|string',
+                'short_description' => 'nullable|string|max:500',
+                'price' => 'required|numeric|min:0',
+                'compare_at_price' => 'nullable|numeric|min:0|gte:price',
+                'cost_price' => 'nullable|numeric|min:0',
+                'stock_quantity' => 'required|integer|min:0',
+                'sku' => 'nullable|string|max:100|unique:products,sku',
+                'weight' => 'nullable|numeric|min:0',
+                'length' => 'nullable|numeric|min:0',
+                'width' => 'nullable|numeric|min:0',
+                'height' => 'nullable|numeric|min:0',
+                'category_id' => 'required|exists:categories,category_id',
+                'brand_id' => 'nullable|exists:brands,brand_id',
+                'main_image_url' => 'nullable|url|max:255',
+                'is_featured' => 'boolean',
+                'status' => 'string|in:active,draft,archived',
+            ]);
+
+            $product = Product::create($request->all());
+
+            return response()->json([
+                'message' => 'Product created successfully',
+                'product' => $product,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while creating the product.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified product.
+     *
+     * @param  \App\Models\Product  $product
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Product $product)
+    {
+        // تضمين العلاقات عند عرض منتج واحد
+        $product->load('category', 'brand', 'images', 'reviews', 'attributes');
+        return response()->json($product);
+    }
+
+    /**
+     * Update the specified product in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Product  $product
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Product $product)
+    {
+        try {
+            $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'slug' => 'sometimes|required|string|max:255|unique:products,slug,' . $product->product_id . ',product_id',
+                'description' => 'nullable|string',
+                'short_description' => 'nullable|string|max:500',
+                'price' => 'sometimes|required|numeric|min:0',
+                'compare_at_price' => 'nullable|numeric|min:0|gte:price',
+                'cost_price' => 'nullable|numeric|min:0',
+                'stock_quantity' => 'sometimes|required|integer|min:0',
+                'sku' => 'nullable|string|max:100|unique:products,sku,' . $product->product_id . ',product_id',
+                'weight' => 'nullable|numeric|min:0',
+                'length' => 'nullable|numeric|min:0',
+                'width' => 'nullable|numeric|min:0',
+                'height' => 'nullable|numeric|min:0',
+                'category_id' => 'sometimes|required|exists:categories,category_id',
+                'brand_id' => 'nullable|exists:brands,brand_id',
+                'main_image_url' => 'nullable|url|max:255',
+                'is_featured' => 'boolean',
+                'status' => 'string|in:active,draft,archived',
+            ]);
+
+            $product->update($request->all());
+
+            return response()->json([
+                'message' => 'Product updated successfully',
+                'product' => $product,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the product.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified product from storage.
+     *
+     * @param  \App\Models\Product  $product
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Product $product)
+    {
+        try {
+            $product->delete(); // يقوم بالحذف الناعم
+
+            return response()->json([
+                'message' => 'Product deleted successfully (soft deleted)',
+            ], 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the product.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+```
+
+---
+
+#### **2.5. العناوين (Addresses)**
+
+**2.5.1. إنشاء Controller للعناوين:**
+
+```bash
+php artisan make:controller Api/AddressController --api --model=Address
+```
+
+**2.5.2. تعديل `app/Http/Controllers/Api/AddressController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Address;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class AddressController extends Controller
+{
+    /**
+     * Display a listing of the addresses.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        // عرض العناوين للمستخدم الحالي فقط (إذا كان مصادقًا)
+        // أو جميع العناوين إذا كان مسؤولاً
+        if (auth()->check()) {
+            if (auth()->user()->is_admin) {
+                $addresses = Address::all();
+            } else {
+                $addresses = Address::where('user_id', auth()->user()->user_id)->get();
+            }
+            return response()->json($addresses);
+        }
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+
+    /**
+     * Store a newly created address in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'user_id' => 'required|exists:users,user_id', // يمكن أن يكون هذا تلقائيًا للمستخدم المصادق
+                'address_type' => 'required|string|in:shipping,billing',
+                'address_line1' => 'required|string|max:255',
+                'address_line2' => 'nullable|string|max:255',
+                'city' => 'required|string|max:100',
+                'state' => 'nullable|string|max:100',
+                'postal_code' => 'nullable|string|max:20',
+                'country' => 'required|string|max:100',
+                'is_default' => 'boolean',
+            ]);
+
+            // التأكد من أن المستخدم المصادق هو من يضيف العنوان أو أن المسؤول يضيفه
+            if (auth()->check() && (auth()->user()->user_id == $request->user_id || auth()->user()->is_admin)) {
+                $address = Address::create($request->all());
+                return response()->json([
+                    'message' => 'Address created successfully',
+                    'address' => $address,
+                ], 201);
+            }
+
+            return response()->json(['message' => 'Unauthorized to create address for this user'], 403);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while creating the address.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified address.
+     *
+     * @param  \App\Models\Address  $address
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Address $address)
+    {
+        // التأكد من أن المستخدم المصادق يملك العنوان أو أنه مسؤول
+        if (auth()->check() && (auth()->user()->user_id == $address->user_id || auth()->user()->is_admin)) {
+            return response()->json($address);
+        }
+        return response()->json(['message' => 'Unauthorized to view this address'], 403);
+    }
+
+    /**
+     * Update the specified address in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Address  $address
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Address $address)
+    {
+        try {
+            // التأكد من أن المستخدم المصادق يملك العنوان أو أنه مسؤول
+            if (auth()->check() && (auth()->user()->user_id == $address->user_id || auth()->user()->is_admin)) {
+                $request->validate([
+                    'user_id' => 'sometimes|required|exists:users,user_id',
+                    'address_type' => 'sometimes|required|string|in:shipping,billing',
+                    'address_line1' => 'sometimes|required|string|max:255',
+                    'address_line2' => 'nullable|string|max:255',
+                    'city' => 'sometimes|required|string|max:100',
+                    'state' => 'nullable|string|max:100',
+                    'postal_code' => 'nullable|string|max:20',
+                    'country' => 'sometimes|required|string|max:100',
+                    'is_default' => 'boolean',
+                ]);
+
+                $address->update($request->all());
+
+                return response()->json([
+                    'message' => 'Address updated successfully',
+                    'address' => $address,
+                ]);
+            }
+            return response()->json(['message' => 'Unauthorized to update this address'], 403);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the address.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified address from storage.
+     *
+     * @param  \App\Models\Address  $address
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Address $address)
+    {
+        try {
+            // التأكد من أن المستخدم المصادق يملك العنوان أو أنه مسؤول
+            if (auth()->check() && (auth()->user()->user_id == $address->user_id || auth()->user()->is_admin)) {
+                $address->delete();
+                return response()->json([
+                    'message' => 'Address deleted successfully',
+                ], 204);
+            }
+            return response()->json(['message' => 'Unauthorized to delete this address'], 403);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the address.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+```
+**شرح:**
+* تم إضافة منطق التحقق من الصلاحيات (`auth()->check()`, `auth()->user()->is_admin`, `auth()->user()->user_id == $address->user_id`) لضمان أن المستخدمين يمكنهم فقط عرض أو تعديل أو حذف عناوينهم الخاصة، بينما يمكن للمسؤولين إدارة جميع العناوين.
+
+---
+
+#### **2.6. الطلبات (Orders)**
+
+**2.6.1. إنشاء Controller للطلبات:**
+
+```bash
+php artisan make:controller Api/OrderController --api --model=Order
+```
+
+**2.6.2. تعديل `app/Http/Controllers/Api/OrderController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Order;
+use App\Models\ShoppingCart; // سنحتاجه لإنشاء الطلبات من سلة التسوق
+use App\Models\Product; // سنحتاجه للتحقق من المخزون
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
+
+class OrderController extends Controller
+{
+    /**
+     * Display a listing of the orders.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        // عرض الطلبات للمستخدم الحالي فقط أو جميع الطلبات إذا كان مسؤولاً
+        if (auth()->check()) {
+            if (auth()->user()->is_admin) {
+                $orders = Order::with(['user', 'shippingAddress', 'billingAddress', 'orderItems.product', 'payments'])->get();
+            } else {
+                $orders = Order::where('user_id', auth()->user()->user_id)
+                               ->with(['user', 'shippingAddress', 'billingAddress', 'orderItems.product', 'payments'])
+                               ->get();
+            }
+            return response()->json($orders);
+        }
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+
+    /**
+     * Store a newly created order in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        // هذه الدالة ستكون معقدة بعض الشيء لأنها تتضمن منطق إنشاء الطلب من سلة التسوق
+        // والتحقق من المخزون وإنشاء عناصر الطلب
+        try {
+            $request->validate([
+                'shipping_address_id' => 'required|exists:addresses,address_id',
+                'billing_address_id' => 'required|exists:addresses,address_id',
+                'payment_method' => 'required|string|max:50',
+                'shipping_method' => 'nullable|string|max:50',
+                'notes' => 'nullable|string',
+                // لا نطلب user_id هنا، سنأخذه من المستخدم المصادق
+            ]);
+
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
+
+            // التأكد من أن العناوين تنتمي للمستخدم المصادق
+            $shippingAddress = $user->addresses()->where('address_id', $request->shipping_address_id)->first();
+            $billingAddress = $user->addresses()->where('address_id', $request->billing_address_id)->first();
+
+            if (!$shippingAddress || !$billingAddress) {
+                return response()->json(['message' => 'Invalid shipping or billing address for this user'], 403);
+            }
+
+            // جلب عناصر سلة التسوق للمستخدم
+            $cartItems = ShoppingCart::where('user_id', $user->user_id)->get();
+
+            if ($cartItems->isEmpty()) {
+                return response()->json(['message' => 'Shopping cart is empty'], 400);
+            }
+
+            $totalAmount = 0;
+            $orderItemsData = [];
+
+            DB::beginTransaction(); // بدء معاملة قاعدة البيانات
+
+            // التحقق من المخزون وحساب الإجمالي
+            foreach ($cartItems as $cartItem) {
+                $product = Product::find($cartItem->product_id);
+
+                if (!$product || $product->stock_quantity < $cartItem->quantity) {
+                    DB::rollBack(); // التراجع عن المعاملة
+                    return response()->json(['message' => 'Product "' . $product->name . '" is out of stock or quantity requested is too high'], 400);
+                }
+
+                $subtotal = $product->price * $cartItem->quantity;
+                $totalAmount += $subtotal;
+
+                $orderItemsData[] = [
+                    'product_id' => $product->product_id,
+                    'quantity' => $cartItem->quantity,
+                    'price_at_order' => $product->price,
+                    'subtotal' => $subtotal,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+
+                // تحديث المخزون
+                $product->decrement('stock_quantity', $cartItem->quantity);
+            }
+
+            // إنشاء الطلب
+            $order = Order::create([
+                'user_id' => $user->user_id,
+                'order_date' => now(),
+                'total_amount' => $totalAmount,
+                'status' => 'pending', // الحالة الأولية
+                'shipping_address_id' => $request->shipping_address_id,
+                'billing_address_id' => $request->billing_address_id,
+                'payment_method' => $request->payment_method,
+                'payment_status' => 'unpaid', // الحالة الأولية
+                'shipping_method' => $request->shipping_method,
+                'notes' => $request->notes,
+            ]);
+
+            // إضافة عناصر الطلب
+            $order->orderItems()->createMany($orderItemsData);
+
+            // مسح سلة التسوق بعد إنشاء الطلب
+            ShoppingCart::where('user_id', $user->user_id)->delete();
+
+            DB::commit(); // تأكيد المعاملة
+
+            return response()->json([
+                'message' => 'Order created successfully',
+                'order' => $order->load('orderItems.product'), // تحميل تفاصيل المنتجات في عناصر الطلب
+            ], 201);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'An error occurred while creating the order.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified order.
+     *
+     * @param  \App\Models\Order  $order
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Order $order)
+    {
+        // التأكد من أن المستخدم المصادق يملك الطلب أو أنه مسؤول
+        if (auth()->check() && (auth()->user()->user_id == $order->user_id || auth()->user()->is_admin)) {
+            $order->load(['user', 'shippingAddress', 'billingAddress', 'orderItems.product', 'payments']);
+            return response()->json($order);
+        }
+        return response()->json(['message' => 'Unauthorized to view this order'], 403);
+    }
+
+    /**
+     * Update the specified order in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Order  $order
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Order $order)
+    {
+        try {
+            // فقط المسؤول يمكنه تحديث الطلبات
+            if (!auth()->check() || !auth()->user()->is_admin) {
+                return response()->json(['message' => 'Unauthorized to update orders'], 403);
+            }
+
+            $request->validate([
+                'total_amount' => 'sometimes|required|numeric|min:0',
+                'status' => 'sometimes|required|string|in:pending,processing,shipped,delivered,cancelled,refunded',
+                'shipping_address_id' => 'sometimes|required|exists:addresses,address_id',
+                'billing_address_id' => 'sometimes|required|exists:addresses,address_id',
+                'payment_method' => 'sometimes|required|string|max:50',
+                'payment_status' => 'sometimes|required|string|in:paid,unpaid,partially_paid,refunded',
+                'shipping_method' => 'nullable|string|max:50',
+                'tracking_number' => 'nullable|string|max:100',
+                'notes' => 'nullable|string',
+            ]);
+
+            $order->update($request->all());
+
+            return response()->json([
+                'message' => 'Order updated successfully',
+                'order' => $order,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the order.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified order from storage.
+     *
+     * @param  \App\Models\Order  $order
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Order $order)
+    {
+        try {
+            // فقط المسؤول يمكنه حذف الطلبات (حذف ناعم)
+            if (!auth()->check() || !auth()->user()->is_admin) {
+                return response()->json(['message' => 'Unauthorized to delete orders'], 403);
+            }
+
+            $order->delete(); // حذف ناعم
+
+            return response()->json([
+                'message' => 'Order deleted successfully (soft deleted)',
+            ], 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the order.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+```
+**شرح:**
+* **`store()`:** هذه الدالة هي الأكثر تعقيدًا.
+    * تتحقق من أن المستخدم مصادق عليه.
+    * تتحقق من أن عناوين الشحن والفواتير تنتمي للمستخدم.
+    * تجلب عناصر سلة التسوق للمستخدم.
+    * تستخدم `DB::beginTransaction()` و `DB::commit()` و `DB::rollBack()` لضمان سلامة البيانات (إذا فشلت أي خطوة، يتم التراجع عن جميع التغييرات).
+    * تتحقق من توفر المخزون لكل منتج في السلة وتخفضه.
+    * تنشئ الطلب وعناصر الطلب.
+    * تمسح سلة التسوق بعد إنشاء الطلب.
+* **`index()` و `show()`:** تحتوي على منطق للتحقق من أن المستخدم يمكنه فقط رؤية طلباته الخاصة، بينما يمكن للمسؤول رؤية جميع الطلبات.
+* **`update()` و `destroy()`:** مخصصة للمسؤولين فقط لتحديث أو حذف الطلبات.
+
+---
+
+#### **2.7. عناصر الطلب (Order_Items)**
+
+**2.7.1. إنشاء Controller لعناصر الطلب:**
+
+```bash
+php artisan make:controller Api/OrderItemController --api --model=OrderItem
+```
+
+**2.7.2. تعديل `app/Http/Controllers/Api/OrderItemController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\OrderItem;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class OrderItemController extends Controller
+{
+    /**
+     * Display a listing of the order items.
+     * (Usually accessed via an Order, but can be listed for admin)
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        // فقط المسؤول يمكنه عرض جميع عناصر الطلب
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        $orderItems = OrderItem::with(['order', 'product'])->get();
+        return response()->json($orderItems);
+    }
+
+    /**
+     * Store a newly created order item in storage.
+     * (Typically created when an Order is stored, not directly)
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        // عادةً ما يتم إنشاء عناصر الطلب كجزء من عملية إنشاء الطلب (في OrderController->store)
+        // لا يُنصح بإنشاء عناصر الطلب بشكل مباشر عبر API منفصلة لهذا الغرض
+        return response()->json([
+            'message' => 'Order items are created as part of the order creation process.',
+            'tip' => 'Please create an order via the /api/orders endpoint.',
+        ], 405); // 405 Method Not Allowed
+    }
+
+    /**
+     * Display the specified order item.
+     *
+     * @param  \App\Models\OrderItem  $orderItem
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(OrderItem $orderItem)
+    {
+        // التأكد من أن المستخدم يملك الطلب الذي يحتوي على هذا العنصر أو أنه مسؤول
+        if (auth()->check() && (auth()->user()->user_id == $orderItem->order->user_id || auth()->user()->is_admin)) {
+            $orderItem->load('order', 'product');
+            return response()->json($orderItem);
+        }
+        return response()->json(['message' => 'Unauthorized to view this order item'], 403);
+    }
+
+    /**
+     * Update the specified order item in storage.
+     * (Rarely updated directly, usually via order modifications for admin)
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\OrderItem  $orderItem
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, OrderItem $orderItem)
+    {
+        // عادةً ما يتم تحديث عناصر الطلب فقط من قبل المسؤولين أو كجزء من منطق معقد
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized to update order items'], 403);
+        }
+        try {
+            $request->validate([
+                'order_id' => 'sometimes|required|exists:orders,order_id',
+                'product_id' => 'sometimes|required|exists:products,product_id',
+                'quantity' => 'sometimes|required|integer|min:1',
+                'price_at_order' => 'sometimes|required|numeric|min:0',
+                'subtotal' => 'sometimes|required|numeric|min:0',
+            ]);
+
+            $orderItem->update($request->all());
+
+            return response()->json([
+                'message' => 'Order item updated successfully',
+                'order_item' => $orderItem,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the order item.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified order item from storage.
+     * (Rarely deleted directly, usually via order modifications for admin)
+     *
+     * @param  \App\Models\OrderItem  $orderItem
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(OrderItem $orderItem)
+    {
+        // عادةً ما يتم حذف عناصر الطلب فقط من قبل المسؤولين أو كجزء من منطق معقد
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized to delete order items'], 403);
+        }
+        try {
+            $orderItem->delete();
+            return response()->json([
+                'message' => 'Order item deleted successfully',
+            ], 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the order item.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+```
+**شرح:**
+* عمليات `store` و `update` و `destroy` لعناصر الطلب عادة ما تتم كجزء من إدارة الطلبات الأكبر. لذلك، تم تقييدها أو توضيح أنها ليست الطريقة الأساسية للتفاعل.
+* تم تطبيق منطق التحقق من الصلاحيات.
+
+---
+
+#### **2.8. سلة التسوق (Shopping_Cart)**
+
+**2.8.1. إنشاء Controller لسلة التسوق:**
+
+```bash
+php artisan make:controller Api/ShoppingCartController --api --model=ShoppingCart
+```
+
+**2.8.2. تعديل `app/Http/Controllers/Api/ShoppingCartController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\ShoppingCart;
+use App\Models\Product; // للتحقق من المخزون
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class ShoppingCartController extends Controller
+{
+    /**
+     * Display the shopping cart items for the authenticated user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $cartItems = ShoppingCart::where('user_id', $user->user_id)
+                                 ->with('product') // تحميل تفاصيل المنتج
+                                 ->get();
+
+        return response()->json($cartItems);
+    }
+
+    /**
+     * Add a product to the shopping cart or update its quantity.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'product_id' => 'required|exists:products,product_id',
+                'quantity' => 'required|integer|min:1',
+            ]);
+
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
+
+            $product = Product::find($request->product_id);
+            if (!$product) {
+                return response()->json(['message' => 'Product not found'], 404);
+            }
+
+            // البحث عن العنصر في السلة
+            $cartItem = ShoppingCart::where('user_id', $user->user_id)
+                                    ->where('product_id', $request->product_id)
+                                    ->first();
+
+            $newQuantity = $request->quantity;
+
+            if ($cartItem) {
+                // إذا كان العنصر موجودًا، قم بتحديث الكمية
+                $newQuantity = $cartItem->quantity + $request->quantity;
+                if ($product->stock_quantity < $newQuantity) {
+                    return response()->json(['message' => 'Requested quantity exceeds product stock'], 400);
+                }
+                $cartItem->update(['quantity' => $newQuantity]);
+            } else {
+                // إذا لم يكن العنصر موجودًا، قم بإنشاء عنصر جديد
+                if ($product->stock_quantity < $newQuantity) {
+                    return response()->json(['message' => 'Requested quantity exceeds product stock'], 400);
+                }
+                $cartItem = ShoppingCart::create([
+                    'user_id' => $user->user_id,
+                    'product_id' => $request->product_id,
+                    'quantity' => $newQuantity,
+                    'added_at' => now(),
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Product added/updated in cart successfully',
+                'cart_item' => $cartItem->load('product'),
+            ], 200); // 200 OK for update, 201 Created for new
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while adding/updating cart item.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified shopping cart item.
+     * (Typically not accessed directly, but for completeness)
+     *
+     * @param  \App\Models\ShoppingCart  $shoppingCart
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(ShoppingCart $shoppingCart)
+    {
+        // التأكد من أن المستخدم المصادق يملك عنصر السلة هذا
+        if (auth()->check() && auth()->user()->user_id == $shoppingCart->user_id) {
+            $shoppingCart->load('product');
+            return response()->json($shoppingCart);
+        }
+        return response()->json(['message' => 'Unauthorized to view this cart item'], 403);
+    }
+
+    /**
+     * Update the quantity of a shopping cart item.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\ShoppingCart  $shoppingCart
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, ShoppingCart $shoppingCart)
+    {
+        try {
+            // التأكد من أن المستخدم المصادق يملك عنصر السلة هذا
+            if (!auth()->check() || auth()->user()->user_id != $shoppingCart->user_id) {
+                return response()->json(['message' => 'Unauthorized to update this cart item'], 403);
+            }
+
+            $request->validate([
+                'quantity' => 'required|integer|min:0', // يمكن أن تكون 0 لحذف العنصر
+            ]);
+
+            $product = Product::find($shoppingCart->product_id);
+            if (!$product) {
+                return response()->json(['message' => 'Product not found for this cart item'], 404);
+            }
+
+            $newQuantity = $request->quantity;
+
+            if ($newQuantity == 0) {
+                // إذا كانت الكمية 0، قم بحذف العنصر من السلة
+                $shoppingCart->delete();
+                return response()->json(['message' => 'Product removed from cart successfully'], 204);
+            }
+
+            if ($product->stock_quantity < $newQuantity) {
+                return response()->json(['message' => 'Requested quantity exceeds product stock'], 400);
+            }
+
+            $shoppingCart->update(['quantity' => $newQuantity]);
+
+            return response()->json([
+                'message' => 'Cart item quantity updated successfully',
+                'cart_item' => $shoppingCart->load('product'),
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating cart item quantity.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified shopping cart item from storage.
+     *
+     * @param  \App\Models\ShoppingCart  $shoppingCart
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(ShoppingCart $shoppingCart)
+    {
+        try {
+            // التأكد من أن المستخدم المصادق يملك عنصر السلة هذا
+            if (!auth()->check() || auth()->user()->user_id != $shoppingCart->user_id) {
+                return response()->json(['message' => 'Unauthorized to delete this cart item'], 403);
+            }
+
+            $shoppingCart->delete();
+
+            return response()->json([
+                'message' => 'Cart item deleted successfully',
+            ], 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the cart item.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+```
+**شرح:**
+* **`index()`:** يعرض عناصر سلة التسوق للمستخدم المصادق فقط.
+* **`store()`:** يضيف منتجًا إلى السلة أو يزيد الكمية إذا كان المنتج موجودًا بالفعل. يتضمن التحقق من المخزون.
+* **`update()`:** يسمح بتحديث كمية منتج في السلة. إذا كانت الكمية 0، يتم حذف العنصر.
+* تم تطبيق منطق التحقق من الصلاحيات لضمان أن المستخدمين يتفاعلون فقط مع سلة التسوق الخاصة بهم.
+
+---
+
+#### **2.9. صور المنتجات (Product_Images)**
+
+**2.9.1. إنشاء Controller لصور المنتجات:**
+
+```bash
+php artisan make:controller Api/ProductImageController --api --model=ProductImage
+```
+
+**2.9.2. تعديل `app/Http/Controllers/Api/ProductImageController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\ProductImage;
+use App\Models\Product; // للتحقق من وجود المنتج
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage; // لرفع الملفات
+
+class ProductImageController extends Controller
+{
+    /**
+     * Display a listing of the product images.
+     * (Typically accessed via a product, but can be listed for admin)
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request)
+    {
+        // فقط المسؤول يمكنه عرض جميع صور المنتجات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $query = ProductImage::with('product');
+
+        if ($request->has('product_id')) {
+            $query->where('product_id', $request->product_id);
+        }
+
+        $images = $query->get();
+        return response()->json($images);
+    }
+
+    /**
+     * Store a newly created product image in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        // فقط المسؤول يمكنه إضافة صور المنتجات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $request->validate([
+                'product_id' => 'required|exists:products,product_id',
+                'image_file' => 'required_without:image_url|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // يمكن رفع ملف صورة
+                'image_url' => 'required_without:image_file|nullable|url|max:255', // أو توفير رابط صورة
+                'thumbnail_url' => 'nullable|url|max:255',
+                'alt_text' => 'nullable|string|max:255',
+                'sort_order' => 'integer|min:0',
+            ]);
+
+            $imageUrl = $request->image_url;
+            $thumbnailUrl = $request->thumbnail_url;
+
+            // إذا تم رفع ملف صورة
+            if ($request->hasFile('image_file')) {
+                $imageFile = $request->file('image_file');
+                $path = $imageFile->store('product_images', 'public'); // تخزين في storage/app/public/product_images
+
+                $imageUrl = Storage::url($path); // الحصول على الرابط العام
+                // يمكنك هنا إنشاء صورة مصغرة وتخزينها
+                // مثال: $thumbnailUrl = Storage::url(Storage::putFile('product_thumbnails', $imageFile, 'public'));
+            }
+
+            $productImage = ProductImage::create([
+                'product_id' => $request->product_id,
+                'image_url' => $imageUrl,
+                'thumbnail_url' => $thumbnailUrl,
+                'alt_text' => $request->alt_text,
+                'sort_order' => $request->sort_order ?? 0,
+            ]);
+
+            return response()->json([
+                'message' => 'Product image created successfully',
+                'product_image' => $productImage,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while creating the product image.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified product image.
+     *
+     * @param  \App\Models\ProductImage  $productImage
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(ProductImage $productImage)
+    {
+        // فقط المسؤول يمكنه عرض صور المنتجات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        $productImage->load('product');
+        return response()->json($productImage);
+    }
+
+    /**
+     * Update the specified product image in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\ProductImage  $productImage
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, ProductImage $productImage)
+    {
+        // فقط المسؤول يمكنه تحديث صور المنتجات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $request->validate([
+                'product_id' => 'sometimes|required|exists:products,product_id',
+                'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // يمكن رفع ملف صورة جديد
+                'image_url' => 'nullable|url|max:255',
+                'thumbnail_url' => 'nullable|url|max:255',
+                'alt_text' => 'nullable|string|max:255',
+                'sort_order' => 'integer|min:0',
+            ]);
+
+            $updateData = $request->except(['image_file']); // استبعاد ملف الصورة من التحديث المباشر
+
+            // إذا تم رفع ملف صورة جديد
+            if ($request->hasFile('image_file')) {
+                // حذف الصورة القديمة إذا كانت موجودة وتخزينها محليًا
+                if ($productImage->image_url && str_contains($productImage->image_url, '/storage/')) {
+                    Storage::disk('public')->delete(str_replace('/storage/', '', $productImage->image_url));
+                }
+
+                $imageFile = $request->file('image_file');
+                $path = $imageFile->store('product_images', 'public');
+                $updateData['image_url'] = Storage::url($path);
+                // تحديث الصورة المصغرة إذا لزم الأمر
+            } elseif ($request->has('image_url')) {
+                // إذا تم توفير رابط URL مباشر، استخدمه
+                $updateData['image_url'] = $request->image_url;
+            }
+
+            $productImage->update($updateData);
+
+            return response()->json([
+                'message' => 'Product image updated successfully',
+                'product_image' => $productImage,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the product image.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified product image from storage.
+     *
+     * @param  \App\Models\ProductImage  $productImage
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(ProductImage $productImage)
+    {
+        // فقط المسؤول يمكنه حذف صور المنتجات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            // حذف الملف المادي إذا كان مخزنًا محليًا
+            if ($productImage->image_url && str_contains($productImage->image_url, '/storage/')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $productImage->image_url));
+            }
+            if ($productImage->thumbnail_url && str_contains($productImage->thumbnail_url, '/storage/')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $productImage->thumbnail_url));
+            }
+
+            $productImage->delete();
+
+            return response()->json([
+                'message' => 'Product image deleted successfully',
+            ], 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the product image.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+```
+**شرح:**
+* هذا Controller مخصص للمسؤولين فقط لإدارة صور المنتجات.
+* دالة `store()` و `update()` تدعم رفع الملفات (Images) إلى مجلد `storage/app/public/product_images` في Laravel.
+    * **ملاحظة هامة:** لتفعيل الوصول العام للملفات المخزنة في `storage/app/public`، يجب تشغيل الأمر التالي في سطر الأوامر مرة واحدة:
+        ```bash
+        php artisan storage:link
+        ```
+        هذا سينشئ رابطًا رمزيًا من `public/storage` إلى `storage/app/public`.
+* دالة `destroy()` تحذف الصورة من قاعدة البيانات ومن نظام الملفات إذا كانت مخزنة محليًا.
+
+---
+
+#### **2.10. المدفوعات (Payments)**
+
+**2.10.1. إنشاء Controller للمدفوعات:**
+
+```bash
+php artisan make:controller Api/PaymentController --api --model=Payment
+```
+
+**2.10.2. تعديل `app/Http/Controllers/Api/PaymentController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Payment;
+use App\Models\Order; // لتحديث حالة الطلب
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
+
+class PaymentController extends Controller
+{
+    /**
+     * Display a listing of the payments.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        // عرض الدفعات للمستخدم الحالي فقط أو جميع الدفعات إذا كان مسؤولاً
+        if (auth()->check()) {
+            if (auth()->user()->is_admin) {
+                $payments = Payment::with(['user', 'order'])->get();
+            } else {
+                $payments = Payment::where('user_id', auth()->user()->user_id)
+                                   ->with(['user', 'order'])
+                                   ->get();
+            }
+            return response()->json($payments);
+        }
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+
+    /**
+     * Store a newly created payment in storage.
+     * (This would typically be triggered by a payment gateway webhook or client-side confirmation)
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'order_id' => 'required|exists:orders,order_id',
+                'payment_method' => 'required|string|max:50',
+                'amount' => 'required|numeric|min:0.01',
+                'currency' => 'required|string|max:10',
+                'transaction_id' => 'nullable|string|max:255|unique:payments,transaction_id',
+                'payment_status' => 'required|string|in:completed,pending,failed,refunded',
+                'gateway_response' => 'nullable|json', // يمكن أن يكون كائن JSON
+            ]);
+
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
+
+            $order = Order::find($request->order_id);
+            if (!$order) {
+                return response()->json(['message' => 'Order not found'], 404);
+            }
+
+            // التأكد من أن المستخدم المصادق يملك الطلب أو أنه مسؤول
+            if ($user->user_id != $order->user_id && !$user->is_admin) {
+                return response()->json(['message' => 'Unauthorized to create payment for this order'], 403);
+            }
+
+            DB::beginTransaction();
+
+            $payment = Payment::create([
+                'order_id' => $request->order_id,
+                'user_id' => $user->user_id, // ربط الدفعة بالمستخدم المصادق
+                'payment_method' => $request->payment_method,
+                'amount' => $request->amount,
+                'currency' => $request->currency,
+                'transaction_id' => $request->transaction_id,
+                'payment_status' => $request->payment_status,
+                'payment_date' => now(),
+                'gateway_response' => $request->gateway_response,
+            ]);
+
+            // تحديث حالة دفع الطلب بناءً على الدفعة
+            if ($request->payment_status === 'completed') {
+                $order->update(['payment_status' => 'paid']);
+            } elseif ($request->payment_status === 'refunded') {
+                $order->update(['payment_status' => 'refunded']);
+            } else {
+                $order->update(['payment_status' => 'partially_paid']); // أو أي منطق آخر
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Payment recorded successfully',
+                'payment' => $payment,
+            ], 201);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'An error occurred while recording the payment.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified payment.
+     *
+     * @param  \App\Models\Payment  $payment
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Payment $payment)
+    {
+        // التأكد من أن المستخدم المصادق يملك الدفعة أو أنه مسؤول
+        if (auth()->check() && (auth()->user()->user_id == $payment->user_id || auth()->user()->is_admin)) {
+            $payment->load('user', 'order');
+            return response()->json($payment);
+        }
+        return response()->json(['message' => 'Unauthorized to view this payment'], 403);
+    }
+
+    /**
+     * Update the specified payment in storage.
+     * (Typically done by admin or automated system)
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Payment  $payment
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Payment $payment)
+    {
+        // فقط المسؤول يمكنه تحديث المدفوعات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized to update payments'], 403);
+        }
+
+        try {
+            $request->validate([
+                'order_id' => 'sometimes|required|exists:orders,order_id',
+                'user_id' => 'sometimes|required|exists:users,user_id',
+                'payment_method' => 'sometimes|required|string|max:50',
+                'amount' => 'sometimes|required|numeric|min:0.01',
+                'currency' => 'sometimes|required|string|max:10',
+                'transaction_id' => 'nullable|string|max:255|unique:payments,transaction_id,' . $payment->payment_id . ',payment_id',
+                'payment_status' => 'sometimes|required|string|in:completed,pending,failed,refunded',
+                'gateway_response' => 'nullable|json',
+            ]);
+
+            DB::beginTransaction();
+
+            $payment->update($request->all());
+
+            // تحديث حالة دفع الطلب المرتبط
+            $order = $payment->order;
+            if ($order) {
+                if ($request->filled('payment_status')) {
+                    if ($request->payment_status === 'completed') {
+                        $order->update(['payment_status' => 'paid']);
+                    } elseif ($request->payment_status === 'refunded') {
+                        $order->update(['payment_status' => 'refunded']);
+                    } else {
+                        // يمكن إضافة منطق أكثر تعقيدًا هنا
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Payment updated successfully',
+                'payment' => $payment,
+            ]);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the payment.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified payment from storage.
+     *
+     * @param  \App\Models\Payment  $payment
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Payment $payment)
+    {
+        // فقط المسؤول يمكنه حذف المدفوعات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $payment->delete();
+
+            // يمكن إضافة منطق لتحديث حالة دفع الطلب المرتبط هنا إذا لزم الأمر
+            // مثال: إذا كانت هذه هي الدفعة الوحيدة للطلب، قم بتغيير حالة الطلب إلى 'unpaid'
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Payment deleted successfully',
+            ], 204);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'An error occurred while deleting the payment.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+```
+**شرح:**
+* دالة `store()` ستكون هي النقطة التي يتم فيها تسجيل الدفعات بعد إتمام عملية الدفع عبر بوابة دفع خارجية.
+* تتضمن تحديث حالة الدفع للطلب المرتبط.
+* تم تطبيق منطق التحقق من الصلاحيات.
+
+---
+
+#### **2.11. سمات المنتجات (Product_Attributes)**
+
+**2.11.1. إنشاء Controller لسمات المنتجات:**
+
+```bash
+php artisan make:controller Api/ProductAttributeController --api --model=ProductAttribute
+```
+
+**2.11.2. تعديل `app/Http/Controllers/Api/ProductAttributeController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\ProductAttribute;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class ProductAttributeController extends Controller
+{
+    /**
+     * Display a listing of the product attributes.
+     * (Typically accessed via a product, but can be listed for admin)
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request)
+    {
+        // فقط المسؤول يمكنه عرض جميع سمات المنتجات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $query = ProductAttribute::with('product');
+
+        if ($request->has('product_id')) {
+            $query->where('product_id', $request->product_id);
+        }
+
+        $attributes = $query->get();
+        return response()->json($attributes);
+    }
+
+    /**
+     * Store a newly created product attribute in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        // فقط المسؤول يمكنه إضافة سمات المنتجات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $request->validate([
+                'product_id' => 'required|exists:products,product_id',
+                'attribute_name' => 'required|string|max:100',
+                'attribute_value' => 'required|string|max:255',
+            ]);
+
+            // التحقق من التفرد (product_id, attribute_name, attribute_value)
+            $existingAttribute = ProductAttribute::where('product_id', $request->product_id)
+                                                ->where('attribute_name', $request->attribute_name)
+                                                ->where('attribute_value', $request->attribute_value)
+                                                ->first();
+            if ($existingAttribute) {
+                return response()->json([
+                    'message' => 'This attribute with this value already exists for this product.',
+                ], 409); // 409 Conflict
+            }
+
+            $productAttribute = ProductAttribute::create($request->all());
+
+            return response()->json([
+                'message' => 'Product attribute created successfully',
+                'product_attribute' => $productAttribute,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while creating the product attribute.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified product attribute.
+     *
+     * @param  \App\Models\ProductAttribute  $productAttribute
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(ProductAttribute $productAttribute)
+    {
+        // فقط المسؤول يمكنه عرض سمات المنتجات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        $productAttribute->load('product');
+        return response()->json($productAttribute);
+    }
+
+    /**
+     * Update the specified product attribute in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\ProductAttribute  $productAttribute
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, ProductAttribute $productAttribute)
+    {
+        // فقط المسؤول يمكنه تحديث سمات المنتجات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $request->validate([
+                'product_id' => 'sometimes|required|exists:products,product_id',
+                'attribute_name' => 'sometimes|required|string|max:100',
+                'attribute_value' => 'sometimes|required|string|max:255',
+            ]);
+
+            // التحقق من التفرد عند التحديث
+            $existingAttribute = ProductAttribute::where('product_id', $request->product_id ?? $productAttribute->product_id)
+                                                ->where('attribute_name', $request->attribute_name ?? $productAttribute->attribute_name)
+                                                ->where('attribute_value', $request->attribute_value ?? $productAttribute->attribute_value)
+                                                ->where('attribute_id', '!=', $productAttribute->attribute_id) // استبعاد العنصر الحالي
+                                                ->first();
+            if ($existingAttribute) {
+                return response()->json([
+                    'message' => 'This attribute with this value already exists for this product.',
+                ], 409);
+            }
+
+            $productAttribute->update($request->all());
+
+            return response()->json([
+                'message' => 'Product attribute updated successfully',
+                'product_attribute' => $productAttribute,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the product attribute.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified product attribute from storage.
+     *
+     * @param  \App\Models\ProductAttribute  $productAttribute
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(ProductAttribute $productAttribute)
+    {
+        // فقط المسؤول يمكنه حذف سمات المنتجات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $productAttribute->delete();
+            return response()->json([
+                'message' => 'Product attribute deleted successfully',
+            ], 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the product attribute.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+```
+**شرح:**
+* هذا Controller مخصص للمسؤولين فقط لإدارة سمات المنتجات.
+* يتضمن التحقق من التفرد لضمان عدم تكرار نفس السمة بنفس القيمة لنفس المنتج.
+
+---
+
+#### **2.12. الخصومات (Discounts)**
+
+**2.12.1. إنشاء Controller للخصومات:**
+
+```bash
+php artisan make:controller Api/DiscountController --api --model=Discount
+```
+
+**2.12.2. تعديل `app/Http/Controllers/Api/DiscountController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Discount;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class DiscountController extends Controller
+{
+    /**
+     * Display a listing of the discounts.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        // يمكن للمستخدمين عرض الخصومات النشطة، والمسؤولين عرض جميع الخصومات
+        if (auth()->check() && auth()->user()->is_admin) {
+            $discounts = Discount::all();
+        } else {
+            $discounts = Discount::where('is_active', true)
+                                 ->where(function ($query) {
+                                     $query->whereNull('start_date')
+                                           ->orWhere('start_date', '<=', now());
+                                 })
+                                 ->where(function ($query) {
+                                     $query->whereNull('end_date')
+                                           ->orWhere('end_date', '>=', now());
+                                 })
+                                 ->get();
+        }
+        return response()->json($discounts);
+    }
+
+    /**
+     * Store a newly created discount in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        // فقط المسؤول يمكنه إضافة خصومات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $request->validate([
+                'code' => 'nullable|string|max:50|unique:discounts,code',
+                'type' => 'required|string|in:percentage,fixed_amount,free_shipping',
+                'value' => 'required|numeric|min:0',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+                'min_amount' => 'nullable|numeric|min:0',
+                'usage_limit' => 'nullable|integer|min:1',
+                'is_active' => 'boolean',
+            ]);
+
+            $discount = Discount::create($request->all());
+
+            return response()->json([
+                'message' => 'Discount created successfully',
+                'discount' => $discount,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while creating the discount.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified discount.
+     *
+     * @param  \App\Models\Discount  $discount
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Discount $discount)
+    {
+        // يمكن للمستخدمين عرض الخصومات النشطة فقط، والمسؤولين عرض أي خصم
+        if (auth()->check() && auth()->user()->is_admin) {
+            return response()->json($discount);
+        } elseif ($discount->is_active && ($discount->start_date === null || $discount->start_date <= now()) && ($discount->end_date === null || $discount->end_date >= now())) {
+            return response()->json($discount);
+        }
+        return response()->json(['message' => 'Unauthorized or Discount not found/active'], 403);
+    }
+
+    /**
+     * Update the specified discount in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Discount  $discount
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Discount $discount)
+    {
+        // فقط المسؤول يمكنه تحديث الخصومات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $request->validate([
+                'code' => 'nullable|string|max:50|unique:discounts,code,' . $discount->discount_id . ',discount_id',
+                'type' => 'sometimes|required|string|in:percentage,fixed_amount,free_shipping',
+                'value' => 'sometimes|required|numeric|min:0',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+                'min_amount' => 'nullable|numeric|min:0',
+                'usage_limit' => 'nullable|integer|min:1',
+                'is_active' => 'boolean',
+            ]);
+
+            $discount->update($request->all());
+
+            return response()->json([
+                'message' => 'Discount updated successfully',
+                'discount' => $discount,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the discount.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified discount from storage.
+     *
+     * @param  \App\Models\Discount  $discount
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Discount $discount)
+    {
+        // فقط المسؤول يمكنه حذف الخصومات
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $discount->delete();
+            return response()->json([
+                'message' => 'Discount deleted successfully',
+            ], 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the discount.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+```
+**شرح:**
+* دالة `index()` تعرض الخصومات النشطة للمستخدمين العاديين، وجميع الخصومات للمسؤولين.
+* دالة `show()` تتحقق من أن الخصم نشط وتاريخه صالح للمستخدمين العاديين.
+* عمليات `store()`, `update()`, `destroy()` مخصصة للمسؤولين فقط.
+
+---
+
+### **3. المصادقة (Authentication) - `AuthController`**
+
+لإكمال الواجهة الخلفية، نحتاج إلى Controller للمصادقة (التسجيل، تسجيل الدخول، تسجيل الخروج).
+
+**3.1. إنشاء Controller للمصادقة:**
+
+```bash
+php artisan make:controller Api/AuthController
+```
+
+**3.2. تعديل `app/Http/Controllers/Api/AuthController.php`:**
+
+
+```php
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
+
+class AuthController extends Controller
+{
+    /**
+     * Register a new user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function register(Request $request)
+    {
+        try {
+            $request->validate([
+                'username' => 'required|string|max:50|unique:users,username',
+                'email' => 'required|string|email|max:100|unique:users,email',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+
+            $user = User::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'status' => 'active', // تعيين الحالة الافتراضية
+            ]);
+
+            // إنشاء رمز API للمستخدم
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'User registered successfully',
+                'user' => $user,
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred during registration.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Authenticate user and return a token.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function login(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|string|email',
+                'password' => 'required|string',
+            ]);
+
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                return response()->json([
+                    'message' => 'Invalid credentials',
+                ], 401);
+            }
+
+            // حذف الرموز القديمة (اختياري، لتحسين الأمان)
+            $user->tokens()->delete();
+
+            // إنشاء رمز API جديد
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Logged in successfully',
+                'user' => $user,
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred during login.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Log out the authenticated user (revoke token).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function logout(Request $request)
+    {
+        // حذف الرمز الحالي المستخدم للمصادقة
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully',
+        ]);
+    }
+}
+```
+**شرح:**
+* **`register()`:** يسجل مستخدمًا جديدًا ويقوم بتشفير كلمة المرور ثم ينشئ رمز API للمصادقة.
+* **`login()`:** يتحقق من بيانات الاعتماد، وينشئ رمز API جديدًا للمستخدم عند تسجيل الدخول بنجاح.
+* **`logout()`:** يحذف الرمز الحالي للمستخدم، مما يؤدي إلى تسجيل خروجه.
+
+---
+
+### **4. إعدادات إضافية وهامة:**
+
+* **تفعيل CORS:**
+    تأكد من أن CORS (Cross-Origin Resource Sharing) مهيأ بشكل صحيح في Laravel للسماح لتطبيق React الخاص بك بالاتصال بالـ API. عادةً ما يتم ذلك في ملف `config/cors.php`. يمكنك السماح لجميع الأصول (`*`) في بيئة التطوير:
+    ```php
+    // config/cors.php
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'allowed_methods' => ['*'],
+    'allowed_origins' => ['*'], // في بيئة التطوير، للسماح لتطبيق React
+    'allowed_origins_patterns' => [],
+    'allowed_headers' => ['*'],
+    'exposed_headers' => [],
+    'max_age' => 0,
+    'supports_credentials' => true,
+    ```
+    **ملاحظة:** في بيئة الإنتاج، يجب عليك استبدال `*` بنطاق (Domain) تطبيق React الخاص بك لأسباب أمنية.
+* **تكوين `sanctum` middleware:**
+    تأكد أن `EnsureFrontendRequestsAreStateful` middleware مفعل في `app/Http/Kernel.php` ضمن مجموعة `api` middleware.
+    ```php
+    // app/Http/Kernel.php
+    protected $middlewareGroups = [
+        'api' => [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            'throttle:api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ],
+    ];
+    ```
+
+---
+
+**الخطوات التالية بالنسبة لك:**
+
+1.  **قم بإنشاء جميع الـ Controllers** باستخدام الأوامر `php artisan make:controller Api/ControllerName --api --model=ModelName`.
+2.  **انسخ والصق الكود** لكل Controller في الملفات المناسبة (تأكد من استبدال المحتوى بالكامل).
+3.  **تأكد من أن ملف `routes/api.php`** يحتوي على جميع `Route::apiResource` التي أدرجتها.
+4.  **تأكد من إعداد Laravel Sanctum** وتكوين CORS كما هو موضح.
+5.  **اختبر الـ API الخاص بك** باستخدام أدوات مثل Postman أو Insomnia أو حتى متصفح الويب لطلبات GET.
+
+الآن، لديك واجهة خلفية RESTful API كاملة لمشروعك، جاهزة للتفاعل مع الواجهة الأمامية React!
+
+هل لديك أي أسئلة حول أي جزء من هذا التنفيذ، أو هل أنت مستعد للانتقال إلى جزء الواجهة الأمامية (Reac
+
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Review;
+use App\Models\Product; // لربط المراجعة بالمنتج
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class ReviewController extends Controller
+{
+    /**
+     * Display a listing of the reviews.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request)
+    {
+        $query = Review::with(['user', 'product']);
+
+        // يمكن تصفية المراجعات حسب المنتج أو المستخدم
+        if ($request->has('product_id')) {
+            $query->where('product_id', $request->product_id);
+        }
+
+        if ($request->has('user_id')) {
+            // فقط المسؤول يمكنه رؤية مراجعات مستخدمين آخرين
+            if (!auth()->check() || (!auth()->user()->is_admin && auth()->user()->user_id != $request->user_id)) {
+                return response()->json(['message' => 'Unauthorized to view reviews for this user'], 403);
+            }
+            $query->where('user_id', $request->user_id);
+        } else {
+            // إذا لم يتم تحديد user_id، اعرض جميع المراجعات للمسؤول، أو مراجعات المستخدم المصادق فقط
+            if (auth()->check() && !auth()->user()->is_admin) {
+                $query->where('user_id', auth()->user()->user_id);
+            } elseif (!auth()->check()) {
+                // إذا لم يكن هناك مستخدم مصادق، يمكن عرض المراجعات المعتمدة فقط
+                $query->where('is_approved', true);
+            }
+        }
+
+        $reviews = $query->get();
+        return response()->json($reviews);
+    }
+
+    /**
+     * Store a newly created review in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'product_id' => 'required|exists:products,product_id',
+                'rating' => 'required|integer|min:1|max:5',
+                'title' => 'nullable|string|max:255',
+                'comment' => 'nullable|string',
+                // user_id سيتم أخذه من المستخدم المصادق
+            ]);
+
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated to add a review'], 401);
+            }
+
+            // التأكد من أن المستخدم لم يقم بتقييم هذا المنتج من قبل (اختياري، حسب سياسة المتجر)
+            $existingReview = Review::where('user_id', $user->user_id)
+                                    ->where('product_id', $request->product_id)
+                                    ->first();
+            if ($existingReview) {
+                return response()->json(['message' => 'You have already reviewed this product.'], 409); // 409 Conflict
+            }
+
+            $review = Review::create([
+                'product_id' => $request->product_id,
+                'user_id' => $user->user_id, // ربط المراجعة بالمستخدم المصادق
+                'rating' => $request->rating,
+                'title' => $request->title,
+                'comment' => $request->comment,
+                'is_approved' => $user->is_admin ? true : false, // الموافقة التلقائية للمسؤول، أو انتظار الموافقة
+                'ip_address' => $request->ip(), // تسجيل عنوان IP
+                'review_date' => now(),
+            ]);
+
+            return response()->json([
+                'message' => 'Review created successfully. It may require admin approval.',
+                'review' => $review,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while creating the review.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified review.
+     *
+     * @param  \App\Models\Review  $review
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Review $review)
+    {
+        // يمكن للمستخدمين رؤية مراجعاتهم الخاصة أو المراجعات المعتمدة، والمسؤولين رؤية أي مراجعة
+        if (auth()->check() && (auth()->user()->is_admin || auth()->user()->user_id == $review->user_id || $review->is_approved)) {
+            $review->load('user', 'product');
+            return response()->json($review);
+        } elseif (!auth()->check() && $review->is_approved) {
+            // للمستخدمين غير المصادقين، فقط المراجعات المعتمدة
+            $review->load('user', 'product');
+            return response()->json($review);
+        }
+        return response()->json(['message' => 'Unauthorized to view this review or review not approved'], 403);
+    }
+
+    /**
+     * Update the specified review in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Review  $review
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Review $review)
+    {
+        // فقط المستخدم الذي كتب المراجعة أو المسؤول يمكنه تحديثها
+        if (!auth()->check() || (auth()->user()->user_id != $review->user_id && !auth()->user()->is_admin)) {
+            return response()->json(['message' => 'Unauthorized to update this review'], 403);
+        }
+
+        try {
+            $request->validate([
+                'rating' => 'sometimes|required|integer|min:1|max:5',
+                'title' => 'nullable|string|max:255',
+                'comment' => 'nullable|string',
+                'is_approved' => 'boolean', // يمكن للمسؤول فقط تحديث هذه القيمة
+            ]);
+
+            $updateData = $request->all();
+
+            // إذا كان المستخدم ليس مسؤولاً، لا يمكنه تغيير is_approved
+            if (!auth()->user()->is_admin && isset($updateData['is_approved'])) {
+                unset($updateData['is_approved']);
+            }
+
+            $review->update($updateData);
+
+            return response()->json([
+                'message' => 'Review updated successfully',
+                'review' => $review,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the review.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified review from storage.
+     *
+     * @param  \App\Models\Review  $review
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Review $review)
+    {
+        // فقط المستخدم الذي كتب المراجعة أو المسؤول يمكنه حذفها
+        if (!auth()->check() || (auth()->user()->user_id != $review->user_id && !auth()->user()->is_admin)) {
+            return response()->json(['message' => 'Unauthorized to delete this review'], 403);
+        }
+
+        try {
+            $review->delete();
+            return response()->json([
+                'message' => 'Review deleted successfully',
+            ], 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the review.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
