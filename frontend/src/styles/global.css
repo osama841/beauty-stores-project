@@ -5,20 +5,97 @@
     @tailwind components;
     @tailwind utilities; */
     /* أنماط عامة إضافية (إذا أردت، وإلا يمكن إزالتها) */
-    body {
-      margin: 0;
-      /* استخدام خط Inter كخط افتراضي */
-      font-family: 'Inter', sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      background-color: #f4f6f9; /* لون خلفية خفيف للتطبيق بالكامل */
-      line-height: 1.5; /* تحسين قابلية القراءة */
-    }
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-rendering: grayscale;
+  background-color: #f4f6f9;
+  line-height: 1.5;
+}
 
-    /* هذا الكود يساعد على تثبيت التذييل في الأسفل إذا كان المحتوى قصيرًا */
-    #root {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+/* تنسيقات لوحة التحكم الإدارية */
+.admin-layout {
+  min-height: 100vh;
+}
+
+/* شريط الجانب للكمبيوتر */
+.desktop-sidebar {
+  width: 250px;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  transition: all 0.3s;
+}
+
+/* شريط الجانب للجوال */
+.mobile-sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100vh;
+  z-index: 1050;
+  transition: all 0.3s;
+}
+
+.mobile-sidebar.show {
+  left: 0;
+}
+
+/* زر التبديل */
+.admin-sidebar-toggler {
+  z-index: 1040;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* طبقة التعتيم */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+/* المحتوى الرئيسي */
+.admin-content {
+  margin-left: 0;
+  transition: all 0.3s;
+}
+
+@media (min-width: 992px) {
+  .admin-content {
+    margin-left: 250px;
+  }
+}
+
+/* إضافة scrollbar أنيقة */
+.admin-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.admin-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.admin-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
