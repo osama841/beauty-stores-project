@@ -9,7 +9,6 @@ const AdminDashboard = () => {
       <p className="text-muted">مرحباً بك في لوحة تحكم المسؤول. من هنا يمكنك إدارة جميع جوانب متجرك.</p>
 
       <div className="row g-4 mt-4">
-        {/* بطاقة إحصائيات بسيطة */}
         <div className="col-md-4">
           <div className="card text-white bg-primary mb-3 shadow-sm">
             <div className="card-header">إجمالي المبيعات</div>
@@ -57,8 +56,6 @@ const AdminDashboard = () => {
           </Link>
         </div>
       </div>
-
-      {/* يمكنك إضافة المزيد من الإحصائيات أو الرسوم البيانية هنا */}
     </div>
   );
 };

@@ -1,31 +1,19 @@
 // src/components/Admin/AdminLayout.jsx
 import React, { useState, useEffect } from 'react';
-import AdminSidebar from "../../pages/Admin/AdminSidebar.jsx";
+import AdminSidebar from "../../pages/Admin/AdminSidebar.jsx"; // ****** المسار الصحيح الآن بناءً على مكان ملفك ******
 
 const AdminLayout = ({ children }) => {
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
-  const [isMobileView, setIsMobileView] = useState(false);
 
   useEffect(() => {
-    // تحديد ما إذا كان العرض الحالي يعتبر جوالاً
-    const checkIfMobile = () => {
-      setIsMobileView(window.innerWidth < 992); // 992px هو breakpoint الـ lg في Bootstrap
-    };
-
-    // التحقق عند التحميل وعند تغيير حجم النافذة
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-
     // إضافة/إزالة كلاس 'sidebar-open-mobile' من <body>
     if (showMobileSidebar) {
       document.body.classList.add('sidebar-open-mobile');
     } else {
       document.body.classList.remove('sidebar-open-mobile');
     }
-
-    // تنظيف event listener عند إلغاء تحميل المكون
+    // دالة تنظيف لإزالة الكلاس عند إلغاء تحميل المكون
     return () => {
-      window.removeEventListener('resize', checkIfMobile);
       document.body.classList.remove('sidebar-open-mobile');
     };
   }, [showMobileSidebar]);
@@ -39,41 +27,27 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="admin-layout d-flex">
-      {/* زر فتح الشريط الجانبي على الجوال (يظهر فقط على الجوال) */}
-      {isMobileView && (
-        <button
-          className="btn btn-primary admin-sidebar-toggler d-lg-none fixed-top m-3"
-          type="button"
-          onClick={toggleMobileSidebar}
-          aria-label="Toggle sidebar"
-        >
-          <i className="bi bi-list fs-4"></i>
-        </button>
-      )}
-
-      {/* الشريط الجانبي */}
-      <div className={`admin-sidebar-wrapper ${isMobileView ? 'mobile-sidebar' : 'desktop-sidebar'}`}>
-        <AdminSidebar 
-          isMobile={isMobileView} 
-          show={showMobileSidebar} 
-          onClose={closeMobileSidebar} 
-        />
+    <div className="d-flex">
+      {/* الشريط الجانبي لسطح المكتب (يظهر فقط على lg فأكبر) */}
+      <div className="d-none d-lg-flex">
+        <AdminSidebar isMobile={false} /> {/* AdminSidebar بدون خصائص الجوال */}
       </div>
 
-      {/* طبقة التعتيم للجوال (تظهر فقط عند فتح الشريط الجانبي) */}
-      {isMobileView && showMobileSidebar && (
-        <div 
-          className="sidebar-overlay"
-          onClick={closeMobileSidebar}
-        ></div>
-      )}
+      {/* زر فتح الشريط الجانبي على الجوال (يظهر فقط على أقل من lg) */}
+      <button
+        className="btn btn-primary admin-sidebar-toggler d-lg-none" // تطبيق أنماط زر التبديل
+        type="button"
+        onClick={toggleMobileSidebar}
+      >
+        <i className="bi bi-list"></i> {/* أيقونة همبرغر */}
+      </button>
 
-      {/* المحتوى الرئيسي */}
-      <div className="admin-content flex-grow-1 p-3 p-lg-4">
-        <div className="container-fluid">
-          {children}
-        </div>
+      {/* الشريط الجانبي للجوال (يتم التحكم فيه بواسطة الحالة) */}
+      <AdminSidebar isMobile={true} show={showMobileSidebar} onClose={closeMobileSidebar} />
+
+      {/* المحتوى الرئيسي للوحة التحكم (سيتم دفعه بواسطة CSS) */}
+      <div className="flex-grow-1 p-4 bg-light admin-content-wrapper">
+        {children}
       </div>
     </div>
   );

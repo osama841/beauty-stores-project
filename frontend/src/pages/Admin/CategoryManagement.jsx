@@ -14,16 +14,14 @@ const CategoryManagement = () => {
   const [newCategoryImagePreview, setNewCategoryImagePreview] = useState(null);
   const [newCategoryStatus, setNewCategoryStatus] = useState('active');
   const [imageRemoved, setImageRemoved] = useState(false);
+
   const [editingCategory, setEditingCategory] = useState(null);
   const [formError, setFormError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
-  const [showModal, setShowModal] = useState(false);
 
   const fileInputRef = useRef(null);
 
-  // توليد الـ Slug من الاسم
   const generateSlug = (name) => {
-    if (!name) return '';
     return name
       .toString()
       .normalize('NFD')
@@ -35,7 +33,6 @@ const CategoryManagement = () => {
       .replace(/--+/g, '-');
   };
 
-  // معالجة تغيير اسم القسم وتوليد الـ Slug تلقائيًا
   const handleNameChange = (e) => {
     const name = e.target.value;
     setNewCategoryName(name);
@@ -44,7 +41,6 @@ const CategoryManagement = () => {
     }
   };
 
-  // جلب الأقسام من API
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -57,13 +53,19 @@ const CategoryManagement = () => {
       });
       setCategories(sortedCategories);
     } catch (err) {
-      let errorMessage = 'فشل تحميل الأقسام. الرجاء المحاولة لاحقاً.';
+      console.error('فشل تحميل الأقسام. الرجاء المحاولة لاحقاً:', err);
+      let errorMessage = 'حدث خطأ غير متوقع أثناء تحميل البيانات.';
       if (err && typeof err === 'object') {
-        if (err.message) errorMessage = err.message;
-        if (err.errors) errorMessage = Object.values(err.errors).flat().join(' ');
+          if (err.message) {
+              errorMessage = err.message;
+          }
+          if (err.errors) {
+              errorMessage = Object.values(err.errors).flat().join(' ');
+          } else if (err.error) {
+              errorMessage = err.error;
+          }
       }
       setError(errorMessage);
-      console.error('Error fetching categories:', err);
     } finally {
       setLoading(false);
     }
@@ -73,21 +75,18 @@ const CategoryManagement = () => {
     fetchCategories();
   }, [fetchCategories]);
 
-  // معالجة تغيير صورة القسم
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        setFormError('حجم الصورة يجب أن لا يتجاوز 2 ميجابايت');
-        return;
-      }
       setNewCategoryImageFile(file);
       setNewCategoryImagePreview(URL.createObjectURL(file));
       setImageRemoved(false);
+    } else {
+      setNewCategoryImageFile(null);
+      setNewCategoryImagePreview(null);
     }
   };
 
-  // إزالة الصورة المحددة
   const handleRemoveImage = () => {
     setNewCategoryImageFile(null);
     setNewCategoryImagePreview(null);
@@ -97,56 +96,6 @@ const CategoryManagement = () => {
     }
   };
 
-  // إعادة تعيين النموذج
-  const resetForm = () => {
-    setNewCategoryName('');
-    setNewCategorySlug('');
-    setNewCategoryDescription('');
-    setNewCategoryParentId('');
-    setNewCategoryImageFile(null);
-    setNewCategoryImagePreview(null);
-    setNewCategoryStatus('active');
-    setImageRemoved(false);
-    setEditingCategory(null);
-    setFormError(null);
-    setValidationErrors({});
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  // فتح النافذة المنبثقة للإضافة
-  const handleAddCategory = () => {
-    resetForm();
-    setShowModal(true);
-  };
-
-  // فتح النافذة المنبثقة للتعديل
-  const handleEdit = (category) => {
-    setEditingCategory(category);
-    setNewCategoryName(category.name);
-    setNewCategorySlug(category.slug);
-    setNewCategoryDescription(category.description);
-    setNewCategoryParentId(category.parent_id || '');
-    setNewCategoryImageFile(null);
-    setNewCategoryImagePreview(category.image_url || null);
-    setNewCategoryStatus(category.status);
-    setImageRemoved(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    setFormError(null);
-    setValidationErrors({});
-    setShowModal(true);
-  };
-
-  // إغلاق النافذة المنبثقة
-  const handleCloseModal = () => {
-    setShowModal(false);
-    resetForm();
-  };
-
-  // إرسال النموذج (إضافة/تعديل)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError(null);
@@ -162,40 +111,62 @@ const CategoryManagement = () => {
 
     try {
       if (editingCategory) {
-        await updateCategory(
-          editingCategory.category_id,
-          categoryData,
-          newCategoryImageFile,
-          imageRemoved
-        );
+        await updateCategory(editingCategory.category_id, categoryData, newCategoryImageFile, imageRemoved);
         alert('تم تحديث القسم بنجاح!');
       } else {
         await createCategory(categoryData, newCategoryImageFile);
         alert('تم إضافة القسم بنجاح!');
       }
-      handleCloseModal();
+      setNewCategoryName('');
+      setNewCategorySlug('');
+      setNewCategoryDescription('');
+      setNewCategoryParentId('');
+      setNewCategoryImageFile(null);
+      setNewCategoryImagePreview(null);
+      setNewCategoryStatus('active');
+      setEditingCategory(null);
+      setImageRemoved(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       fetchCategories();
     } catch (err) {
       console.error('خطأ في العملية:', err);
-      if (err?.response?.data?.errors) {
-        setValidationErrors(err.response.data.errors);
-        setFormError(err.response.data.message || 'الرجاء التحقق من الحقول المدخلة.');
+      if (err && typeof err === 'object' && err.errors) {
+        setValidationErrors(err.errors);
+        setFormError(err.message || 'الرجاء التحقق من الحقول المدخلة.');
       } else {
-        setFormError(err.message || 'حدث خطأ غير متوقع.');
+        setFormError(err || 'حدث خطأ غير متوقع.');
       }
     }
   };
 
-  // حذف قسم
+  const handleEdit = (category) => {
+    setEditingCategory(category);
+    setNewCategoryName(category.name);
+    setNewCategorySlug(category.slug);
+    setNewCategoryDescription(category.description);
+    setNewCategoryParentId(category.parent_id || '');
+    setNewCategoryImageFile(null);
+    setNewCategoryImagePreview(category.image_url || null);
+    setNewCategoryStatus(category.status);
+    setImageRemoved(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setFormError(null);
+    setValidationErrors({});
+  };
+
   const handleDelete = async (id) => {
-    if (window.confirm('هل أنت متأكد أنك تريد حذف هذا القسم؟ سيتم حذف جميع الأقسام الفرعية التابعة له أيضاً.')) {
+    if (window.confirm('هل أنت متأكد أنك تريد حذف هذا القسم؟')) {
       try {
         await deleteCategory(id);
         alert('تم حذف القسم بنجاح!');
         fetchCategories();
       } catch (err) {
         console.error('خطأ في حذف القسم:', err);
-        alert('فشل حذف القسم: ' + (err.message || 'حدث خطأ غير متوقع'));
+        alert('فشل حذف القسم: ' + (err.message || JSON.stringify(err)));
       }
     }
   };
@@ -217,9 +188,6 @@ const CategoryManagement = () => {
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
-        <button className="btn btn-primary mt-3" onClick={fetchCategories}>
-          إعادة المحاولة
-        </button>
       </div>
     );
   }
@@ -228,330 +196,174 @@ const CategoryManagement = () => {
     <div className="container-fluid">
       <h1 className="mb-4 fw-bold text-success">إدارة الأقسام</h1>
 
-      {/* زر إضافة قسم جديد */}
-      <button 
-        className="btn btn-success mb-4"
-        onClick={handleAddCategory}
-      >
-        <i className="bi bi-plus-circle me-2"></i> إضافة قسم جديد
-      </button>
-
-      {/* قائمة الأقسام الحالية */}
-      <div className="card shadow-lg border-0 rounded-lg">
-        <div className="card-header bg-primary text-white fw-bold py-3">
-          الأقسام الحالية ({categories.length})
+      <div className="card shadow-lg mb-5 border-0 rounded-lg">
+        <div className="card-header bg-success text-white fw-bold py-3">
+          {editingCategory ? 'تعديل قسم موجود' : 'إضافة قسم جديد'}
         </div>
-        <div className="card-body p-0">
-          {categories.length === 0 ? (
-            <div className="text-center py-5">
-              <i className="bi bi-folder-x text-muted" style={{ fontSize: '3rem' }}></i>
-              <p className="text-muted mt-3">لا توجد أقسام حتى الآن</p>
-              <button 
-                className="btn btn-success mt-2"
-                onClick={handleAddCategory}
-              >
-                <i className="bi bi-plus-circle me-2"></i> إضافة قسم جديد
-              </button>
+        <div className="card-body p-4">
+          <form onSubmit={handleSubmit}>
+            <div className="row g-3 mb-3">
+              <div className="col-md-6">
+                <label htmlFor="categoryName" className="form-label">اسم القسم:</label>
+                <input
+                  type="text"
+                  id="categoryName"
+                  className={`form-control ${validationErrors.name ? 'is-invalid' : ''}`}
+                  value={newCategoryName}
+                  onChange={handleNameChange}
+                  required
+                />
+                {validationErrors.name && <div className="invalid-feedback">{validationErrors.name[0]}</div>}
+              </div>
+              <div className="col-md-6">
+                <label htmlFor="categorySlug" className="form-label">الرابط النظيف (Slug):</label>
+                <input
+                  type="text"
+                  id="categorySlug"
+                  className={`form-control ${validationErrors.slug ? 'is-invalid' : ''}`}
+                  value={newCategorySlug}
+                  onChange={(e) => setNewCategorySlug(e.target.value)}
+                  required
+                />
+                {validationErrors.slug && <div className="invalid-feedback">{validationErrors.slug[0]}</div>}
+              </div>
             </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-hover mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th style={{ width: '80px' }}>الصورة</th>
-                    <th>الاسم</th>
-                    <th>الوصف</th>
-                    <th>الفئة الأم</th>
-                    <th>الحالة</th>
-                    <th style={{ width: '150px' }}>الإجراءات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.map((category) => (
-                    <tr key={category.category_id}>
-                      <td>
-                        {category.image_url ? (
-                          <img
-                            src={category.image_url}
-                            alt={category.name}
-                            className="img-thumbnail"
-                            style={{
-                              width: '60px',
-                              height: '60px',
-                              objectFit: 'cover',
-                              borderRadius: '8px'
-                            }}
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = "https://placehold.co/60x60/cccccc/333333?text=لا+يوجد+صورة";
-                            }}
-                          />
-                        ) : (
-                          <div 
-                            className="d-flex align-items-center justify-content-center bg-light"
-                            style={{
-                              width: '60px',
-                              height: '60px',
-                              borderRadius: '8px'
-                            }}
-                          >
-                            <i className="bi bi-image text-muted"></i>
-                          </div>
-                        )}
-                      </td>
-                      <td>
-                        <div className="fw-bold">{category.name}</div>
-                        <div className="text-muted small">{category.slug}</div>
-                      </td>
-                      <td>
-                        <div className="text-truncate" style={{ maxWidth: '200px' }}>
-                          {category.description || 'لا يوجد وصف'}
-                        </div>
-                      </td>
-                      <td>
-                        {category.parent ? (
-                          <span className="badge bg-info text-dark">
-                            {category.parent.name}
-                          </span>
-                        ) : (
-                          <span className="badge bg-secondary">رئيسي</span>
-                        )}
-                      </td>
-                      <td>
-                        <span className={`badge ${category.status === 'active' ? 'bg-success' : 'bg-danger'}`}>
-                          {category.status === 'active' ? 'نشط' : 'غير نشط'}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="d-flex">
-                          <button
-                            className="btn btn-sm btn-outline-primary me-2"
-                            onClick={() => handleEdit(category)}
-                            title="تعديل"
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleDelete(category.category_id)}
-                            title="حذف"
-                          >
-                            <i className="bi bi-trash"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+
+            <div className="mb-3">
+              <label htmlFor="categoryDescription" className="form-label">الوصف:</label>
+              <textarea
+                id="categoryDescription"
+                className={`form-control ${validationErrors.description ? 'is-invalid' : ''}`}
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+                rows="3"
+              ></textarea>
+              {validationErrors.description && <div className="invalid-feedback">{validationErrors.description[0]}</div>}
+            </div>
+
+            <div className="row g-3 mb-3">
+              <div className="col-md-6">
+                <label htmlFor="categoryParent" className="form-label">الفئة الأم (اختياري):</label>
+                <select
+                  id="categoryParent"
+                  className={`form-select ${validationErrors.parent_id ? 'is-invalid' : ''}`}
+                  value={newCategoryParentId}
+                  onChange={(e) => setNewCategoryParentId(e.target.value)}
+                >
+                  <option value="">لا يوجد فئة أم</option>
+                  {categories.filter(cat => cat.category_id !== (editingCategory ? editingCategory.category_id : null)).map((cat) => (
+                    <option key={cat.category_id} value={cat.category_id}>
+                      {cat.name}
+                    </option>
                   ))}
-                </tbody>
-              </table>
+                </select>
+                {validationErrors.parent_id && <div className="invalid-feedback">{validationErrors.parent_id[0]}</div>}
+              </div>
+
+              <div className="col-md-6">
+                <label htmlFor="categoryImageFile" className="form-label">صورة القسم (ملف):</label>
+                <input
+                  type="file"
+                  id="categoryImageFile"
+                  className={`form-control ${validationErrors.image ? 'is-invalid' : ''}`}
+                  onChange={handleImageChange}
+                  ref={fileInputRef}
+                  accept="image/*"
+                />
+                {validationErrors.image && <div className="invalid-feedback">{validationErrors.image[0]}</div>}
+                {(newCategoryImagePreview || (editingCategory && editingCategory.image_url && !imageRemoved)) && (
+                  <div className="mt-2 text-center border p-2 rounded bg-light">
+                    <img
+                      src={newCategoryImagePreview || (editingCategory && editingCategory.image_url)}
+                      alt="معاينة الصورة"
+                      className="img-thumbnail"
+                      style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}
+                      onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/100x100/cccccc/333333?text=خطأ"; }}
+                    />
+                    <p className="small text-muted mt-1">معاينة الصورة</p>
+                    {(newCategoryImagePreview || (editingCategory && editingCategory.image_url)) && (
+                        <button type="button" className="btn btn-sm btn-outline-danger mt-1" onClick={handleRemoveImage}>
+                            إزالة الصورة
+                        </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+
+            <div className="mb-3">
+              <label htmlFor="categoryStatus" className="form-label">الحالة:</label>
+              <select
+                id="categoryStatus"
+                className={`form-select ${validationErrors.status ? 'is-invalid' : ''}`}
+                value={newCategoryStatus}
+                onChange={(e) => setNewCategoryStatus(e.target.value)}
+                required
+              >
+                <option value="active">نشط</option>
+                <option value="inactive">غير نشط</option>
+              </select>
+              {validationErrors.status && <div className="invalid-feedback">{validationErrors.status[0]}</div>}
+            </div>
+
+            {formError && <div className="alert alert-danger">{formError}</div>}
+            <button type="submit" className="btn btn-success me-2">
+              {editingCategory ? 'تحديث القسم' : 'إضافة القسم'}
+            </button>
+            {editingCategory && (
+              <button type="button" className="btn btn-secondary" onClick={() => setEditingCategory(null)}>
+                إلغاء التعديل
+              </button>
+            )}
+          </form>
         </div>
       </div>
 
-      {/* نافذة منبثقة لإضافة/تعديل الأقسام */}
-      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} 
-           style={{ backgroundColor: showModal ? 'rgba(0,0,0,0.5)' : 'transparent' }} 
-           tabIndex="-1" 
-           aria-hidden={!showModal}>
-        <div className="modal-dialog modal-lg modal-dialog-centered">
-          <div className="modal-content border-0 shadow-lg">
-            <div className="modal-header bg-success text-white">
-              <h5 className="modal-title fw-bold">
-                <i className={`bi ${editingCategory ? 'bi-pencil-square' : 'bi-plus-circle'} me-2`}></i>
-                {editingCategory ? 'تعديل القسم' : 'إضافة قسم جديد'}
-              </h5>
-              <button 
-                type="button" 
-                className="btn-close btn-close-white" 
-                onClick={handleCloseModal}
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body p-4">
-              <form onSubmit={handleSubmit}>
-                <div className="row g-3 mb-3">
-                  <div className="col-md-6">
-                    <label htmlFor="categoryName" className="form-label">
-                      اسم القسم: <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="categoryName"
-                      className={`form-control ${validationErrors.name ? 'is-invalid' : ''}`}
-                      value={newCategoryName}
-                      onChange={handleNameChange}
-                      required
-                      placeholder="أدخل اسم القسم"
-                    />
-                    {validationErrors.name && (
-                      <div className="invalid-feedback">{validationErrors.name[0]}</div>
-                    )}
-                  </div>
-                  <div className="col-md-6">
-                    <label htmlFor="categorySlug" className="form-label">
-                      الرابط النظيف (Slug): <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="categorySlug"
-                      className={`form-control ${validationErrors.slug ? 'is-invalid' : ''}`}
-                      value={newCategorySlug}
-                      onChange={(e) => setNewCategorySlug(e.target.value)}
-                      required
-                      placeholder="سيتم توليده تلقائياً"
-                    />
-                    {validationErrors.slug && (
-                      <div className="invalid-feedback">{validationErrors.slug[0]}</div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <label htmlFor="categoryDescription" className="form-label">
-                    الوصف:
-                  </label>
-                  <textarea
-                    id="categoryDescription"
-                    className={`form-control ${validationErrors.description ? 'is-invalid' : ''}`}
-                    value={newCategoryDescription}
-                    onChange={(e) => setNewCategoryDescription(e.target.value)}
-                    rows="3"
-                    placeholder="وصف مختصر للقسم (اختياري)"
-                  ></textarea>
-                  {validationErrors.description && (
-                    <div className="invalid-feedback">{validationErrors.description[0]}</div>
-                  )}
-                </div>
-
-                <div className="row g-3 mb-3">
-                  <div className="col-md-6">
-                    <label htmlFor="categoryParent" className="form-label">
-                      الفئة الأم (اختياري):
-                    </label>
-                    <select
-                      id="categoryParent"
-                      className={`form-select ${validationErrors.parent_id ? 'is-invalid' : ''}`}
-                      value={newCategoryParentId}
-                      onChange={(e) => setNewCategoryParentId(e.target.value)}
-                    >
-                      <option value="">لا يوجد فئة أم</option>
-                      {categories
-                        .filter(cat => 
-                          !editingCategory || 
-                          cat.category_id !== editingCategory.category_id
-                        )
-                        .map((cat) => (
-                          <option key={cat.category_id} value={cat.category_id}>
-                            {cat.name}
-                          </option>
-                        ))}
-                    </select>
-                    {validationErrors.parent_id && (
-                      <div className="invalid-feedback">{validationErrors.parent_id[0]}</div>
-                    )}
-                  </div>
-
-                  <div className="col-md-6">
-                    <label htmlFor="categoryImageFile" className="form-label">
-                      صورة القسم:
-                    </label>
-                    <div className="input-group">
-                      <input
-                        type="file"
-                        id="categoryImageFile"
-                        className={`form-control ${validationErrors.image ? 'is-invalid' : ''}`}
-                        onChange={handleImageChange}
-                        ref={fileInputRef}
-                        accept="image/*"
+      <div className="card shadow-sm border-0 rounded-lg">
+        <div className="card-header bg-primary text-white fw-bold py-3">
+          الأقسام الحالية
+        </div>
+        <div className="card-body p-0">
+          {categories.length === 0 ? (
+            <p className="text-center text-muted py-4 mb-0">لا توجد أقسام حتى الآن.</p>
+          ) : (
+            <ul className="list-group list-group-flush">
+              {categories.map((category) => (
+                <li key={category.category_id} className="list-group-item d-flex justify-content-between align-items-center py-3">
+                  <div className="d-flex align-items-center">
+                    {category.image_url && (
+                      <img
+                        src={category.image_url}
+                        alt={category.name}
+                        className="img-thumbnail me-3"
+                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px' }}
+                        onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/60x60/cccccc/333333?text=خطأ"; }}
                       />
-                      <button 
-                        className="btn btn-outline-secondary" 
-                        type="button"
-                        onClick={() => fileInputRef.current.click()}
-                      >
-                        <i className="bi bi-upload"></i>
-                      </button>
-                    </div>
-                    <small className="text-muted">يُفضل صورة بحجم 800x800 بكسل وبحد أقصى 2MB</small>
-                    {validationErrors.image && (
-                      <div className="invalid-feedback">{validationErrors.image[0]}</div>
                     )}
+                    <div>
+                      <h5 className="mb-1 fw-bold text-dark">{category.name}</h5>
+                      {category.parent && (
+                        <p className="mb-1 text-muted small">
+                          الفئة الأم: <span className="badge bg-secondary">{category.parent.name}</span>
+                        </p>
+                      )}
+                      <p className="mb-1 text-muted small">{category.description}</p>
+                      <span className="badge bg-light text-dark me-2">{category.slug}</span>
+                      <span className={`badge ${category.status === 'active' ? 'bg-success' : 'bg-danger'}`}>{category.status === 'active' ? 'نشط' : 'غير نشط'}</span>
+                    </div>
                   </div>
-                </div>
-
-                {/* معاينة الصورة */}
-                {(newCategoryImagePreview || (editingCategory?.image_url && !imageRemoved)) && (
-                  <div className="mb-4 p-3 border rounded bg-light text-center">
-                    <img
-                      src={newCategoryImagePreview || editingCategory.image_url}
-                      alt="معاينة صورة القسم"
-                      className="img-thumbnail mb-2"
-                      style={{ 
-                        maxWidth: '200px', 
-                        maxHeight: '200px', 
-                        objectFit: 'cover',
-                        borderRadius: '8px'
-                      }}
-                      onError={(e) => { 
-                        e.target.onerror = null; 
-                        e.target.src = "https://placehold.co/200x200/cccccc/333333?text=خطأ+في+الصورة";
-                      }}
-                    />
-                    <button 
-                      type="button" 
-                      className="btn btn-sm btn-outline-danger"
-                      onClick={handleRemoveImage}
-                    >
-                      <i className="bi bi-trash me-1"></i> إزالة الصورة
+                  <div>
+                    <button className="btn btn-sm btn-info text-white me-2" onClick={() => handleEdit(category)}>
+                      <i className="bi bi-pencil-square"></i> تعديل
+                    </button>
+                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(category.category_id)}>
+                      <i className="bi bi-trash"></i> حذف
                     </button>
                   </div>
-                )}
-
-                <div className="mb-4">
-                  <label htmlFor="categoryStatus" className="form-label">
-                    الحالة: <span className="text-danger">*</span>
-                  </label>
-                  <select
-                    id="categoryStatus"
-                    className={`form-select ${validationErrors.status ? 'is-invalid' : ''}`}
-                    value={newCategoryStatus}
-                    onChange={(e) => setNewCategoryStatus(e.target.value)}
-                    required
-                  >
-                    <option value="active">نشط</option>
-                    <option value="inactive">غير نشط</option>
-                  </select>
-                  {validationErrors.status && (
-                    <div className="invalid-feedback">{validationErrors.status[0]}</div>
-                  )}
-                </div>
-
-                {formError && (
-                  <div className="alert alert-danger mb-4">
-                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                    {formError}
-                  </div>
-                )}
-
-                <div className="d-flex justify-content-end gap-2">
-                  <button 
-                    type="button" 
-                    className="btn btn-outline-secondary px-4"
-                    onClick={handleCloseModal}
-                  >
-                    إلغاء
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="btn btn-success px-4"
-                  >
-                    {editingCategory ? 'حفظ التعديلات' : 'إضافة القسم'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>

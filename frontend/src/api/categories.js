@@ -56,7 +56,7 @@ export const updateCategory = async (id, categoryData, imageFile, imageRemoved) 
     // إضافة _method=PUT لـ Laravel لمعالجة طلب PUT مع FormData
     const dataWithMethod = { ...categoryData, _method: 'PUT' };
     const formData = createCategoryFormData(dataWithMethod, imageFile, imageRemoved);
-
+         
     const response = await axiosInstance.post(`/categories/${id}`, formData, { // نستخدم POST لكن نمرر _method=PUT
       headers: {
         'Content-Type': 'multipart/form-data', // مهم جداً لإرسال الملفات
