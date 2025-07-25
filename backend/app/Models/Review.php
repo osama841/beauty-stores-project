@@ -37,23 +37,39 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Review whereUserId($value)
  * @mixin \Eloquent
  */
-class Review extends Model
-{
-    use HasFactory;
 
-    protected $primaryKey = 'review_id';
-    protected $fillable = [
-        'product_id', 'user_id', 'rating', 'title', 'comment',
-        'is_approved', 'ip_address', 'review_date'
-    ];
-
-    public function product()
+    class Review extends Model
     {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
+        use HasFactory;
 
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
+        protected $primaryKey = 'review_id';
+
+        protected $fillable = [
+            'product_id',
+            'user_id',
+            'rating',
+            'title',
+            'comment',
+            'is_approved',
+            'ip_address',
+            'review_date',
+        ];
+
+        protected $casts = [
+            'is_approved' => 'boolean',
+            'review_date' => 'datetime',
+        ];
+
+        // العلاقة مع المنتج الذي تمت مراجعته
+        public function product()
+        {
+            return $this->belongsTo(Product::class, 'product_id');
+        }
+
+        // العلاقة مع المستخدم الذي كتب المراجعة
+        public function user()
+        {
+            return $this->belongsTo(User::class, 'user_id');
+        }
     }
-}
+    

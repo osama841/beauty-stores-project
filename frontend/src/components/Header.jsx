@@ -1,7 +1,8 @@
 // src/components/Header.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { getCategories } from '../api/categories';
 import { BiUser, BiShoppingBag, BiLogOut, BiLogIn, BiUserPlus } from 'react-icons/bi';
 import { FaUserShield } from 'react-icons/fa';
 
@@ -9,6 +10,20 @@ const Header = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+  const fetchCategoriesForNav = useCallback(async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (err) {
+      console.error('فشل تحميل الفئات لشريط التنقل:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategoriesForNav();
+  }, [fetchCategoriesForNav]);
 
   const handleLogout = async () => {
     try {
@@ -31,7 +46,7 @@ const Header = () => {
         <div className="container">
           {/* العلامة التجارية وزر القائمة */}
           <div className="d-flex align-items-center">
-            <button 
+            <button
               className="navbar-toggler me-3 border-0"
               onClick={toggleMenu}
               aria-expanded={isMenuOpen}
@@ -78,6 +93,22 @@ const Header = () => {
                   المنتجات
                 </Link>
               </li>
+              {categories.length > 0 && (
+                <li className="nav-item dropdown">
+                  <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownCategories" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    الفئات
+                  </a>
+                  <ul className="dropdown-menu" aria-labelledby="navbarDropdownCategories">
+                    {categories.map(cat => (
+                      <li key={cat.category_id}>
+                        <Link className="dropdown-item" to={`/products?category_id=${cat.category_id}`} onClick={() => setIsMenuOpen(false)}>
+                          {cat.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              )}
               <li className="nav-item">
                 <Link className="nav-link" to="/about" onClick={() => setIsMenuOpen(false)}>
                   عن المتجر
@@ -95,7 +126,7 @@ const Header = () => {
               {isAuthenticated ? (
                 <>
                   {user?.is_admin && (
-                    <Link 
+                    <Link
                       className="btn btn-sm btn-outline-danger d-flex align-items-center gap-2"
                       to="/admin"
                       onClick={() => setIsMenuOpen(false)}
@@ -137,8 +168,9 @@ const Header = () => {
                   </Link>
                 </>
               )}
-              <Link 
-                to="/cart" 
+              {/* زر سلة التسوق للشاشات الكبيرة */}
+              <Link
+                to="/cart"
                 className="btn btn-warning position-relative d-none d-lg-flex align-items-center gap-2"
                 onClick={() => setIsMenuOpen(false)}
               >

@@ -1,0 +1,148 @@
+/* src/styles/admin/AdminSidebar.css */
+
+/* أنماط عامة للشريط الجانبي */
+.admin-sidebar-container {
+    background-color: #212529; /* خلفية داكنة */
+    color: #f8f9fa; /* لون النص الفاتح */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25); /* ظل خفيف لإبرازه */
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: 100vh; /* ارتفاع كامل الشاشة */
+    position: sticky; /* يلتصق عند التمرير على سطح المكتب */
+    top: 0;
+    z-index: 1000; /* تأكد من ظهوره فوق المحتوى العادي */
+}
+
+/* عنوان لوحة المسؤول داخل الشريط الجانبي */
+.admin-sidebar-header {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #0d6efd; /* لون أزرق مميز */
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.admin-sidebar-header i {
+    font-size: 2rem;
+    margin-inline-end: 0.75rem; /* مسافة بعد الأيقونة */
+}
+
+/* خط فاصل */
+.admin-sidebar-container hr {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 1.5rem 0;
+}
+
+/* قائمة التنقل */
+.admin-sidebar-nav .nav-link {
+    color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.admin-sidebar-nav .nav-link i {
+    font-size: 1.25rem;
+    margin-inline-end: 0.75rem;
+}
+
+.admin-sidebar-nav .nav-link:hover {
+    background-color: #343a40; /* لون خلفية عند التحويم */
+    color: #ffffff;
+}
+
+.admin-sidebar-nav .nav-link.active {
+    background-color: #0d6efd; /* لون خلفية للعنصر النشط */
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* قسم المستخدم في الأسفل */
+.admin-sidebar-user-dropdown {
+    margin-top: auto; /* يدفع هذا القسم إلى الأسفل */
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar-user-dropdown .dropdown-toggle {
+    color: #f8f9fa;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.admin-sidebar-user-dropdown .dropdown-toggle img {
+    border: 2px solid #0d6efd; /* إطار أزرق حول الصورة */
+}
+
+/* --------------------------------------------------- */
+/* أنماط الشريط الجانبي المتجاوبة (للدفع) */
+/* --------------------------------------------------- */
+
+/* إخفاء الشريط الجانبي على الجوال افتراضياً */
+@media (max-width: 991.98px) {
+    .admin-sidebar-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%); /* مخفي خارج الشاشة */
+        transition: transform 0.3s ease-in-out;
+        z-index: 1050; /* يظهر فوق المحتوى */
+    }
+
+    .admin-sidebar-container.show {
+        transform: translateX(0%); /* يظهر على الشاشة */
+    }
+
+    /* زر الهمبرغر على الجوال */
+    .admin-sidebar-toggler {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1040;
+    }
+
+    /* تأثير الدفع على المحتوى الرئيسي */
+    .admin-content-wrapper {
+        transition: margin-left 0.3s ease-in-out;
+        margin-left: 0; /* لا يوجد هامش افتراضياً */
+    }
+
+    /* عند فتح الشريط الجانبي، ادفع المحتوى */
+    body.sidebar-open-mobile .admin-content-wrapper {
+        margin-left: 280px; /* يدفع المحتوى بمقدار عرض الشريط الجانبي */
+    }
+
+    /* منع التمرير على الجسم عندما يكون الشريط الجانبي مفتوحاً */
+    body.sidebar-open-mobile {
+        overflow: hidden;
+    }
+}
+
+/* الشريط الجانبي على شاشات سطح المكتب (lg فأكبر) */
+@media (min-width: 992px) {
+    .admin-sidebar-container {
+        position: sticky; /* يلتصق عند التمرير */
+        top: 0;
+        height: 100vh;
+        width: 280px;
+        flex-shrink: 0;
+    }
+
+    /* ادفع المحتوى الرئيسي على سطح المكتب */
+    .admin-content-wrapper {
+        margin-left: 280px; /* يدفع المحتوى بمقدار عرض الشريط الجانبي */
+    }
+
+    /* إخفاء زر الهمبرغر على سطح المكتب */
+    .admin-sidebar-toggler {
+        display: none !important;
+    }
+}

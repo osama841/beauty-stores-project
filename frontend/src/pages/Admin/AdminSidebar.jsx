@@ -1,6 +1,7 @@
-// src/pages/Admin/AdminSidebar.jsx
+// src/components/Admin/AdminSidebar.jsx
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import '../../styles/admin/AdminSidebar.css';
 
 const AdminSidebar = ({ isMobile = false, show = false, onClose = () => {} }) => {
   const location = useLocation();
@@ -10,7 +11,7 @@ const AdminSidebar = ({ isMobile = false, show = false, onClose = () => {} }) =>
     { path: '/admin/categories', name: 'إدارة الأقسام', icon: 'bi-tags' },
     { path: '/admin/products', name: 'إدارة المنتجات', icon: 'bi-box-seam' },
     { path: '/admin/orders', name: 'إدارة الطلبات', icon: 'bi-receipt' },
-    { path: '/admin/users', name: 'إدارة المستخدمين', icon: 'bi-people' },
+    { path: '/admin/users', name: 'إدارة المستخدمين', icon: 'bi-people' }, // ****** إضافة رابط إدارة المستخدمين ******
     { path: '/admin/brands', name: 'إدارة العلامات التجارية', icon: 'bi-badge-ad' },
     { path: '/admin/reviews', name: 'إدارة المراجعات', icon: 'bi-star' },
     { path: '/admin/content', name: 'إدارة المحتوى', icon: 'bi-file-earmark-text' },
@@ -19,20 +20,19 @@ const AdminSidebar = ({ isMobile = false, show = false, onClose = () => {} }) =>
 
   return (
     <div
-      className={`d-flex flex-column flex-shrink-0 p-3 bg-dark text-white ${isMobile ? 'admin-sidebar-mobile' : 'admin-sidebar-desktop'} ${isMobile && show ? 'show' : ''}`}
-      style={{ width: '280px' }}
+      className={`admin-sidebar-container ${isMobile ? 'admin-sidebar-mobile' : ''} ${isMobile && show ? 'show' : ''}`}
     >
       {isMobile && (
         <div className="d-flex justify-content-end mb-3">
           <button type="button" className="btn-close btn-close-white" aria-label="Close" onClick={onClose}></button>
         </div>
       )}
-      <Link to="/admin" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none" onClick={onClose}>
-        <i className="bi bi-gear-fill me-2 fs-4"></i>
-        <span className="fs-5 fw-bold">لوحة المسؤول</span>
+      <Link to="/admin" className="admin-sidebar-header" onClick={onClose}>
+        <i className="bi bi-gear-fill"></i>
+        <span>لوحة المسؤول</span>
       </Link>
-      <hr className="bg-secondary" />
-      <ul className="nav nav-pills flex-column mb-auto">
+      <hr />
+      <ul className="nav nav-pills flex-column mb-auto admin-sidebar-nav">
         {navItems.map((item) => (
           <li className="nav-item mb-2" key={item.path}>
             <Link
@@ -41,13 +41,13 @@ const AdminSidebar = ({ isMobile = false, show = false, onClose = () => {} }) =>
               aria-current={location.pathname === item.path ? 'page' : undefined}
               onClick={onClose}
             >
-              <i className={`bi ${item.icon} me-2`}></i>
+              <i className={`bi ${item.icon}`}></i>
               {item.name}
             </Link>
           </li>
         ))}
       </ul>
-      <hr className="bg-secondary" />
+      <hr />
       <div className="dropdown mt-auto">
         <a href="#" className="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
           <img src="https://github.com/mdo.png" alt="" width="32" height="32" className="rounded-circle me-2" />

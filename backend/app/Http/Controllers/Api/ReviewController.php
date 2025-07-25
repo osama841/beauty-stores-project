@@ -7,11 +7,14 @@ use App\Models\Review;
 use App\Models\Product; // لربط المراجعة بالمنتج
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // لاستخدام Log
 
 class ReviewController extends Controller
 {
     /**
      * Display a listing of the reviews.
+     * (Used for general review management in admin panel)
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -20,7 +23,7 @@ class ReviewController extends Controller
     {
         $query = Review::with(['user', 'product']);
 
-        // يمكن تصفية المراجعات حسب المنتج أو المستخدم
+        // يمكن تصفية المراجعات حسب المنتج أو المستخدم أو الحالة
         if ($request->has('product_id')) {
             $query->where('product_id', $request->product_id);
         }
@@ -41,7 +44,28 @@ class ReviewController extends Controller
             }
         }
 
-        $reviews = $query->get();
+        if ($request->has('status')) { // تصفية حسب حالة الموافقة (للمسؤول)
+            $query->where('is_approved', $request->status === 'approved');
+        }
+
+        $reviews = $query->orderBy('review_date', 'desc')->get(); // فرز حسب التاريخ
+        return response()->json($reviews);
+    }
+
+    /**
+     * Display a listing of the reviews for a specific product.
+     * (Used by ProductDetailPage, publicly accessible for approved reviews)
+     *
+     * @param  int  $productId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexByProduct($productId) // ****** هذه هي الدالة التي كانت مفقودة ******
+    {
+        $reviews = Review::where('product_id', $productId)
+                         ->where('is_approved', true) // عرض المراجعات المعتمدة فقط
+                         ->with('user:user_id,username') // جلب اسم المستخدم فقط
+                         ->orderBy('review_date', 'desc')
+                         ->get();
         return response()->json($reviews);
     }
 
@@ -58,8 +82,7 @@ class ReviewController extends Controller
                 'product_id' => 'required|exists:products,product_id',
                 'rating' => 'required|integer|min:1|max:5',
                 'title' => 'nullable|string|max:255',
-                'comment' => 'nullable|string',
-                // user_id سيتم أخذه من المستخدم المصادق
+                'comment' => 'nullable|string', // حافظنا على nullable هنا
             ]);
 
             $user = auth()->user();
@@ -77,12 +100,12 @@ class ReviewController extends Controller
 
             $review = Review::create([
                 'product_id' => $request->product_id,
-                'user_id' => $user->user_id, // ربط المراجعة بالمستخدم المصادق
+                'user_id' => $user->user_id,
                 'rating' => $request->rating,
                 'title' => $request->title,
                 'comment' => $request->comment,
                 'is_approved' => $user->is_admin ? true : false, // الموافقة التلقائية للمسؤول، أو انتظار الموافقة
-                'ip_address' => $request->ip(), // تسجيل عنوان IP
+                'ip_address' => $request->ip(),
                 'review_date' => now(),
             ]);
 
@@ -96,6 +119,7 @@ class ReviewController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
+            Log::error('Error submitting review: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while creating the review.',
                 'error' => $e->getMessage(),
@@ -113,7 +137,6 @@ class ReviewController extends Controller
     {
         // يمكن للمستخدمين رؤية مراجعاتهم الخاصة أو المراجعات المعتمدة، والمسؤولين رؤية أي مراجعة
         if (auth()->check() && (auth()->user()->is_admin || auth()->user()->user_id == $review->user_id || $review->is_approved)) {
-
             $review->load('user', 'product');
             return response()->json($review);
         } elseif (!auth()->check() && $review->is_approved) {
@@ -126,6 +149,7 @@ class ReviewController extends Controller
 
     /**
      * Update the specified review in storage.
+     * (Can be updated by the user who wrote it, or by an admin)
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Review  $review
@@ -165,6 +189,7 @@ class ReviewController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
+            Log::error('Error updating review: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while updating the review.',
                 'error' => $e->getMessage(),
@@ -173,7 +198,33 @@ class ReviewController extends Controller
     }
 
     /**
+     * Approve a specific review.
+     * (Accessible by authenticated admins only)
+     *
+     * @param  \App\Models\Review  $review
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function approve(Review $review)
+    {
+        // تأكد أن المستخدم الحالي مسؤول (يمكن استخدام Laravel Policies هنا أيضاً)
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized to approve reviews'], 403);
+        }
+
+        try {
+            $review->is_approved = true;
+            $review->save();
+            return response()->json(['message' => 'Review approved successfully', 'review' => $review]);
+        } catch (\Exception $e) {
+            Log::error('Error approving review: ' . $e->getMessage());
+            return response()->json(['message' => 'An error occurred while approving the review.'], 500);
+        }
+    }
+
+
+    /**
      * Remove the specified review from storage.
+     * (Can be deleted by the user who wrote it, or by an admin)
      *
      * @param  \App\Models\Review  $review
      * @return \Illuminate\Http\JsonResponse
@@ -191,6 +242,7 @@ class ReviewController extends Controller
                 'message' => 'Review deleted successfully',
             ], 204);
         } catch (\Exception $e) {
+            Log::error('Error deleting review: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while deleting the review.',
                 'error' => $e->getMessage(),

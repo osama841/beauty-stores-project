@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -6,6 +7,7 @@ use App\Models\ShoppingCart;
 use App\Models\Product; // للتحقق من المخزون
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth; // لاستخدام Auth::user()
 
 class ShoppingCartController extends Controller
 {
@@ -25,7 +27,16 @@ class ShoppingCartController extends Controller
                                  ->with('product') // تحميل تفاصيل المنتج
                                  ->get();
 
-        return response()->json($cartItems);
+        // ****** حساب المبلغ الإجمالي للسلة ******
+        $totalAmount = $cartItems->sum(function($item) {
+            // تأكد أن product موجود وأن price هو رقم
+            return $item->quantity * ($item->product ? (float)$item->product->price : 0);
+        });
+
+        return response()->json([
+            'cart_items' => $cartItems,
+            'total_amount' => $totalAmount, // ****** إرجاع المبلغ الإجمالي ******
+        ]);
     }
 
     /**
@@ -52,7 +63,6 @@ class ShoppingCartController extends Controller
                 return response()->json(['message' => 'Product not found'], 404);
             }
 
-            // البحث عن العنصر في السلة
             $cartItem = ShoppingCart::where('user_id', $user->user_id)
                                     ->where('product_id', $request->product_id)
                                     ->first();
@@ -60,14 +70,12 @@ class ShoppingCartController extends Controller
             $newQuantity = $request->quantity;
 
             if ($cartItem) {
-                // إذا كان العنصر موجودًا، قم بتحديث الكمية
                 $newQuantity = $cartItem->quantity + $request->quantity;
                 if ($product->stock_quantity < $newQuantity) {
                     return response()->json(['message' => 'Requested quantity exceeds product stock'], 400);
                 }
                 $cartItem->update(['quantity' => $newQuantity]);
             } else {
-                // إذا لم يكن العنصر موجودًا، قم بإنشاء عنصر جديد
                 if ($product->stock_quantity < $newQuantity) {
                     return response()->json(['message' => 'Requested quantity exceeds product stock'], 400);
                 }
@@ -75,7 +83,7 @@ class ShoppingCartController extends Controller
                     'user_id' => $user->user_id,
                     'product_id' => $request->product_id,
                     'quantity' => $newQuantity,
-                    'added_at' => now(),
+                     'added_at' => now(), // هذا الحقل غير موجود في هجرة shopping_cart التي قدمتها، يمكن إزالته أو إضافته للهجرة
                 ]);
             }
 
@@ -89,6 +97,7 @@ class ShoppingCartController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
+            \Log::error('Error adding/updating cart item: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while adding/updating cart item.',
                 'error' => $e->getMessage(),
@@ -105,7 +114,6 @@ class ShoppingCartController extends Controller
      */
     public function show(ShoppingCart $shoppingCart)
     {
-        // التأكد من أن المستخدم المصادق يملك عنصر السلة هذا
         if (auth()->check() && auth()->user()->user_id == $shoppingCart->user_id) {
             $shoppingCart->load('product');
             return response()->json($shoppingCart);
@@ -123,13 +131,12 @@ class ShoppingCartController extends Controller
     public function update(Request $request, ShoppingCart $shoppingCart)
     {
         try {
-            // التأكد من أن المستخدم المصادق يملك عنصر السلة هذا
             if (!auth()->check() || auth()->user()->user_id != $shoppingCart->user_id) {
                 return response()->json(['message' => 'Unauthorized to update this cart item'], 403);
             }
 
             $request->validate([
-                'quantity' => 'required|integer|min:0', // يمكن أن تكون 0 لحذف العنصر
+                'quantity' => 'required|integer|min:0',
             ]);
 
             $product = Product::find($shoppingCart->product_id);
@@ -140,7 +147,6 @@ class ShoppingCartController extends Controller
             $newQuantity = $request->quantity;
 
             if ($newQuantity == 0) {
-                // إذا كانت الكمية 0، قم بحذف العنصر من السلة
                 $shoppingCart->delete();
                 return response()->json(['message' => 'Product removed from cart successfully'], 204);
             }
@@ -161,6 +167,7 @@ class ShoppingCartController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
+            \Log::error('Error updating cart item quantity: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while updating cart item quantity.',
                 'error' => $e->getMessage(),
@@ -177,7 +184,6 @@ class ShoppingCartController extends Controller
     public function destroy(ShoppingCart $shoppingCart)
     {
         try {
-            // التأكد من أن المستخدم المصادق يملك عنصر السلة هذا
             if (!auth()->check() || auth()->user()->user_id != $shoppingCart->user_id) {
                 return response()->json(['message' => 'Unauthorized to delete this cart item'], 403);
             }
@@ -188,6 +194,7 @@ class ShoppingCartController extends Controller
                 'message' => 'Cart item deleted successfully',
             ], 204);
         } catch (\Exception $e) {
+            \Log::error('Error deleting cart item: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while deleting the cart item.',
                 'error' => $e->getMessage(),

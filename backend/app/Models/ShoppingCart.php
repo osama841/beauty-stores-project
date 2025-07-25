@@ -21,6 +21,7 @@ class ShoppingCart extends Model
 
     protected $primaryKey = 'cart_item_id';
     protected $fillable = ['user_id', 'product_id', 'quantity', 'added_at'];
+    protected $table = 'shopping_cart'; // اسم الجدول في قاعدة البيانات
 
     public function user()
     {

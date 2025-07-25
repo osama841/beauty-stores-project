@@ -6,7 +6,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Homepage from './pages/Homepage';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
-// import ProductListingPage from './pages/Products/ProductListingPage'; // تم إزالة استيراد صفحة المنتجات
+import ProductListingPage from './pages/Products/ProductListingPage';
+import ProductDetailPage from './pages/Products/ProductDetailPage';
+import ShoppingCartPage from './pages/Cart/ShoppingCartPage';
+import CheckoutPage from './pages/Checkout/CheckoutPage'; // ****** استيراد صفحة إتمام الشراء ******
+import OrderConfirmationPage from './pages/Checkout/OrderConfirmationPage'; // ****** استيراد صفحة تأكيد الطلب ******
+import ReviewForm from './components/ReviewForm';
 
 // استيراد مكونات الهيكل الأساسي
 import Header from './components/Header';
@@ -18,7 +23,10 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 // استيراد صفحات ومكونات لوحة تحكم المسؤول
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import CategoryManagement from './pages/Admin/CategoryManagement';
-import ProductManagement from './pages/Admin/ProductManagement'; // ****** استيراد صفحة إدارة المنتجات ******
+import ProductManagement from './pages/Admin/ProductManagement';
+import BrandManagement from './pages/Admin/BrandManagement';
+import OrderManagement from './pages/Admin/OrderManagement';
+import UserManagement from './pages/Admin/UserManagement';
 import AdminLayout from './components/Admin/AdminLayout';
 
 
@@ -75,7 +83,8 @@ const AppContent = () => {
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          {/* <Route path="/products" element={<ProductListingPage />} /> */}
+          <Route path="/products" element={<ProductListingPage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
 
           {/* مسارات المستخدم المحمية */}
           <Route
@@ -99,22 +108,25 @@ const AppContent = () => {
                   <Routes>
                     <Route index element={<AdminDashboard />} />
                     <Route path="categories" element={<CategoryManagement />} />
-                    <Route path="products" element={<ProductManagement />} /> {/* ****** إضافة مسار إدارة المنتجات ****** */}
+                    <Route path="products" element={<ProductManagement />} />
+                    <Route path="brands" element={<BrandManagement />} />
+                    <Route path="orders" element={<OrderManagement />} />
+                    <Route path="users" element={<UserManagement />} />
+                    <Route path="users" element={<ReviewForm />} />
                     {/* أضف مسارات لوحة تحكم المسؤول الأخرى هنا: */}
-                    {/* <Route path="orders" element={<OrderManagement />} /> */}
-                    {/* <Route path="users" element={<UserManagement />} /> */}
-                    {/* <Route path="brands" element={<BrandManagement />} /> */}
-                    {/* <Route path="reviews" element={<ReviewManagement />} /> */}
+                    {/* <Route path="reviews" element={<ReviewManagement />} */}
+                    {/* <Route path="content" element={<ContentManagement />} */}
+                    {/* <Route path="settings" element={<StoreSettings />} /> */}
                   </Routes>
                 </AdminLayout>
               </AdminRoute>
             }
           />
 
-          {/* مسارات الصفحات الأخرى (قريباً) */}
-          <Route path="/products/:id" element={<div className="container text-center mt-5"><p className="text-muted">صفحة تفاصيل المنتج (قريباً)</p></div>} />
-          <Route path="/cart" element={<div className="container text-center mt-5"><p className="text-muted">صفحة سلة التسوق (قريباً)</p></div>} />
-          <Route path="/checkout" element={<PrivateRoute><div className="container text-center mt-5"><p className="text-muted">صفحة إتمام الشراء (قريباً)</p></div></PrivateRoute>} />
+          {/* ****** مسارات الصفحات الأخرى (Checkout Flow) ****** */}
+          <Route path="/cart" element={<ShoppingCartPage />} />
+          <Route path="/checkout" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} /> {/* ****** مسار إتمام الشراء محمي ****** */}
+          <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} /> {/* ****** مسار تأكيد الطلب ****** */}
           <Route path="/about-us" element={<div className="container text-center mt-5"><p className="text-muted">صفحة من نحن (قريباً)</p></div>} />
           <Route path="/privacy-policy" element={<div className="container text-center mt-5"><p className="text-muted">صفحة سياسة الخصوصية (قريباً)</p></div>} />
           <Route path="/terms-of-service" element={<div className="container text-center mt-5"><p className="text-muted">صفحة شروط الاستخدام (قريباً)</p></div>} />

@@ -1,0 +1,30 @@
+/* src/styles/products/ProductDetailPage.css */
+
+/* أنماط مخصصة لصفحة تفاصيل المنتج */
+
+/* لضمان أن الصور الإضافية تظهر بشكل جيد في المعرض */
+.product-additional-images img {
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.product-additional-images img:hover {
+    border-color: #0d6efd; /* لون أزرق عند التحويم */
+}
+
+/* أنماط التقييمات */
+.review-rating .bi-star-fill {
+    color: #ffc107; /* لون نجمة ذهبي */
+}
+
+.review-item {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}

@@ -1,0 +1,159 @@
+/* ألوان مخصصة */
+:root {
+  --purple: #6f42c1;
+  --purple-light: #f0e6ff;
+  --purple-dark: #5a32a3;
+}
+
+/* تنسيقات عامة */
+.homepage-container {
+  overflow-x: hidden;
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+}
+
+.hero-content {
+  z-index: 2;
+}
+
+.wave-divider {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  transform: rotate(180deg);
+}
+
+.wave-divider svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 120px;
+}
+
+/* الأزرار المخصصة */
+.btn-purple {
+  background-color: var(--purple);
+  color: white;
+  border-color: var(--purple);
+}
+
+.btn-purple:hover {
+  background-color: var(--purple-dark);
+  border-color: var(--purple-dark);
+  color: white;
+}
+
+.btn-outline-purple {
+  color: var(--purple);
+  border-color: var(--purple);
+}
+
+.btn-outline-purple:hover {
+  background-color: var(--purple);
+  color: white;
+}
+
+/* العناوين */
+.section-title {
+  font-size: 2.2rem;
+  padding-bottom: 10px;
+}
+
+.section-title-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 4rem;
+  font-weight: 900;
+  color: rgba(111, 66, 193, 0.05);
+  white-space: nowrap;
+  z-index: 0;
+}
+
+/* تأثيرات الحركة */
+.transition {
+  transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.hover-opacity-100:hover {
+  opacity: 1 !important;
+}
+
+/* بطاقات الفئات */
+.category-card {
+  transition: all 0.3s ease;
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+}
+
+/* بطاقات المميزات */
+.feature-card {
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+/* العروض الخاصة */
+.special-offer {
+  position: relative;
+  overflow: hidden;
+}
+
+.special-offer::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+  z-index: 1;
+}
+
+/* التقييمات */
+.rating i {
+  font-size: 1.2rem;
+}
+
+/* القوائم */
+.brand-logo img {
+  max-height: 50px;
+  width: auto;
+  filter: grayscale(100%);
+  transition: all 0.3s ease;
+}
+
+.brand-logo:hover img {
+  filter: grayscale(0%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-content {
+    text-align: center !important;
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .section-title-bg {
+    font-size: 3rem;
+  }
+}

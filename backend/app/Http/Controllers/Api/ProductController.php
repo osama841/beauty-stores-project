@@ -21,23 +21,22 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        // ****** تحميل علاقات الفئة والعلامة التجارية ******
         $query = Product::with(['category', 'brand']);
 
-        // Filtering - التصفية
-        if ($request->has('category_id') && $request->category_id) {
+        // Filtering - التصفية (تطبيق الشرط فقط إذا كانت القيمة موجودة وغير فارغة)
+        if ($request->filled('category_id')) { // ****** استخدام filled() ******
             $query->where('category_id', $request->category_id);
         }
-        if ($request->has('brand_id') && $request->brand_id) {
+        if ($request->filled('brand_id')) { // ****** استخدام filled() ******
             $query->where('brand_id', $request->brand_id);
         }
-        if ($request->has('min_price') && $request->min_price !== '') {
+        if ($request->filled('min_price')) { // ****** استخدام filled() ******
             $query->where('price', '>=', $request->min_price);
         }
-        if ($request->has('max_price') && $request->max_price !== '') {
+        if ($request->filled('max_price')) { // ****** استخدام filled() ******
             $query->where('price', '<=', $request->max_price);
         }
-        if ($request->has('search') && $request->search) {
+        if ($request->filled('search')) { // ****** استخدام filled() ******
             $query->where(function($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('description', 'like', '%' . $request->search . '%')
@@ -81,7 +80,7 @@ class ProductController extends Controller
                 'width' => 'nullable|numeric|min:0',
                 'height' => 'nullable|numeric|min:0',
                 'category_id' => 'required|exists:categories,category_id',
-                'brand_id' => 'nullable|exists:brands,brand_id',
+                'brand_id' => 'required|exists:brands,brand_id',
                 'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'additional_images' => 'nullable|array',
                 'additional_images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -152,7 +151,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load(['category', 'brand', 'images', 'attributes', 'reviews']);
+        $product->load(['category', 'brand', 'images', 'attributes', 'reviews.user']);
         return response()->json($product);
     }
 
@@ -181,7 +180,7 @@ class ProductController extends Controller
                 'width' => 'nullable|numeric|min:0',
                 'height' => 'nullable|numeric|min:0',
                 'category_id' => 'sometimes|required|exists:categories,category_id',
-                'brand_id' => 'nullable|exists:brands,brand_id',
+                'brand_id' => 'required|exists:brands,brand_id',
                 'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'main_image_removed' => 'boolean',
                 'additional_images' => 'nullable|array',
