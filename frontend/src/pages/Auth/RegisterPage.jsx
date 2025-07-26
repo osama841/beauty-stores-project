@@ -28,6 +28,7 @@
           const response = await registerUser({
             first_name,
             last_name,
+            // Add other fields as needed for registration
             username,
             email,
             password,
@@ -51,7 +52,7 @@
           setLoading(false);
         }
       };
-
+      
       return (
         <div className="container my-5">
           <div className="row justify-content-center">
