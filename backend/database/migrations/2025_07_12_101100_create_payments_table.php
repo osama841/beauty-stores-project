@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id('payment_id');
-            $table->unsignedBigInteger('order_id');
+            $table->unsignedBigInteger('order_id')->nullable();
             $table->unsignedBigInteger('user_id');
             $table->string('payment_method', 50);
             $table->decimal('amount', 10, 2);

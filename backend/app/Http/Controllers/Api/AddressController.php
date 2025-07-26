@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Address;
+use App\Models\Address; // نموذج العنوان (الذي يمثل جدول 'addresses')
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth; // استخدام Auth facade
 
 class AddressController extends Controller
 {
@@ -16,13 +17,12 @@ class AddressController extends Controller
      */
     public function index()
     {
-        // عرض العناوين للمستخدم الحالي فقط (إذا كان مصادقًا)
-        // أو جميع العناوين إذا كان مسؤولاً
-        if (auth()->check()) {
-            if (auth()->user()->is_admin) {
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->is_admin) {
                 $addresses = Address::all();
             } else {
-                $addresses = Address::where('user_id', auth()->user()->user_id)->get();
+                $addresses = Address::where('user_id', $user->user_id)->get();
             }
             return response()->json($addresses);
         }
@@ -38,34 +38,51 @@ class AddressController extends Controller
     public function store(Request $request)
     {
         try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
+
             $request->validate([
-                'user_id' => 'required|exists:users,user_id', // يمكن أن يكون هذا تلقائيًا للمستخدم المصادق
+                // 'user_id' => 'required|exists:users,user_id', // user_id سيتم أخذه من المستخدم المصادق
                 'address_type' => 'required|string|in:shipping,billing',
                 'address_line1' => 'required|string|max:255',
                 'address_line2' => 'nullable|string|max:255',
                 'city' => 'required|string|max:100',
                 'state' => 'nullable|string|max:100',
-                'postal_code' => 'nullable|string|max:20',
+                'postal_code' => 'required|string|max:20', // ****** جعلها required لتطابق الواجهة الأمامية ******
                 'country' => 'required|string|max:100',
+                'phone_number' => 'nullable|string|max:20', // ****** إضافة phone_number إلى قواعد التحقق ******
                 'is_default' => 'boolean',
             ]);
 
             // التأكد من أن المستخدم المصادق هو من يضيف العنوان أو أن المسؤول يضيفه
-            if (auth()->check() && (auth()->user()->user_id == $request->user_id || auth()->user()->is_admin)) {
-                $address = Address::create($request->all());
-                return response()->json([
-                    'message' => 'Address created successfully',
-                    'address' => $address,
-                ], 201);
-            }
+            // (في سياق Checkout، المستخدم المصادق هو من يضيف لنفسه)
+            // إذا كان المسؤول يضيف لمستخدم آخر، يجب التحقق من صلاحياته
+            $address = Address::create([
+                'user_id' => $user->user_id, // ربط العنوان بالمستخدم المصادق
+                'address_type' => $request->address_type,
+                'address_line1' => $request->address_line1,
+                'address_line2' => $request->address_line2,
+                'city' => $request->city,
+                'state' => $request->state,
+                'postal_code' => $request->postal_code,
+                'country' => $request->country,
+                'phone_number' => $request->phone_number,
+                'is_default' => $request->is_default ?? false, // افتراضي false
+            ]);
 
-            return response()->json(['message' => 'Unauthorized to create address for this user'], 403);
+            return response()->json([
+                'message' => 'Address created successfully',
+                'address' => $address,
+            ], 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Validation Error',
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
+            \Log::error('Error creating address: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while creating the address.',
                 'error' => $e->getMessage(),
@@ -81,8 +98,7 @@ class AddressController extends Controller
      */
     public function show(Address $address)
     {
-        // التأكد من أن المستخدم المصادق يملك العنوان أو أنه مسؤول
-        if (auth()->check() && (auth()->user()->user_id == $address->user_id || auth()->user()->is_admin)) {
+        if (Auth::check() && (Auth::user()->user_id == $address->user_id || Auth::user()->is_admin)) {
             return response()->json($address);
         }
         return response()->json(['message' => 'Unauthorized to view this address'], 403);
@@ -97,29 +113,31 @@ class AddressController extends Controller
      */
     public function update(Request $request, Address $address)
     {
-        try {
-            // التأكد من أن المستخدم المصادق يملك العنوان أو أنه مسؤول
-            if (auth()->check() && (auth()->user()->user_id == $address->user_id || auth()->user()->is_admin)) {
-                $request->validate([
-                    'user_id' => 'sometimes|required|exists:users,user_id',
-                    'address_type' => 'sometimes|required|string|in:shipping,billing',
-                    'address_line1' => 'sometimes|required|string|max:255',
-                    'address_line2' => 'nullable|string|max:255',
-                    'city' => 'sometimes|required|string|max:100',
-                    'state' => 'nullable|string|max:100',
-                    'postal_code' => 'nullable|string|max:20',
-                    'country' => 'sometimes|required|string|max:100',
-                    'is_default' => 'boolean',
-                ]);
-
-                $address->update($request->all());
-
-                return response()->json([
-                    'message' => 'Address updated successfully',
-                    'address' => $address,
-                ]);
-            }
+        // التأكد من أن المستخدم المصادق يملك العنوان أو أنه مسؤول
+        if (!Auth::check() || (Auth::user()->user_id != $address->user_id && !Auth::user()->is_admin)) {
             return response()->json(['message' => 'Unauthorized to update this address'], 403);
+        }
+
+        try {
+            $request->validate([
+                // 'user_id' => 'sometimes|required|exists:users,user_id', // user_id سيتم أخذه من المستخدم المصادق
+                'address_type' => 'sometimes|required|string|in:shipping,billing',
+                'address_line1' => 'sometimes|required|string|max:255',
+                'address_line2' => 'nullable|string|max:255',
+                'city' => 'sometimes|required|string|max:100',
+                'state' => 'nullable|string|max:100',
+                'postal_code' => 'sometimes|required|string|max:20', // ****** جعلها sometimes|required لتطابق الواجهة الأمامية ******
+                'country' => 'sometimes|required|string|max:100',
+                'phone_number' => 'nullable|string|max:20', // ****** إضافة phone_number إلى قواعد التحقق ******
+                'is_default' => 'boolean',
+            ]);
+
+            $address->update($request->all());
+
+            return response()->json([
+                'message' => 'Address updated successfully',
+                'address' => $address,
+            ]);
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Validation Error',
@@ -142,14 +160,14 @@ class AddressController extends Controller
     public function destroy(Address $address)
     {
         try {
-            // التأكد من أن المستخدم المصادق يملك العنوان أو أنه مسؤول
-            if (auth()->check() && (auth()->user()->user_id == $address->user_id || auth()->user()->is_admin)) {
-                $address->delete();
-                return response()->json([
-                    'message' => 'Address deleted successfully',
-                ], 204);
+            if (!Auth::check() || (Auth::user()->user_id != $address->user_id && !Auth::user()->is_admin)) {
+                return response()->json(['message' => 'Unauthorized to delete this address'], 403);
             }
-            return response()->json(['message' => 'Unauthorized to delete this address'], 403);
+
+            $address->delete();
+            return response()->json([
+                'message' => 'Address deleted successfully',
+            ], 204);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'An error occurred while deleting the address.',

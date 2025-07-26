@@ -7,13 +7,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/checkout/CheckoutPage.css';
 
 const CheckoutPage = () => {
-  const { isAuthenticated, loading: authLoading, user } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth(); // 'user' غير مستخدم حاليًا
   const navigate = useNavigate();
 
   const [cartItems, setCartItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // لخطأ جلب السلة أو حالات عامة
 
   // حالة نموذج الشحن
   const [addressLine1, setAddressLine1] = useState('');
@@ -22,16 +22,16 @@ const CheckoutPage = () => {
   const [state, setState] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [country, setCountry] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState(''); // هذا الاسم في الواجهة الأمامية
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   // حالة نموذج الدفع
   const [paymentMethod, setPaymentMethod] = useState('credit_card');
   const [cardNumber, setCardNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
-  const [paymentStatus, setPaymentStatus] = useState('pending'); // حالة الدفع الأولية
+  const [paymentStatus, setPaymentStatus] = useState('pending');
 
-  const [formError, setFormError] = useState(null); // لأخطاء النموذج العامة
+  const [formError, setFormError] = useState(null); // لأخطاء النموذج العامة بعد الإرسال
   const [validationErrors, setValidationErrors] = useState({}); // لأخطاء التحقق من Laravel
 
   // جلب عناصر السلة عند تحميل الصفحة
@@ -42,13 +42,30 @@ const CheckoutPage = () => {
     }
     setLoading(true);
     setError(null);
+    setCartItems([]); // **إعادة تعيين للتأكد من أنها مصفوفة فارغة قبل الجلب**
+    setTotalAmount(0); // إعادة تعيين المبلغ الإجمالي
+
     try {
       const data = await getCartItems();
+
+      // **فحص دفاعي: التأكد من أن data و data.cart_items موجودين ومصفوفة**
+      if (!data || !Array.isArray(data.cart_items)) {
+        console.warn('استجابة API لعناصر سلة التسوق ليست مصفوفة أو فارغة:', data);
+        alert('حدث خطأ في استجابة سلة التسوق، الرجاء المحاولة مرة أخرى.');
+        setCartItems([]); // التأكد من إعادة تعيينها لمصفوفة فارغة
+        setTotalAmount(0);
+        navigate('/cart'); // إعادة توجيه إذا كانت البيانات مشوهة
+        return;
+      }
+
       if (data.cart_items.length === 0) {
         alert('سلة التسوق الخاصة بك فارغة. الرجاء إضافة منتجات قبل إتمام الشراء.');
+        setCartItems([]);
+        setTotalAmount(0);
         navigate('/cart');
         return;
       }
+
       const processedItems = data.cart_items.map(item => ({
         ...item,
         quantity: parseInt(item.quantity),
@@ -62,17 +79,22 @@ const CheckoutPage = () => {
     } catch (err) {
       console.error('فشل تحميل السلة لإتمام الشراء:', err);
       let errorMessage = 'حدث خطأ أثناء تحميل السلة لإتمام الشراء.';
-      if (err && typeof err === 'object') {
-          if (err.message) {
-              errorMessage = err.message;
-          }
-          if (err.errors) {
-              errorMessage = Object.values(err.errors).flat().join(' ');
-          } else if (err.error) {
-              errorMessage = err.error;
-          }
+      if (err.response) {
+        if (err.response.data && err.response.data.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.response.data && err.response.data.error) {
+          errorMessage = err.response.data.error;
+        } else {
+          errorMessage = `خطأ من الخادم: ${err.response.status} ${err.response.statusText}`;
+        }
+      } else if (err.request) {
+        errorMessage = 'لا توجد استجابة من الخادم. الرجاء التحقق من اتصالك بالإنترنت.';
+      } else {
+        errorMessage = err.message || 'حدث خطأ غير متوقع.';
       }
       setError(errorMessage);
+      setCartItems([]); // **حاسم: إعادة تعيين لمصفوفة فارغة عند الخطأ لضمان .map() يعمل**
+      setTotalAmount(0); // إعادة تعيين المجموع عند الخطأ
     } finally {
       setLoading(false);
     }
@@ -90,6 +112,9 @@ const CheckoutPage = () => {
     setFormError(null);
     setValidationErrors({});
 
+    // **ملاحظة: لا ترسل CVV إلى الـ Backend إذا كنت لا تنوي تخزينه بأمان (لا يوصى بتخزينه)**
+    // للتجربة، أرسلته سابقًا. للأمان، يجب التعامل مع الدفع عبر خدمة خارجية.
+    // للحفاظ على التناسق مع الـ Backend، سأبقيه حاليًا ولكن مع ملاحظة أمنية.
     const orderData = {
       shipping_address: {
         address_line1: addressLine1,
@@ -98,24 +123,26 @@ const CheckoutPage = () => {
         state: state,
         postal_code: postalCode,
         country: country,
-        phone_number: phoneNumber, // ****** هذا الاسم يجب أن يتطابق مع 'phone_number' في Laravel ******
-        address_type: 'shipping', // ****** هذا الاسم يجب أن يتطابق مع 'address_type' في Laravel ******
-        is_default: false, // ****** هذا الاسم يجب أن يتطابق مع 'is_default' في Laravel ******
+        phone_number: phoneNumber,
+        address_type: 'shipping',
+        is_default: false,
       },
       payment: {
-        method: paymentMethod, // ****** هذا الاسم يجب أن يتطابق مع 'method' في Laravel ******
+        method: paymentMethod,
         card_number: cardNumber,
         expiry_date: expiryDate,
-        cvv: cvv,
-        status: paymentStatus, // ****** هذا الاسم يجب أن يتطابق مع 'status' في Laravel ******
-        amount: totalAmount, // ****** هذا الاسم يجب أن يتطابق مع 'amount' في Laravel ******
-        currency: 'USD', // ****** هذا الاسم يجب أن يتطابق مع 'currency' في Laravel ******
-        transaction_id: 'TRX_' + Math.random().toString(36).substring(2, 15), // ****** هذا الاسم يجب أن يتطابق مع 'transaction_id' في Laravel ******
-        payment_date: new Date().toISOString().slice(0, 19).replace('T', ' '), // ****** هذا الاسم يجب أن يتطابق مع 'payment_date' في Laravel ******
-        gateway_response: 'Simulated response', // ****** هذا الاسم يجب أن يتطابق مع 'gateway_response' في Laravel ******
-        card_number_last_four: cardNumber ? cardNumber.slice(-4) : null, // ****** هذا الاسم يجب أن يتطابق مع 'card_number_last_four' في Laravel ******
+        cvv: cvv, // **أمنيًا: لا يوصى بإرسال أو تخزين CVV.**
+        status: paymentStatus,
+        amount: totalAmount, // **استخدام totalAmount من حالة الـ frontend**
+        currency: 'USD',
+        transaction_id: 'TRX_' + Math.random().toString(36).substring(2, 15),
+        payment_date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        gateway_response: 'Simulated response',
+        card_number_last_four: cardNumber ? cardNumber.slice(-4) : null,
       },
       notes: '',
+      // 'shipping_method' أصبحت اختيارية في الـ Backend، يمكنك إرسالها أو لا
+      shipping_method: 'standard', // قيمة افتراضية أو اتركها فارغة إذا لم يتم اختيارها
     };
 
     setLoading(true);
@@ -125,11 +152,22 @@ const CheckoutPage = () => {
       navigate(`/order-confirmation/${response.order.order_id}`);
     } catch (err) {
       console.error('فشل تقديم الطلب:', err);
-      if (err && typeof err === 'object' && err.errors) {
-        setValidationErrors(err.errors);
-        setFormError(err.message || 'الرجاء التحقق من الحقول المدخلة لتقديم الطلب.');
+      // معالجة أفضل لرسائل الخطأ من Axios
+      if (err.response && err.response.data) {
+        if (err.response.data.errors) {
+          // أخطاء التحقق من صحة Laravel
+          setValidationErrors(err.response.data.errors);
+          setFormError(err.response.data.message || 'الرجاء التحقق من الحقول المدخلة لتقديم الطلب.');
+        } else {
+          // أخطاء أخرى من الخادم (مثلاً 500)
+          setFormError(err.response.data.message || err.response.data.error || `خطأ في الخادم: ${err.response.status}`);
+        }
+      } else if (err.request) {
+        // الطلب تم إرساله ولكن لم يتم تلقي استجابة
+        setFormError('لا توجد استجابة من الخادم. الرجاء التحقق من اتصالك بالإنترنت.');
       } else {
-        setFormError(err || 'حدث خطأ غير متوقع أثناء تقديم الطلب.');
+        // خطأ آخر في إعداد الطلب
+        setFormError(err.message || 'حدث خطأ غير متوقع أثناء تقديم الطلب.');
       }
     } finally {
       setLoading(false);
@@ -180,6 +218,7 @@ const CheckoutPage = () => {
             </div>
             <div className="card-body">
               <ul className="list-group list-group-flush mb-3">
+                {/* هنا تم التأكد من أن cartItems هي دائمًا مصفوفة */}
                 {cartItems.map((item) => (
                   <li key={item.cart_id} className="list-group-item d-flex justify-content-between align-items-center small">
                     <span>{item.product.name} x {item.quantity}</span>
@@ -191,7 +230,6 @@ const CheckoutPage = () => {
                 <span>المجموع الفرعي:</span>
                 <span>${totalAmount.toFixed(2)}</span>
               </div>
-              {/* يمكن إضافة رسوم الشحن والضرائب هنا لاحقاً */}
               <hr />
               <div className="d-flex justify-content-between fs-5 fw-bold text-primary">
                 <span>المجموع الكلي:</span>

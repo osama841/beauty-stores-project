@@ -1,105 +1,123 @@
 // src/pages/Admin/OrderManagement.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { getOrders, getOrderById, updateOrderStatus } from '../../api/orders'; // استيراد دوال API الطلبات
-import '../../styles/admin/OrderManagement.css'; // استيراد ملف CSS الخاص بإدارة الطلبات
+import { getOrders, getOrderById, updateOrderStatus } from '../../api/orders';
+import '../../styles/admin/OrderManagement.css';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // لرسائل الخطأ العامة من API (سلسلة نصية)
-  const [selectedOrder, setSelectedOrder] = useState(null); // لعرض تفاصيل طلب معين في Modal
-  const [showDetailModal, setShowDetailModal] = useState(false); // للتحكم في ظهور Modal التفاصيل
+  const [error, setError] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [filterStatus, setFilterStatus] = useState(''); // لتصفية الطلبات حسب الحالة
+  const [filterStatus, setFilterStatus] = useState('');
 
   // -------------------------------------------------------------------
   // دوال جلب البيانات
   // -------------------------------------------------------------------
 
-  // دالة لجلب الطلبات
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setOrders([]); // إعادة تعيين لضمان أنها مصفوفة فارغة قبل الجلب
+    setTotalPages(1); // إعادة تعيين الصفحات الكلية
+
     try {
-      const params = { page: currentPage, status: filterStatus };
-      const data = await getOrders(params);
-      // Laravel paginate object يُرجع المنتجات في `data` property
-      // ونحتاج لتحويل القيم الرقمية إذا لم يتم تحويلها في Laravel
-      const processedOrders = data.data.map(order => ({
+      const params = { page: currentPage, status: filterStatus }; // نرسل رقم الصفحة وحالة الفلتر
+      const response = await getOrders(params); // الآن 'response' يجب أن تكون كائن pagination
+
+      // **هذا الفحص سيصبح صحيحاً الآن بعد تعديل الـ Backend:**
+      // نتحقق مما إذا كانت الاستجابة وكائن 'data' داخلها موجودين ومصفوفة.
+      if (!response || !Array.isArray(response.data)) {
+        console.warn('استجابة API للطلبات ليست بالتنسيق المتوقع أو data.data ليست مصفوفة:', response);
+        setError('تنسيق بيانات الطلبات غير صالح من الخادم.');
+        setOrders([]);
+        setTotalPages(1);
+        return;
+      }
+
+      // بما أن response.data هي المصفوفة مباشرة الآن (من كائن pagination)
+      const processedOrders = response.data.map(order => ({
         ...order,
         total_amount: parseFloat(order.total_amount),
-        // يمكن إضافة تحويلات أخرى هنا إذا كانت هناك حقول رقمية أخرى
       }));
+
       setOrders(processedOrders);
-      setCurrentPage(data.current_page);
-      setTotalPages(data.last_page);
+      setCurrentPage(response.current_page); // تحديث الصفحة الحالية من استجابة Laravel
+      setTotalPages(response.last_page);     // تحديث إجمالي الصفحات من استجابة Laravel
+
     } catch (err) {
       console.error('فشل تحميل الطلبات. الرجاء المحاولة لاحقاً:', err);
       let errorMessage = 'حدث خطأ غير متوقع أثناء تحميل البيانات.';
-      if (err && typeof err === 'object') {
-          if (err.message) {
-              errorMessage = err.message;
-          }
-          if (err.errors) {
-              errorMessage = Object.values(err.errors).flat().join(' ');
-          } else if (err.error) {
-              errorMessage = err.error;
-          }
+      if (err.response) {
+        if (err.response.data && err.response.data.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.response.data && err.response.data.error) {
+          errorMessage = err.response.data.error;
+        } else {
+          errorMessage = `خطأ من الخادم: ${err.response.status} ${err.response.statusText}`;
+        }
+      } else if (err.request) {
+        errorMessage = 'لا توجد استجابة من الخادم. الرجاء التحقق من اتصالك بالإنترنت.';
+      } else {
+        errorMessage = err.message || 'حدث خطأ غير متوقع.';
       }
       setError(errorMessage);
+      setOrders([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, filterStatus]); // أعد جلب الطلبات عند تغيير الصفحة أو حالة التصفية
+  }, [currentPage, filterStatus]); // التبعيات صحيحة الآن للـ pagination والفلاتر
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
   // -------------------------------------------------------------------
-  // دوال معالجة الطلبات
+  // دوال معالجة الطلبات (لم تتغير في هذا السياق)
   // -------------------------------------------------------------------
 
-  // دالة لفتح Modal تفاصيل الطلب
   const handleViewDetails = async (orderId) => {
-    setLoading(true); // يمكن وضع تحميل خاص بالـ Modal
     try {
       const orderDetails = await getOrderById(orderId);
-      // تحويل القيم الرقمية في تفاصيل الطلب
       const processedOrderDetails = {
         ...orderDetails,
         total_amount: parseFloat(orderDetails.total_amount),
-        order_items: orderDetails.order_items.map(item => ({
+        order_items: Array.isArray(orderDetails.order_items) ? orderDetails.order_items.map(item => ({
           ...item,
           price_at_purchase: parseFloat(item.price_at_purchase),
-        })),
+          product: item.product ? {
+            ...item.product,
+            price: parseFloat(item.product.price)
+          } : null
+        })) : [],
       };
       setSelectedOrder(processedOrderDetails);
       setShowDetailModal(true);
     } catch (err) {
       console.error('فشل جلب تفاصيل الطلب:', err);
-      alert('فشل جلب تفاصيل الطلب: ' + (err.message || JSON.stringify(err)));
-    } finally {
-      setLoading(false);
+      alert('فشل جلب تفاصيل الطلب: ' + (err.response?.data?.message || err.message || JSON.stringify(err)));
     }
   };
 
-  // دالة لتحديث حالة الطلب
   const handleUpdateStatus = async (orderId, newStatus) => {
     if (window.confirm(`هل أنت متأكد أنك تريد تغيير حالة الطلب إلى "${newStatus}"؟`)) {
+      setLoading(true);
       try {
         await updateOrderStatus(orderId, newStatus);
         alert('تم تحديث حالة الطلب بنجاح!');
-        fetchOrders(); // إعادة جلب الطلبات لتحديث القائمة
+        fetchOrders();
       } catch (err) {
         console.error('فشل تحديث حالة الطلب:', err);
-        alert('فشل تحديث حالة الطلب: ' + (err.message || JSON.stringify(err)));
+        alert('فشل تحديث حالة الطلب: ' + (err.response?.data?.message || err.message || JSON.stringify(err)));
+      } finally {
+        setLoading(false);
       }
     }
   };
 
-  // دالة للتنقل بين الصفحات
   const handlePageChange = (page) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);
@@ -132,7 +150,7 @@ const OrderManagement = () => {
   }
 
   // -------------------------------------------------------------------
-  // عرض المكون الرئيسي
+  // عرض المكون الرئيسي (بما في ذلك Pagination UI)
   // -------------------------------------------------------------------
 
   return (
@@ -228,7 +246,7 @@ const OrderManagement = () => {
         </div>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination (هذا الجزء سيعمل الآن لأن totalPages سيتم تحديثه) */}
       {totalPages > 1 && (
         <nav aria-label="Order pagination" className="mt-4">
           <ul className="pagination justify-content-center">
@@ -253,7 +271,7 @@ const OrderManagement = () => {
         </nav>
       )}
 
-      {/* Modal لعرض تفاصيل الطلب */}
+      {/* Modal لعرض تفاصيل الطلب (لم يتغير) */}
       {selectedOrder && (
         <div className={`modal fade ${showDetailModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showDetailModal ? 'rgba(0,0,0,0.5)' : '' }} aria-modal="true" role="dialog">
           <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
