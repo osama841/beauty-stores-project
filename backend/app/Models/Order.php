@@ -62,7 +62,7 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'order_date', 'total_amount', 'status', 'shipping_address_id',
         'billing_address_id', 'payment_method', 'payment_status', 'shipping_method',
-        'tracking_number', 'notes'
+        'tracking_number', 'notes','payment_id'
     ];
 
     public function user()
@@ -84,9 +84,8 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class, 'order_id');
     }
-
-    public function payments()
-    {
-        return $this->hasMany(Payment::class, 'order_id');
-    }
+public function payment()
+{
+    return $this->belongsTo(Payment::class, 'payment_id', 'payment_id');
+}
 }

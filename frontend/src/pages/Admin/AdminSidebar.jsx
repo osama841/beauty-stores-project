@@ -11,10 +11,10 @@ const AdminSidebar = ({ isMobile = false, show = false, onClose = () => {} }) =>
     { path: '/admin/categories', name: 'إدارة الأقسام', icon: 'bi-tags' },
     { path: '/admin/products', name: 'إدارة المنتجات', icon: 'bi-box-seam' },
     { path: '/admin/orders', name: 'إدارة الطلبات', icon: 'bi-receipt' },
-    { path: '/admin/users', name: 'إدارة المستخدمين', icon: 'bi-people' }, // ****** إضافة رابط إدارة المستخدمين ******
+    { path: '/admin/users', name: 'إدارة المستخدمين', icon: 'bi-people' },
     { path: '/admin/brands', name: 'إدارة العلامات التجارية', icon: 'bi-badge-ad' },
     { path: '/admin/reviews', name: 'إدارة المراجعات', icon: 'bi-star' },
-    { path: '/admin/content', name: 'إدارة المحتوى', icon: 'bi-file-earmark-text' },
+    { path: '/admin/content', name: 'إدارة المحتوى', icon: 'bi-file-earmark-text' }, // ****** إضافة رابط إدارة المحتوى ******
     { path: '/admin/settings', name: 'إعدادات المتجر', icon: 'bi-gear' },
   ];
 

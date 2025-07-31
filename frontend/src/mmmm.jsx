@@ -1,3 +1,4 @@
+
 // src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -9,9 +10,10 @@ import RegisterPage from './pages/Auth/RegisterPage';
 import ProductListingPage from './pages/Products/ProductListingPage';
 import ProductDetailPage from './pages/Products/ProductDetailPage';
 import ShoppingCartPage from './pages/Cart/ShoppingCartPage';
-import CheckoutPage from './pages/Checkout/CheckoutPage';
-import OrderConfirmationPage from './pages/Checkout/OrderConfirmationPage';
-import StaticPage from './pages/StaticPage'; // ****** استيراد صفحة عرض المحتوى الثابت ******
+import CheckoutPage from './pages/Checkout/CheckoutPage'; // ****** استيراد صفحة إتمام الشراء ******
+import OrderConfirmationPage from './pages/Checkout/OrderConfirmationPage'; // ****** استيراد صفحة تأكيد الطلب ******
+import ReviewForm from './components/ReviewForm';
+// استيراد إدارة المراجعات
 
 // استيراد مكونات الهيكل الأساسي
 import Header from './components/Header';
@@ -27,16 +29,8 @@ import ProductManagement from './pages/Admin/ProductManagement';
 import BrandManagement from './pages/Admin/BrandManagement';
 import OrderManagement from './pages/Admin/OrderManagement';
 import UserManagement from './pages/Admin/UserManagement';
-import ReviewManagement from './pages/Admin/ReviewManagement';
-import ContentManagement from './pages/Admin/ContentManagement'; // ****** استيراد صفحة إدارة المحتوى ******
+import ReviewManagement from './pages/Admin/ReviewManagement'; 
 import AdminLayout from './components/Admin/AdminLayout';
-
-// استيراد صفحات ومكونات لوحة تحكم المستخدم
-import UserDashboard from './pages/MyAccount/UserDashboard';
-import UserProfile from './pages/MyAccount/UserProfile';
-import UserAddresses from './pages/MyAccount/UserAddresses';
-import UserOrders from './pages/MyAccount/UserOrders';
-import UserLayout from './components/User/UserLayout';
 
 
 // مكون لحماية المسارات العامة التي تتطلب مصادقة
@@ -95,19 +89,15 @@ const AppContent = () => {
           <Route path="/products" element={<ProductListingPage />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
 
-          {/* مسارات لوحة تحكم المستخدم المحمية */}
+          {/* مسارات المستخدم المحمية */}
           <Route
-            path="/my-account/*"
+            path="/my-account"
             element={
               <PrivateRoute>
-                <UserLayout>
-                  <Routes>
-                    <Route index element={<UserDashboard />} />
-                    <Route path="profile" element={<UserProfile />} />
-                    <Route path="orders" element={<UserOrders />} />
-                    <Route path="addresses" element={<UserAddresses />} />
-                  </Routes>
-                </UserLayout>
+                <div className="container text-center mt-5">
+                  <h2 className="mb-3">مرحباً بك في حسابك، {user?.first_name || user?.username || user?.email}!</h2>
+                  <p className="text-muted">هذه صفحة محمية، مرئية فقط للمستخدمين المصادق عليهم.</p>
+                </div>
               </PrivateRoute>
             }
           />
@@ -125,9 +115,12 @@ const AppContent = () => {
                     <Route path="brands" element={<BrandManagement />} />
                     <Route path="orders" element={<OrderManagement />} />
                     <Route path="users" element={<UserManagement />} />
+                    <Route path="users" element={<ReviewForm />} />
                     <Route path="reviews" element={<ReviewManagement />} />
-                    <Route path="content" element={<ContentManagement />} /> {/* ****** إضافة مسار إدارة المحتوى ****** */}
+         
                     {/* أضف مسارات لوحة تحكم المسؤول الأخرى هنا: */}
+                    {/* <Route path="reviews" element={<ReviewManagement />} */}
+                    {/* <Route path="content" element={<ContentManagement />} */}
                     {/* <Route path="settings" element={<StoreSettings />} /> */}
                   </Routes>
                 </AdminLayout>
@@ -135,16 +128,16 @@ const AppContent = () => {
             }
           />
 
-          {/* مسارات الصفحات الأخرى (Checkout Flow) */}
+          {/* ****** مسارات الصفحات الأخرى (Checkout Flow) ****** */}
           <Route path="/cart" element={<ShoppingCartPage />} />
-          <Route path="/checkout" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
-          <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
-          {/* ****** مسارات عرض الصفحات الثابتة (عامة) ****** */}
-          <Route path="/about-us" element={<StaticPage slug="about-us" />} /> {/* ربط مسار بـ StaticPage */}
-          <Route path="/privacy-policy" element={<StaticPage slug="privacy-policy" />} />
-          <Route path="/terms-of-service" element={<StaticPage slug="terms-of-service" />} />
-          <Route path="/contact-us" element={<StaticPage slug="contact-us" />} />
+          <Route path="/checkout" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} /> {/* ****** مسار إتمام الشراء محمي ****** */}
+          <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} /> {/* ****** مسار تأكيد الطلب ****** */}
+          <Route path="/about-us" element={<div className="container text-center mt-5"><p className="text-muted">صفحة من نحن (قريباً)</p></div>} />
+          <Route path="/privacy-policy" element={<div className="container text-center mt-5"><p className="text-muted">صفحة سياسة الخصوصية (قريباً)</p></div>} />
+          <Route path="/terms-of-service" element={<div className="container text-center mt-5"><p className="text-muted">صفحة شروط الاستخدام (قريباً)</p></div>} />
+          <Route path="/contact-us" element={<div className="container text-center mt-5"><p className="text-muted">صفحة اتصل بنا (قريباً)</p></div>} />
           <Route path="/forgot-password" element={<div className="container text-center mt-5"><p className="text-muted">صفحة نسيت كلمة المرور (قريباً)</p></div>} />
+
         </Routes>
       </main>
       <Footer />

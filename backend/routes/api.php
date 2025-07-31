@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductAttributeController;
 use App\Http\Controllers\Api\DiscountController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PageController; // ****** تصحيح: استخدام \ ******
 use App\Http\Controllers\Api\BeautyAdvisorController;
 
 /*
@@ -42,56 +43,51 @@ Route::get('/brands', [BrandController::class, 'index']);       // عرض الع
 Route::get('/products', [ProductController::class, 'index']);   // عرض المنتجات
 Route::get('/products/{product}', [ProductController::class, 'show']); // عرض تفاصيل منتج
 
-// ****** المسار المحدد لجلب المراجعات لمنتج معين (عام) ******
-Route::get('/products/{productId}/reviews', [ReviewController::class, 'indexByProduct']);
+// مسارات المراجعات
+Route::get('/products/{productId}/reviews', [ReviewController::class, 'indexByProduct']); // عام
 
 
-// مسارات محمية بـ Sanctum (تتطلب مصادقة)
+// ****** مسارات الصفحات الثابتة (عامة) ******
+Route::get('/pages', [PageController::class, 'index']);
+Route::get('/pages/{page:slug}', [PageController::class, 'show']); // يمكن جلب الصفحة باستخدام الـ slug
+
+
+// Protected routes (تتطلب مصادقة Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // مسارات Beauty Advisor (إذا تم تفعيلها)
+    // مسارات Beauty Advisor
     Route::post('/beauty-advisor/ask', [BeautyAdvisorController::class,'ask']);
 
-    // مسارات المستخدمين (CRUD)
+    // ****** إدارة المستخدمين ******
     Route::apiResource('users', UserController::class);
 
-    // مسارات الفئات (CRUD)
-    Route::apiResource('categories', CategoryController::class)->except(['index', 'show']); // استثناء index, show لأنها عامة
+    // ****** إدارة الفئات (للمسؤول) ******
+    Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
 
-    // مسارات العلامات التجارية (CRUD)
-    Route::apiResource('brands', BrandController::class)->except(['index', 'show']); // استثناء index, show لأنها عامة
+    // ****** إدارة العلامات التجارية (للمسؤول) ******
+    Route::apiResource('brands', BrandController::class)->except(['index', 'show']);
 
-    // مسارات المنتجات (CRUD)
-    Route::apiResource('products', ProductController::class)->except(['index', 'show']); // استثناء index, show لأنها عامة
+    // ****** إدارة المنتجات (للمسؤول) ******
+    Route::apiResource('products', ProductController::class)->except(['index', 'show']);
 
-    // مسارات العناوين (CRUD)
+    // ****** إدارة العناوين (للمستخدم المصادق عليه) ******
     Route::apiResource('addresses', AddressController::class);
 
-    // مسارات الطلبات (CRUD)
-    Route::apiResource('orders', OrderController::class); // يمكن تعديلها لتكون updateStatus فقط
+    // ****** إدارة الطلبات (للمسؤول والمستخدم) ******
+    Route::get('/orders', [OrderController::class, 'index']); // المستخدم يرى طلباته، المسؤول يرى الكل
+    Route::get('/orders/{order}', [OrderController::class, 'show']); // المستخدم يرى طلبه، المسؤول يرى أي طلب
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']); // للمسؤول
 
-    // مسارات عناصر الطلب (CRUD)
-    Route::apiResource('order-items', OrderItemController::class);
+    // ****** إدارة سلة التسوق (للمستخدم المصادق عليه) ******
+    Route::apiResource('shopping-cart', ShoppingCartController::class)->only(['index', 'store', 'update', 'destroy']);
 
-    // مسارات سلة التسوق (CRUD)
-    Route::apiResource('shopping-cart', ShoppingCartController::class);
+    // ****** إدارة المراجعات (للمسؤول) ******
+    Route::apiResource('reviews', ReviewController::class)->except(['indexByProduct']);
+    Route::patch('/reviews/{review}/approve', [ReviewController::class, 'approve']);
 
-    // مسارات المراجعات (CRUD)
-    Route::apiResource('reviews', ReviewController::class); // هذا سيضيف store, update, destroy
-
-    // مسارات صور المنتجات (CRUD)
-    Route::apiResource('product-images', ProductImageController::class);
-
-    // مسارات المدفوعات (CRUD)
-    Route::apiResource('payments', PaymentController::class);
-
-    // مسارات سمات المنتجات (CRUD)
-    Route::apiResource('product-attributes', ProductAttributeController::class);
-
-    // مسارات الخصومات (CRUD)
-    Route::apiResource('discounts', DiscountController::class);
+    // ****** إدارة الصفحات الثابتة (للمسؤول) ******
+    Route::apiResource('pages', PageController::class)->except(['index', 'show']);
 });
