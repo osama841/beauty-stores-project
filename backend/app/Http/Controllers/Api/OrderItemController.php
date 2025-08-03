@@ -9,6 +9,11 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 class OrderItemController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(OrderItem::class, 'orderItem');
+    }
+
     /**
      * Display a listing of the order items.
      * (Usually accessed via an Order, but can be listed for admin)
@@ -17,10 +22,8 @@ class OrderItemController extends Controller
      */
     public function index()
     {
-        // فقط المسؤول يمكنه عرض جميع عناصر الطلب
-        if (!auth()->check() || !auth()->user()->is_admin) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('viewAny', OrderItem::class);
+        
         $orderItems = OrderItem::with(['order', 'product'])->get();
         return response()->json($orderItems);
     }
@@ -34,6 +37,8 @@ class OrderItemController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', OrderItem::class);
+        
         // عادةً ما يتم إنشاء عناصر الطلب كجزء من عملية إنشاء الطلب (في OrderController->store)
         // لا يُنصح بإنشاء عناصر الطلب بشكل مباشر عبر API منفصلة لهذا الغرض
         return response()->json([
@@ -50,12 +55,8 @@ class OrderItemController extends Controller
      */
     public function show(OrderItem $orderItem)
     {
-        // التأكد من أن المستخدم يملك الطلب الذي يحتوي على هذا العنصر أو أنه مسؤول
-        if (auth()->check() && (auth()->user()->user_id == $orderItem->order->user_id || auth()->user()->is_admin)) {
-            $orderItem->load('order', 'product');
-            return response()->json($orderItem);
-        }
-        return response()->json(['message' => 'Unauthorized to view this order item'], 403);
+        $orderItem->load('order', 'product');
+        return response()->json($orderItem);
     }
 
     /**
@@ -68,10 +69,6 @@ class OrderItemController extends Controller
      */
     public function update(Request $request, OrderItem $orderItem)
     {
-        // عادةً ما يتم تحديث عناصر الطلب فقط من قبل المسؤولين أو كجزء من منطق معقد
-        if (!auth()->check() || !auth()->user()->is_admin) {
-            return response()->json(['message' => 'Unauthorized to update order items'], 403);
-        }
         try {
             $request->validate([
                 'order_id' => 'sometimes|required|exists:orders,order_id',
@@ -109,10 +106,6 @@ class OrderItemController extends Controller
      */
     public function destroy(OrderItem $orderItem)
     {
-        // عادةً ما يتم حذف عناصر الطلب فقط من قبل المسؤولين أو كجزء من منطق معقد
-        if (!auth()->check() || !auth()->user()->is_admin) {
-            return response()->json(['message' => 'Unauthorized to delete order items'], 403);
-        }
         try {
             $orderItem->delete();
             return response()->json([

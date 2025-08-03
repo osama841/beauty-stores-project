@@ -239,7 +239,7 @@ class ProductController extends Controller
                 }
             }
 
-            if ($request->has('removed_additional_image_ids')) {
+            if ($request->filled('removed_additional_image_ids')) {
                 foreach ($request->input('removed_additional_image_ids') as $imageId) {
                     $productImage = ProductImage::find($imageId);
                     if ($productImage && $productImage->product_id === $product->product_id) {

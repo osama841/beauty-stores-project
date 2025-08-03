@@ -63,11 +63,13 @@ const UserProfile = () => {
       setConfirmPassword('');
     } catch (err) {
       console.error('فشل تحديث الملف الشخصي:', err);
-      if (err && typeof err === 'object' && err.errors) {
+      if (err.response && err.response.status === 403) {
+        setFormError('ليس لديك الصلاحية لتحديث هذا الملف الشخصي.');
+      } else if (err && typeof err === 'object' && err.errors) {
         setValidationErrors(err.errors);
         setFormError(Object.values(err.errors).flat().join(' ') || err.message || 'الرجاء التحقق من الحقول المدخلة.');
       } else {
-        setFormError(err || 'حدث خطأ غير متوقع أثناء تحديث الملف الشخصي.');
+        setFormError((err.response && err.response.data && err.response.data.message) || err.message || 'حدث خطأ غير متوقع أثناء تحديث الملف الشخصي.');
       }
     } finally {
       setLoading(false);

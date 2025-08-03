@@ -26,7 +26,7 @@ class ProductImageController extends Controller
 
         $query = ProductImage::with('product');
 
-        if ($request->has('product_id')) {
+        if ($request->filled('product_id')) {
             $query->where('product_id', $request->product_id);
         }
 
@@ -148,7 +148,7 @@ class ProductImageController extends Controller
                 $path = $imageFile->store('product_images', 'public');
                 $updateData['image_url'] = Storage::url($path);
                 // تحديث الصورة المصغرة إذا لزم الأمر
-            } elseif ($request->has('image_url')) {
+            } elseif ($request->filled('image_url')) {
                 // إذا تم توفير رابط URL مباشر، استخدمه
                 $updateData['image_url'] = $request->image_url;
             }

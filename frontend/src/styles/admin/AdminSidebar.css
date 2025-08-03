@@ -91,7 +91,7 @@
     .admin-sidebar-container {
         position: fixed;
         top: 0;
-        left: 0;
+        right: 0;
         transform: translateX(-100%); /* مخفي خارج الشاشة */
         transition: transform 0.3s ease-in-out;
         z-index: 1050; /* يظهر فوق المحتوى */
@@ -105,14 +105,14 @@
     .admin-sidebar-toggler {
         position: fixed;
         top: 1rem;
-        left: 1rem;
+        right: 1rem;
         z-index: 1040;
     }
 
     /* تأثير الدفع على المحتوى الرئيسي */
     .admin-content-wrapper {
         transition: margin-left 0.3s ease-in-out;
-        margin-left: 0; /* لا يوجد هامش افتراضياً */
+        margin-right: 0; /* لا يوجد هامش افتراضياً */
     }
 
     /* عند فتح الشريط الجانبي، ادفع المحتوى */
@@ -146,3 +146,4 @@
         display: none !important;
     }
 }
+

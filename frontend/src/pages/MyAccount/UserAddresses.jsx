@@ -135,11 +135,13 @@ const UserAddresses = () => {
       fetchAddresses(); // إعادة جلب العناوين لتحديث القائمة
     } catch (err) {
       console.error('خطأ في العملية:', err);
-      if (err && typeof err === 'object' && err.errors) {
+      if (err.response && err.response.status === 403) {
+        setFormError('ليس لديك الصلاحية لتنفيذ هذا الإجراء.');
+      } else if (err && typeof err === 'object' && err.errors) {
         setValidationErrors(err.errors);
         setFormError(Object.values(err.errors).flat().join(' ') || err.message || 'الرجاء التحقق من الحقول المدخلة.');
       } else {
-        setFormError(err || 'حدث خطأ غير متوقع.');
+        setFormError((err.response && err.response.data && err.response.data.message) || err.message || 'حدث خطأ غير متوقع.');
       }
     }
   };
@@ -149,11 +151,10 @@ const UserAddresses = () => {
     if (window.confirm('هل أنت متأكد أنك تريد حذف هذا العنوان؟')) {
       try {
         await deleteAddress(id);
-        alert('تم حذف العنوان بنجاح!');
         fetchAddresses();
       } catch (err) {
         console.error('خطأ في حذف العنوان:', err);
-        alert('فشل حذف العنوان: ' + (err.message || JSON.stringify(err)));
+        setError('فشل حذف العنوان: ' + ((err.response && err.response.data && err.response.data.message) || err.message || JSON.stringify(err)));
       }
     }
   };

@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Log; // لاستخدام Log
 
 class ReviewController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Review::class, 'review');
+    }
+
     /**
      * Display a listing of the reviews.
      * (Used for general review management in admin panel)
@@ -21,30 +26,32 @@ class ReviewController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Review::class);
+        
         $query = Review::with(['user', 'product']);
 
         // يمكن تصفية المراجعات حسب المنتج أو المستخدم أو الحالة
-        if ($request->has('product_id')) {
+        if ($request->filled('product_id')) {
             $query->where('product_id', $request->product_id);
         }
 
-        if ($request->has('user_id')) {
+        if ($request->filled('user_id')) {
             // فقط المسؤول يمكنه رؤية مراجعات مستخدمين آخرين
-            if (!auth()->check() || (!auth()->user()->is_admin && auth()->user()->user_id != $request->user_id)) {
+            if (!Auth::check() || (!Auth::user()->is_admin && Auth::user()->user_id != $request->user_id)) {
                 return response()->json(['message' => 'Unauthorized to view reviews for this user'], 403);
             }
             $query->where('user_id', $request->user_id);
         } else {
             // إذا لم يتم تحديد user_id، اعرض جميع المراجعات للمسؤول، أو مراجعات المستخدم المصادق فقط
-            if (auth()->check() && !auth()->user()->is_admin) {
-                $query->where('user_id', auth()->user()->user_id);
-            } elseif (!auth()->check()) {
+            if (Auth::check() && !Auth::user()->is_admin) {
+                $query->where('user_id', Auth::user()->user_id);
+            } elseif (!Auth::check()) {
                 // إذا لم يكن هناك مستخدم مصادق، يمكن عرض المراجعات المعتمدة فقط
                 $query->where('is_approved', true);
             }
         }
 
-        if ($request->has('status')) { // تصفية حسب حالة الموافقة (للمسؤول)
+        if ($request->filled('status')) { // تصفية حسب حالة الموافقة (للمسؤول)
             $query->where('is_approved', $request->status === 'approved');
         }
 
@@ -77,6 +84,8 @@ class ReviewController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Review::class);
+        
         try {
             $request->validate([
                 'product_id' => 'required|exists:products,product_id',
@@ -85,7 +94,7 @@ class ReviewController extends Controller
                 'comment' => 'nullable|string', // حافظنا على nullable هنا
             ]);
 
-            $user = auth()->user();
+            $user = Auth::user();
             if (!$user) {
                 return response()->json(['message' => 'Unauthenticated to add a review'], 401);
             }
@@ -104,7 +113,7 @@ class ReviewController extends Controller
                 'rating' => $request->rating,
                 'title' => $request->title,
                 'comment' => $request->comment,
-                'is_approved' => $user->is_admin ? true : false, // الموافقة التلقائية للمسؤول، أو انتظار الموافقة
+                'is_approved' => $user->is_admin ? true : false,
                 'ip_address' => $request->ip(),
                 'review_date' => now(),
             ]);
@@ -127,53 +136,25 @@ class ReviewController extends Controller
         }
     }
 
-    /**
-     * Display the specified review.
-     *
-     * @param  \App\Models\Review  $review
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function show(Review $review)
     {
-        // يمكن للمستخدمين رؤية مراجعاتهم الخاصة أو المراجعات المعتمدة، والمسؤولين رؤية أي مراجعة
-        if (auth()->check() && (auth()->user()->is_admin || auth()->user()->user_id == $review->user_id || $review->is_approved)) {
-            $review->load('user', 'product');
-            return response()->json($review);
-        } elseif (!auth()->check() && $review->is_approved) {
-            // للمستخدمين غير المصادقين، فقط المراجعات المعتمدة
-            $review->load('user', 'product');
-            return response()->json($review);
-        }
-        return response()->json(['message' => 'Unauthorized to view this review or review not approved'], 403);
+        $review->load('user', 'product');
+        return response()->json($review);
     }
 
-    /**
-     * Update the specified review in storage.
-     * (Can be updated by the user who wrote it, or by an admin)
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Review  $review
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function update(Request $request, Review $review)
     {
-        // فقط المستخدم الذي كتب المراجعة أو المسؤول يمكنه تحديثها
-        if (!auth()->check() || (auth()->user()->user_id != $review->user_id && !auth()->user()->is_admin)) {
-            return response()->json(['message' => 'Unauthorized to update this review'], 403);
-        }
-
         try {
             $request->validate([
                 'rating' => 'sometimes|required|integer|min:1|max:5',
                 'title' => 'nullable|string|max:255',
                 'comment' => 'nullable|string',
-                'is_approved' => 'boolean', // يمكن للمسؤول فقط تحديث هذه القيمة
+                'is_approved' => 'boolean',
             ]);
 
             $updateData = $request->all();
 
-            // إذا كان المستخدم ليس مسؤولاً، لا يمكنه تغيير is_approved
-            if (!auth()->user()->is_admin && isset($updateData['is_approved'])) {
+            if (Auth::check() && !Auth::user()->is_admin && isset($updateData['is_approved'])) {
                 unset($updateData['is_approved']);
             }
 
@@ -197,19 +178,9 @@ class ReviewController extends Controller
         }
     }
 
-    /**
-     * Approve a specific review.
-     * (Accessible by authenticated admins only)
-     *
-     * @param  \App\Models\Review  $review
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function approve(Review $review)
     {
-        // تأكد أن المستخدم الحالي مسؤول (يمكن استخدام Laravel Policies هنا أيضاً)
-        if (!auth()->check() || !auth()->user()->is_admin) {
-            return response()->json(['message' => 'Unauthorized to approve reviews'], 403);
-        }
+        $this->authorize('update', $review);
 
         try {
             $review->is_approved = true;
@@ -221,21 +192,8 @@ class ReviewController extends Controller
         }
     }
 
-
-    /**
-     * Remove the specified review from storage.
-     * (Can be deleted by the user who wrote it, or by an admin)
-     *
-     * @param  \App\Models\Review  $review
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function destroy(Review $review)
     {
-        // فقط المستخدم الذي كتب المراجعة أو المسؤول يمكنه حذفها
-        if (!auth()->check() || (auth()->user()->user_id != $review->user_id && !auth()->user()->is_admin)) {
-            return response()->json(['message' => 'Unauthorized to delete this review'], 403);
-        }
-
         try {
             $review->delete();
             return response()->json([

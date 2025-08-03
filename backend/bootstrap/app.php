@@ -27,6 +27,13 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         // ****** نهاية الجزء الجديد والمهم جداً ******
 
+        // إضافة Rate Limiting Middlewares
+        $middleware->alias([
+            'rate.limit' => \App\Http\Middleware\RateLimitMiddleware::class,
+            'auth.rate.limit' => \App\Http\Middleware\AuthRateLimitMiddleware::class,
+            'api.rate.limit' => \App\Http\Middleware\ApiRateLimitMiddleware::class,
+        ]);
+
         // يمكنك إضافة Middleware أخرى هنا (كما كانت تعليقاتك الأصلية)
         // $middleware->append(
         //     \App\Http\Middleware\YourCustomMiddleware::class,

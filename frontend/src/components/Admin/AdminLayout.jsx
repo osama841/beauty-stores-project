@@ -1,7 +1,7 @@
 // src/components/Admin/AdminLayout.jsx
 import React, { useState, useEffect } from 'react';
 import AdminSidebar from "../../pages/Admin/AdminSidebar.jsx"; // ****** المسار الصحيح الآن بناءً على مكان ملفك ******
-
+/* import '../../styles/admin/AdminSidebar.css'; */
 const AdminLayout = ({ children }) => {
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 

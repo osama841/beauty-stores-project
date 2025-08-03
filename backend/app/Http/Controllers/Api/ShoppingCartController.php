@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Auth; // لاستخدام Auth::user()
 
 class ShoppingCartController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(ShoppingCart::class, 'shoppingCart');
+    }
+
     /**
      * Display the shopping cart items for the authenticated user.
      *
@@ -18,7 +23,9 @@ class ShoppingCartController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
+        $this->authorize('viewAny', ShoppingCart::class);
+        
+        $user = Auth::user();
         if (!$user) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
@@ -47,13 +54,15 @@ class ShoppingCartController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', ShoppingCart::class);
+        
         try {
             $request->validate([
                 'product_id' => 'required|exists:products,product_id',
                 'quantity' => 'required|integer|min:1',
             ]);
 
-            $user = auth()->user();
+            $user = Auth::user();
             if (!$user) {
                 return response()->json(['message' => 'Unauthenticated'], 401);
             }
@@ -114,11 +123,8 @@ class ShoppingCartController extends Controller
      */
     public function show(ShoppingCart $shoppingCart)
     {
-        if (auth()->check() && auth()->user()->user_id == $shoppingCart->user_id) {
-            $shoppingCart->load('product');
-            return response()->json($shoppingCart);
-        }
-        return response()->json(['message' => 'Unauthorized to view this cart item'], 403);
+        $shoppingCart->load('product');
+        return response()->json($shoppingCart);
     }
 
     /**
@@ -131,9 +137,6 @@ class ShoppingCartController extends Controller
     public function update(Request $request, ShoppingCart $shoppingCart)
     {
         try {
-            if (!auth()->check() || auth()->user()->user_id != $shoppingCart->user_id) {
-                return response()->json(['message' => 'Unauthorized to update this cart item'], 403);
-            }
 
             $request->validate([
                 'quantity' => 'required|integer|min:0',
@@ -184,9 +187,6 @@ class ShoppingCartController extends Controller
     public function destroy(ShoppingCart $shoppingCart)
     {
         try {
-            if (!auth()->check() || auth()->user()->user_id != $shoppingCart->user_id) {
-                return response()->json(['message' => 'Unauthorized to delete this cart item'], 403);
-            }
 
             $shoppingCart->delete();
 

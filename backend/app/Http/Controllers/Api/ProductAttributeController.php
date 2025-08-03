@@ -24,7 +24,7 @@ class ProductAttributeController extends Controller
 
         $query = ProductAttribute::with('product');
 
-        if ($request->has('product_id')) {
+        if ($request->filled('product_id')) {
             $query->where('product_id', $request->product_id);
         }
 

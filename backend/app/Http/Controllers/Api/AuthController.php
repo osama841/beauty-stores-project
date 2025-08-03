@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth; // لضمان وجوده، حتى لو لم يستخدم مباشرة في register
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -45,6 +47,13 @@ class AuthController extends Controller
             // إنشاء رمز API للمستخدم الجديد باستخدام Laravel Sanctum
             $token = $user->createToken('auth_token')->plainTextToken;
 
+            // تسجيل التسجيل الناجح
+            Log::info('User registered successfully', [
+                'user_id' => $user->user_id,
+                'email' => $user->email,
+                'ip' => $request->ip()
+            ]);
+
             // إرجاع استجابة JSON بنجاح التسجيل وبيانات المستخدم والرمز المميز
             return response()->json([
                 'message' => 'User registered successfully',
@@ -60,7 +69,7 @@ class AuthController extends Controller
             ], 422); // 422 Unprocessable Content
         } catch (\Exception $e) {
             // التقاط أي أخطاء أخرى غير متوقعة
-            \Log::error('Error during registration: ' . $e->getMessage()); // تسجيل الخطأ في سجلات Laravel
+            Log::error('Error during registration: ' . $e->getMessage()); // تسجيل الخطأ في سجلات Laravel
             return response()->json([
                 'message' => 'An error occurred during registration.',
                 'error' => $e->getMessage(),
@@ -77,7 +86,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
-            \Log::info('🚀 بدأ login', $request->all());
+            Log::info('🚀 بدأ login', $request->all());
 
             // قواعد التحقق لحقلي البريد الإلكتروني وكلمة المرور
             $request->validate([
@@ -90,12 +99,19 @@ class AuthController extends Controller
 
             // التحقق من وجود المستخدم وصحة كلمة المرور
             if (!$user || !Hash::check($request->password, $user->password)) {
+                // تسجيل المحاولة الفاشلة
+                Log::warning('Failed login attempt', [
+                    'email' => $request->email,
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent()
+                ]);
+
                 return response()->json([
                     'message' => 'Invalid credentials',
                 ], 401); // 401 Unauthorized
             }
 
-            \Log::info('✅ بيانات صحيحة للمستخدم: ' . $user->id);
+            Log::info('✅ بيانات صحيحة للمستخدم: ' . $user->user_id);
 
             // حذف جميع الرموز المميزة السابقة للمستخدم لضمان صلاحية واحدة لكل جلسة
             $user->tokens()->delete();
@@ -118,7 +134,7 @@ class AuthController extends Controller
             ], 422); // 422 Unprocessable Content
         } catch (\Exception $e) {
             // التقاط أي أخطاء أخرى غير متوقعة
-            \Log::error('🔥 خطأ في login: ' . $e->getMessage()); // تسجيل الخطأ في سجلات Laravel
+            Log::error('🔥 خطأ في login: ' . $e->getMessage()); // تسجيل الخطأ في سجلات Laravel
             return response()->json([
                 'message' => 'An error occurred during login.',
                 'error' => $e->getMessage(),

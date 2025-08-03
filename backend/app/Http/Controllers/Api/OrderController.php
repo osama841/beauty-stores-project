@@ -18,34 +18,29 @@ use Carbon\Carbon; // إضافة Carbon للاستخدام المباشر
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the orders.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-      public function index(Request $request)
+    public function __construct()
+    {
+        $this->authorizeResource(Order::class, 'order');
+    }
+
+    public function index(Request $request)
     {
         $user = Auth::user();
-        if (!$user) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
 
         try {
             $query = Order::with(['user', 'shippingAddress', 'billingAddress', 'orderItems.product', 'payment']);
 
-            // تطبيق الفلاتر بناءً على حالة الطلب (status)
-            // نستخدم input() للحصول على قيمة 'status' من طلب الواجهة الأمامية
-            if ($request->has('status') && $request->input('status') !== '') {
+            if (!$user->is_admin) {
+                $query->where('user_id', $user->id);
+            }
+
+            if ($request->filled('status')) {
                 $query->where('status', $request->input('status'));
             }
 
-            // تحديد عدد العناصر لكل صفحة، ويمكن للواجهة الأمامية أن تمررها
-            $perPage = $request->input('per_page', 15); // افتراضيًا 15 عنصر لكل صفحة
-            // استخدام paginate() لتقسيم النتائج إلى صفحات
+            $perPage = $request->input('per_page', 15);
             $orders = $query->paginate($perPage);
 
-            // Laravel يقوم تلقائيًا بإرجاع كائن JSON لهيكل Pagination
             return response()->json($orders, 200);
 
         } catch (\Exception $e) {
@@ -57,19 +52,9 @@ class OrderController extends Controller
         }
     }
 
-
-    /**
-     * Store a newly created order.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function store(Request $request)
     {
         $user = Auth::user();
-        if (!$user) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
 
         try {
             $request->validate([
@@ -84,10 +69,9 @@ class OrderController extends Controller
                 'shipping_address.is_default' => 'boolean',
 
                 'payment.method' => 'required|string|in:credit_card,paypal,cash_on_delivery',
-                // CVV لا يجب تخزينه، لذا لا نجعله مطلوباً بشكل صارم للتخزين
                 'payment.card_number' => 'required_if:payment.method,credit_card|nullable|string|max:16',
                 'payment.expiry_date' => 'required_if:payment.method,credit_card|nullable|string|max:7',
-                'payment.cvv' => 'nullable|string|max:4', // **ملاحظة أمنية: لا يوصى بتخزين CVV**
+                'payment.cvv' => 'nullable|string|max:4',
                 'payment.status' => 'required|string|in:pending,completed,failed',
                 'payment.amount' => 'required|numeric|min:0',
                 'payment.currency' => 'nullable|string|max:10',
@@ -117,16 +101,12 @@ class OrderController extends Controller
                     $totalAmountCalculated += $item->quantity * $item->product->price;
                 }
 
-                // **التحقق من تطابق المبلغ المرسل مع المبلغ المحسوب (مهم للأمان)**
-                if (abs($request->input('payment.amount') - $totalAmountCalculated) > 0.01) { // سماحية بسيطة للتعويم
+                if (abs($request->input('payment.amount') - $totalAmountCalculated) > 0.01) {
                     Log::warning('Frontend total amount mismatch for user: ' . $user->user_id, [
                         'frontend_amount' => $request->input('payment.amount'),
                         'calculated_amount' => $totalAmountCalculated,
                         'cart_items' => $cartItems->toArray(),
                     ]);
-                    // يمكن اختيار رفض الطلب هنا أو تعديل المبلغ إلى المحسوب
-                    // للحفاظ على الأمان، سنستخدم المبلغ المحسوب دائمًا
-                    // throw new \Exception('Mismatch in total amount.'); // يمكن تفعيل هذا لزيادة الأمان
                 }
 
                 $shippingAddress = Address::create([
@@ -142,56 +122,49 @@ class OrderController extends Controller
                     'is_default' => $request->input('shipping_address.is_default', false),
                 ]);
 
-                // 1. إنشاء الطلب أولًا
                 $order = Order::create([
                     'user_id' => $user->user_id,
                     'order_date' => now(),
-                    'total_amount' => $totalAmountCalculated, // **استخدام المبلغ المحسوب**
+                    'total_amount' => $totalAmountCalculated,
                     'status' => 'pending',
                     'shipping_address_id' => $shippingAddress->address_id,
-                    'billing_address_id' => $shippingAddress->address_id, // بافتراض أنها نفسها حاليًا
+                    'billing_address_id' => $shippingAddress->address_id,
                     'notes' => $request->input('notes'),
                     'shipping_method' => $request->input('shipping_method'),
-                    'payment_method' => $request->input('payment.method'), // **تمت إضافة هذا العمود**
+                    'payment_method' => $request->input('payment.method'),
                 ]);
 
-                // 2. إنشاء الدفع وربطه بـ order_id
                 $payment = Payment::create([
                     'user_id' => $user->user_id,
                     'order_id' => $order->order_id,
-                    'amount' => $totalAmountCalculated, // **استخدام المبلغ المحسوب هنا أيضاً**
+                    'amount' => $totalAmountCalculated,
                     'payment_method' => $request->input('payment.method'),
                     'transaction_id' => $request->input('payment.transaction_id') ?: null,
                     'payment_status' => $request->input('payment.status'),
                     'card_number_last_four' => $request->input('payment.card_number_last_four') ?: null,
-                    // 'cvv' لا يتم تخزينه هنا كما هو موصى به أمنيًا
                     'expiry_date' => $request->input('payment.expiry_date') ?: null,
                     'payment_date' => $request->input('payment.payment_date') ? Carbon::parse($request->input('payment.payment_date')) : now(),
                     'gateway_response' => $request->input('payment.gateway_response') ?: null,
                     'currency' => $request->input('payment.currency') ?: null,
                 ]);
 
-                // 3. ربط الطلب بمعرف الدفع
-                $order->payment_id = $payment->payment_id; // **تأكد أن جدول orders لديه عمود payment_id**
+                $order->payment_id = $payment->payment_id;
                 $order->save();
 
-                // 4. إدخال المنتجات إلى order_items وتحديث المخزون
                 foreach ($cartItems as $item) {
                     OrderItem::create([
                         'order_id' => $order->order_id,
                         'product_id' => $item->product_id,
                         'quantity' => $item->quantity,
                         'price_at_purchase' => $item->product->price,
-                        'price_at_order' => $item->product->price, // يمكن أن يكون مختلفًا في حالات معينة
-                        'subtotal' => $item->quantity * $item->product->price, // تأكد من وجود هذا العمود في جدول order_items
+                        'price_at_order' => $item->product->price,
+                        'subtotal' => $item->quantity * $item->product->price,
                     ]);
                     $item->product->decrement('stock_quantity', $item->quantity);
                 }
 
-                // حذف عناصر سلة التسوق بعد نجاح الطلب
                 ShoppingCart::where('user_id', $user->user_id)->delete();
 
-                // تحميل العلاقات للرد بالطلب الكامل
                 $order->load(['user', 'orderItems.product', 'shippingAddress', 'payment']);
 
                 return response()->json([
@@ -217,35 +190,15 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Display the specified order.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function show(Order $order)
     {
-        if (Auth::check() && (Auth::user()->user_id == $order->user_id || Auth::user()->is_admin)) {
-            $order->load(['user', 'shippingAddress', 'billingAddress', 'orderItems.product', 'payment']);
-            return response()->json($order);
-        }
-        return response()->json(['message' => 'Unauthorized to view this order'], 403);
+        $order->load(['user', 'shippingAddress', 'billingAddress', 'orderItems.product', 'payment']);
+        return response()->json($order);
     }
 
-    /**
-     * Update the specified order in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function update(Request $request, Order $order)
     {
         try {
-            if (!Auth::check() || !Auth::user()->is_admin) {
-                return response()->json(['message' => 'Unauthorized to update orders'], 403);
-            }
-
             $request->validate([
                 'total_amount' => 'sometimes|required|numeric|min:0',
                 'status' => 'sometimes|required|string|in:pending,processing,shipped,delivered,cancelled,refunded',
@@ -277,19 +230,9 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Remove the specified order from storage.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function destroy(Order $order)
     {
         try {
-            if (!Auth::check() || !Auth::user()->is_admin) {
-                return response()->json(['message' => 'Unauthorized to delete orders'], 403);
-            }
-
             $order->delete();
 
             return response()->json([

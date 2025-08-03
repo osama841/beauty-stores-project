@@ -11,38 +11,21 @@
 
     class UserController extends Controller
     {
-        /**
-         * Display a listing of the users.
-         * (Accessible by authenticated admins only)
-         *
-         * @param  \Illuminate\Http\Request  $request
-         * @return \Illuminate\Http\JsonResponse
-         */
+        public function __construct()
+        {
+            $this->authorizeResource(User::class, 'user');
+        }
+
         public function index(Request $request)
         {
-            if (!auth()->check() || !auth()->user()->is_admin) {
-                return response()->json(['message' => 'Unauthorized to view users.'], 403);
-            }
-
             $users = User::orderBy('created_at', 'desc')
                          ->paginate($request->get('per_page', 10));
 
             return response()->json($users);
         }
 
-        /**
-         * Store a newly created user in storage.
-         * (Primarily for admin to create users, or internal use)
-         *
-         * @param  \Illuminate\Http\Request  $request
-         * @return \Illuminate\Http\JsonResponse
-         */
         public function store(Request $request)
         {
-            if (!auth()->check() || !auth()->user()->is_admin) {
-                return response()->json(['message' => 'Unauthorized to create users.'], 403);
-            }
-
             try {
                 $request->validate([
                     'first_name' => 'required|string|max:50',
@@ -84,33 +67,13 @@
             }
         }
 
-        /**
-         * Display the specified user.
-         *
-         * @param  \App\Models\User  $user
-         * @return \Illuminate\Http\JsonResponse
-         */
         public function show(User $user)
         {
-            if (!auth()->check() || (!auth()->user()->is_admin && auth()->user()->user_id != $user->user_id)) {
-                return response()->json(['message' => 'Unauthorized to view this user.'], 403);
-            }
             return response()->json($user);
         }
 
-        /**
-         * Update the specified user in storage.
-         *
-         * @param  \Illuminate\Http\Request  $request
-         * @param  \App\Models\User  $user
-         * @return \Illuminate\Http\JsonResponse
-         */
         public function update(Request $request, User $user)
         {
-            if (!auth()->check() || (!auth()->user()->is_admin && auth()->user()->user_id != $user->user_id)) {
-                return response()->json(['message' => 'Unauthorized to update this user.'], 403);
-            }
-
             try {
                 $request->validate([
                     'first_name' => 'sometimes|required|string|max:50',
@@ -125,7 +88,7 @@
 
                 $updateData = $request->all();
 
-                if (!auth()->user()->is_admin) {
+                if (auth()->check() && !auth()->user()->is_admin) {
                     unset($updateData['is_admin']);
                     unset($updateData['status']);
                 }
@@ -156,18 +119,8 @@
             }
         }
 
-        /**
-         * Remove the specified user from storage.
-         *
-         * @param  \App\Models\User  $user
-         * @return \Illuminate\Http\JsonResponse
-         */
         public function destroy(User $user)
         {
-            if (!auth()->check() || !auth()->user()->is_admin || auth()->user()->user_id == $user->user_id) {
-                return response()->json(['message' => 'Unauthorized to delete this user or cannot delete self.'], 403);
-            }
-
             try {
                 $user->delete();
                 return response()->json([

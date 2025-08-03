@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Auth; // تم إضافة هذا السطر
 
 class PaymentController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Payment::class, 'payment');
+    }
+
     /**
      * Display a listing of the payments.
      *
@@ -19,6 +24,8 @@ class PaymentController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Payment::class);
+        
         // استخدام Auth::check() و Auth::user() بدلاً من auth()->check() و auth()->user()
         if (Auth::check()) {
             $user = Auth::user();
@@ -42,6 +49,8 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Payment::class);
+        
         DB::beginTransaction();
         try {
             $validated = $request->validate([
