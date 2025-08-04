@@ -1,21 +1,20 @@
 // src/components/User/UserSidebar.jsx
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext'; // لجلب بيانات المستخدم
-import '../../styles/user/UserSidebar.css'; // استيراد ملف CSS الخاص بالشريط الجانبي
+import { useAuth } from '../../contexts/AuthContext';
+import '../../styles/user/UserSidebar.css';
 
 const UserSidebar = () => {
   const location = useLocation();
-  const { user } = useAuth(); // جلب المستخدم لعرض اسمه
+  const { user } = useAuth();
 
   const navItems = [
     { path: '/my-account', name: 'لوحة التحكم', icon: 'bi-speedometer2' },
     { path: '/my-account/profile', name: 'الملف الشخصي', icon: 'bi-person-circle' },
     { path: '/my-account/orders', name: 'طلباتي', icon: 'bi-receipt' },
     { path: '/my-account/addresses', name: 'عناويني', icon: 'bi-geo-alt' },
-    { path: '/my-account/wishlist', name: 'قائمة الرغبات', icon: 'bi-heart' },
+    { path: '/my-account/wishlist', name: 'قائمة الرغبات', icon: 'bi-heart' }, // ****** إضافة رابط قائمة الرغبات ******
     { path: '/my-account/reviews', name: 'مراجعاتي', icon: 'bi-star' },
-    // يمكنك إضافة المزيد من الروابط هنا
   ];
 
   return (

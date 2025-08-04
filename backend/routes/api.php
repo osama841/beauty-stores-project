@@ -16,8 +16,9 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductAttributeController;
 use App\Http\Controllers\Api\DiscountController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\PageController; // ****** تصحيح: استخدام \ ******
+use App\Http\Controllers\Api\PageController;
 use App\Http\Controllers\Api\BeautyAdvisorController;
+use App\Http\Controllers\Api\WishlistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,31 +32,28 @@ use App\Http\Controllers\Api\BeautyAdvisorController;
 */
 
 // مسارات المصادقة العامة مع Rate Limiting
-Route::post('/register', [AuthController::class, 'register'])->middleware('auth.rate.limit');
-Route::post('/login', [AuthController::class, 'login'])->middleware('auth.rate.limit');
-
-// مسارات عامة أخرى مع Rate Limiting (لا تتطلب مصادقة)
-Route::get('/sanctum/csrf-cookie', function () {
-    return response('OK');
+Route::middleware('throttle:60,1')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 });
 
-// مسارات المنتجات والفئات مع Rate Limiting
+// ****** مسارات التحقق من البريد الإلكتروني ******
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
+Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])->middleware('auth:sanctum')->name('verification.resend');
+
+// مسارات عامة أخرى مع Rate Limiting
 Route::middleware('api.rate.limit')->group(function () {
-    Route::get('/categories', [CategoryController::class, 'index']); // عرض الفئات
-    Route::get('/brands', [BrandController::class, 'index']);       // عرض العلامات التجارية
-    Route::get('/products', [ProductController::class, 'index']);   // عرض المنتجات
-    Route::get('/products/{product}', [ProductController::class, 'show']); // عرض تفاصيل منتج
-    
-    // مسارات المراجعات
-    Route::get('/products/{productId}/reviews', [ReviewController::class, 'indexByProduct']); // عام
-    
-    // مسارات الصفحات الثابتة (عامة)
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/brands', [BrandController::class, 'index']);
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/{product}', [ProductController::class, 'show']);
+    Route::get('/products/{productId}/reviews', [ReviewController::class, 'indexByProduct']);
     Route::get('/pages', [PageController::class, 'index']);
-    Route::get('/pages/{page:slug}', [PageController::class, 'show']); // يمكن جلب الصفحة باستخدام الـ slug
+    Route::get('/pages/{page:slug}', [PageController::class, 'show']);
 });
 
 // Protected routes (تتطلب مصادقة Sanctum) مع Rate Limiting
-Route::middleware(['auth:sanctum', 'rate.limit:60,1'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -78,10 +76,10 @@ Route::middleware(['auth:sanctum', 'rate.limit:60,1'])->group(function () {
     Route::apiResource('addresses', AddressController::class);
 
     // إدارة الطلبات (للمسؤول والمستخدم)
-    Route::get('/orders', [OrderController::class, 'index']); // المستخدم يرى طلباته، المسؤول يرى الكل
-    Route::get('/orders/{order}', [OrderController::class, 'show']); // المستخدم يرى طلبه، المسؤول يرى أي طلب
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::post('/orders', [OrderController::class, 'store']);
-    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']); // للمسؤول
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
 
     // إدارة سلة التسوق (للمستخدم المصادق عليه)
     Route::apiResource('shopping-cart', ShoppingCartController::class)->only(['index', 'store', 'update', 'destroy']);
@@ -92,4 +90,14 @@ Route::middleware(['auth:sanctum', 'rate.limit:60,1'])->group(function () {
 
     // إدارة الصفحات الثابتة (للمسؤول)
     Route::apiResource('pages', PageController::class)->except(['index', 'show']);
+    
+    // إدارة الخصومات (للمسؤول)
+    Route::apiResource('discounts', DiscountController::class);
+    // مسار تطبيق الخصم (للمستخدم المصادق عليه)
+    Route::post('/discounts/apply', [DiscountController::class, 'apply']);
+
+    // إدارة قائمة الرغبات (Wishlist)
+    Route::get('/wishlist', [WishlistController::class, 'index']);
+    Route::post('/wishlist', [WishlistController::class, 'store']);
+    Route::delete('/wishlist/{productId}', [WishlistController::class, 'destroy']);
 });

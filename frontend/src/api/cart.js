@@ -11,7 +11,7 @@ export const getCartItems = async () => {
   }
 };
 
-export const addProductToCart = async (productId, quantity = 1) => { // ****** تأكد من أن هذا هو اسم الدالة ******
+export const addProductToCart = async (productId, quantity = 1) => {
   try {
     const response = await axiosInstance.post('/shopping-cart', { product_id: productId, quantity });
     return response.data;
@@ -37,6 +37,17 @@ export const removeCartItem = async (cartItemId) => {
     return response.data;
   } catch (error) {
     console.error(`Error removing cart item ${cartItemId}:`, error);
+    throw error.response?.data || error.message;
+  }
+};
+
+// ****** دالة جديدة لتطبيق الخصم ******
+export const applyDiscount = async (code, subtotal) => {
+  try {
+    const response = await axiosInstance.post('/discounts/apply', { code, subtotal });
+    return response.data;
+  } catch (error) {
+    console.error('Error applying discount:', error);
     throw error.response?.data || error.message;
   }
 };

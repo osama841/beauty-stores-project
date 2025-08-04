@@ -3,7 +3,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProductById } from '../../api/products';
 import { getReviewsByProductId, addReview } from '../../api/reviews';
-import { addProductToCart } from '../../api/cart'; // ****** استيراد دالة إضافة للسلة ******
+import { addProductToCart } from '../../api/cart';
+import { addProductToWishlist } from '../../api/wishlist'; // ****** استيراد دالة إضافة لقائمة الرغبات ******
 import ReviewForm from '../../components/ReviewForm';
 import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/products/ProductDetailPage.css';
@@ -17,7 +18,7 @@ const ProductDetailPage = () => {
   const [error, setError] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [mainDisplayImage, setMainDisplayImage] = useState(null);
-  const [quantity, setQuantity] = useState(1); // ****** حالة لكمية المنتج المراد إضافتها للسلة ******
+  const [quantity, setQuantity] = useState(1);
 
   // دالة لجلب تفاصيل المنتج والمراجعات
   const fetchProductDetails = useCallback(async () => {
@@ -32,9 +33,9 @@ const ProductDetailPage = () => {
         cost_price: productData.cost_price ? parseFloat(productData.cost_price) : null,
         stock_quantity: parseInt(productData.stock_quantity),
         weight: productData.weight ? parseFloat(productData.weight) : null,
-        length: productData.length ? parseFloat(productData.length) : null,
-        width: productData.width ? parseFloat(productData.width) : null,
-        height: productData.height ? parseFloat(productData.height) : null,
+        length: product.length ? parseFloat(productData.length) : null,
+        width: product.width ? parseFloat(productData.width) : null,
+        height: product.height ? parseFloat(product.height) : null,
       };
       setProduct(processedProduct);
       setMainDisplayImage(processedProduct.main_image_url || 'https://placehold.co/600x400/cccccc/333333?text=لا+توجد+صورة');
@@ -82,10 +83,24 @@ const ProductDetailPage = () => {
     try {
       await addProductToCart(product.product_id, quantity);
       alert(`${quantity} من ${product.name} تم إضافتها إلى السلة بنجاح!`);
-      // يمكنك تحديث عدد عناصر السلة في الـ Header هنا (يتطلب Context للسلة)
     } catch (err) {
       console.error('فشل إضافة المنتج إلى السلة:', err);
       alert('فشل إضافة المنتج إلى السلة: ' + (err.message || JSON.stringify(err)));
+    }
+  };
+
+  // ****** دالة لإضافة المنتج إلى قائمة الرغبات ******
+  const handleAddToWishlist = async () => {
+    if (!isAuthenticated) {
+      alert('الرجاء تسجيل الدخول لإضافة منتجات إلى قائمة الرغبات.');
+      return;
+    }
+    try {
+      await addProductToWishlist(product.product_id);
+      alert(`${product.name} تم إضافته إلى قائمة الرغبات بنجاح!`);
+    } catch (err) {
+      console.error('فشل إضافة المنتج إلى قائمة الرغبات:', err);
+      alert('فشل إضافة المنتج إلى قائمة الرغبات: ' + (err.message || JSON.stringify(err)));
     }
   };
 
@@ -240,7 +255,6 @@ const ProductDetailPage = () => {
               )}
             </ul>
 
-            {/* ****** حقل الكمية وزر أضف إلى السلة ****** */}
             <div className="d-flex align-items-center mb-3">
               <label htmlFor="productQuantity" className="form-label me-2 mb-0">الكمية:</label>
               <input
@@ -248,18 +262,26 @@ const ProductDetailPage = () => {
                 id="productQuantity"
                 className="form-control w-auto me-3"
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} // لا تقل عن 1
+                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                 min="1"
                 max={product.stock_quantity}
                 disabled={product.stock_quantity === 0}
               />
-              <button
-                className="btn btn-warning btn-lg w-100 fw-bold shadow-sm"
-                disabled={product.stock_quantity === 0}
-                onClick={handleAddToCart} // ****** تفعيل وظيفة إضافة للسلة ******
-              >
-                {product.stock_quantity > 0 ? 'أضف إلى السلة' : 'نفد المخزون'}
-              </button>
+              <div className="d-flex w-100 gap-2">
+                <button
+                  className="btn btn-warning btn-lg w-100 fw-bold shadow-sm"
+                  disabled={product.stock_quantity === 0}
+                  onClick={handleAddToCart}
+                >
+                  {product.stock_quantity > 0 ? 'أضف إلى السلة' : 'نفد المخزون'}
+                </button>
+                <button
+                  className="btn btn-outline-danger btn-lg d-flex align-items-center justify-content-center"
+                  onClick={handleAddToWishlist} // ****** تفعيل زر قائمة الرغبات ******
+                >
+                  <i className="bi bi-heart"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>

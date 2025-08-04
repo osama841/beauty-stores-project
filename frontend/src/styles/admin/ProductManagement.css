@@ -1,0 +1,15 @@
+/* src/styles/admin/ProductManagement.css */
+
+/* نمط بسيط للتأكيد أن ملف CSS هذا يتم تحميله */
+.product-management-container h1 {
+    font-size: 2.5rem;
+    color: #0d6efd; /* لون أزرق مميز */
+    border-bottom: 2px solid #0d6efd;
+    padding-bottom: 0.5rem;
+}
+
+/* نمط لتنبيه المخزون المنخفض */
+.low-stock-alert {
+    font-weight: bold;
+    color: #dc3545; /* لون أحمر */
+}

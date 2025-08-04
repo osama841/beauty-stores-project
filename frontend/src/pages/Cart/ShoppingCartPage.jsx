@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getCartItems, updateCartItemQuantity, removeCartItem } from '../../api/cart';
+import { applyDiscount } from '../../api/discounts'; // ****** استيراد دالة تطبيق الخصم ******
 import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/cart/ShoppingCartPage.css';
 
@@ -12,7 +13,10 @@ const ShoppingCartPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // دالة لجلب عناصر السلة
+  const [discountCode, setDiscountCode] = useState(''); // ****** حالة جديدة لكود الخصم ******
+  const [discountedAmount, setDiscountedAmount] = useState(0); // ****** حالة جديدة للمبلغ المخصوم ******
+  const [discountMessage, setDiscountMessage] = useState(null); // ****** حالة جديدة لرسالة الخصم ******
+
   const fetchCart = useCallback(async () => {
     if (!isAuthenticated) {
       setLoading(false);
@@ -22,6 +26,11 @@ const ShoppingCartPage = () => {
     setError(null);
     try {
       const data = await getCartItems();
+      if (data.cart_items.length === 0) {
+        alert('سلة التسوق الخاصة بك فارغة. الرجاء إضافة منتجات قبل إتمام الشراء.');
+        setLoading(false);
+        return;
+      }
       const processedItems = data.cart_items.map(item => ({
         ...item,
         quantity: parseInt(item.quantity),
@@ -57,7 +66,23 @@ const ShoppingCartPage = () => {
     }
   }, [fetchCart, authLoading]);
 
-  // دالة لتغيير كمية منتج في السلة
+  // دالة لتطبيق الخصم
+  const handleApplyDiscount = async () => {
+    if (!discountCode) {
+      setDiscountMessage('الرجاء إدخال كود خصم.');
+      return;
+    }
+    try {
+      const response = await applyDiscount(discountCode, totalAmount);
+      setDiscountedAmount(response.discounted_amount);
+      setDiscountMessage(response.message);
+    } catch (err) {
+      console.error('فشل تطبيق الخصم:', err);
+      setDiscountedAmount(0);
+      setDiscountMessage(err.message || 'كود خصم غير صالح أو منتهي الصلاحية.');
+    }
+  };
+
   const handleQuantityChange = async (cartItemId, newQuantity) => {
     if (newQuantity <= 0) {
       handleRemoveItem(cartItemId);
@@ -67,6 +92,8 @@ const ShoppingCartPage = () => {
     try {
       await updateCartItemQuantity(cartItemId, newQuantity);
       await fetchCart();
+      setDiscountedAmount(0); // إعادة تعيين الخصم عند تغيير الكمية
+      setDiscountMessage(null);
     } catch (err) {
       console.error('فشل تحديث الكمية:', err);
       alert('فشل تحديث الكمية: ' + (err.message || JSON.stringify(err)));
@@ -75,20 +102,19 @@ const ShoppingCartPage = () => {
     }
   };
 
-  // دالة لإزالة منتج من السلة
   const handleRemoveItem = async (cartItemId) => {
-    // تأكد أن cartItemId له قيمة قبل إرسال الطلب
     if (!cartItemId) {
         console.error("خطأ: معرف عنصر السلة غير معرف (undefined).");
         alert("لا يمكن إزالة المنتج. معرف العنصر غير صالح.");
         return;
     }
-
     if (window.confirm('هل أنت متأكد أنك تريد إزالة هذا المنتج من السلة؟')) {
       setLoading(true);
       try {
         await removeCartItem(cartItemId);
         await fetchCart();
+        setDiscountedAmount(0); // إعادة تعيين الخصم عند الإزالة
+        setDiscountMessage(null);
         alert('تم إزالة المنتج من السلة!');
       } catch (err) {
         console.error('فشل إزالة المنتج:', err);
@@ -98,6 +124,8 @@ const ShoppingCartPage = () => {
       }
     }
   };
+
+  const finalAmount = Math.max(0, totalAmount - discountedAmount);
 
   if (authLoading || loading) {
     return (
@@ -149,8 +177,7 @@ const ShoppingCartPage = () => {
               <div className="card-body p-0">
                 <ul className="list-group list-group-flush">
                   {cartItems.map((item) => (
-                    // ****** استخدام item.cart_item_id كـ key ******
-                    <li key={item.cart_item_id} className="list-group-item d-flex align-items-center py-3">
+                    <li key={item.cart_id} className="list-group-item d-flex align-items-center py-3">
                       <img
                         src={item.product.main_image_url || 'https://placehold.co/80x80/cccccc/333333?text=صورة'}
                         alt={item.product.name}
@@ -168,11 +195,10 @@ const ShoppingCartPage = () => {
                           className="form-control text-center me-2"
                           style={{ width: '70px' }}
                           value={item.quantity}
-                          // ****** تمرير item.cart_item_id إلى handleQuantityChange ******
-                          onChange={(e) => handleQuantityChange(item.cart_item_id, parseInt(e.target.value) || 0)}
+                          onChange={(e) => handleQuantityChange(item.cart_id, parseInt(e.target.value) || 0)}
                           min="0"
                         />
-                        <button className="btn btn-danger btn-sm" onClick={() => handleRemoveItem(item.cart_item_id)}> {/* ****** تمرير item.cart_item_id هنا ****** */}
+                        <button className="btn btn-danger btn-sm" onClick={() => handleRemoveItem(item.cart_id)}>
                           <i className="bi bi-trash"></i>
                         </button>
                       </div>
@@ -194,11 +220,43 @@ const ShoppingCartPage = () => {
                   <span>المجموع الفرعي:</span>
                   <span className="fw-bold">${totalAmount.toFixed(2)}</span>
                 </div>
-                {/* يمكن إضافة رسوم الشحن والضرائب هنا لاحقاً */}
+                
+                {/* ****** حقل كود الخصم ****** */}
+                <div className="input-group my-3">
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    placeholder="كود الخصم" 
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value)}
+                  />
+                  <button 
+                    className="btn btn-primary" 
+                    type="button" 
+                    onClick={handleApplyDiscount}
+                    disabled={loading}
+                  >
+                    تطبيق
+                  </button>
+                </div>
+                {discountMessage && (
+                  <p className={`small ${discountedAmount > 0 ? 'text-success' : 'text-danger'} text-center`}>{discountMessage}</p>
+                )}
+
+                {discountedAmount > 0 && (
+                  <div className="d-flex justify-content-between mb-2">
+                    <span>الخصم ({discountCode}):</span>
+                    <span className="fw-bold text-success">-${discountedAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="d-flex justify-content-between fw-bold">
+                  <span>الشحن:</span>
+                  <span>مجاني</span> {/* يمكن إضافة حساب الشحن هنا */}
+                </div>
                 <hr />
-                <div className="d-flex justify-content-between mb-3">
-                  <span className="fs-5 fw-bold">المجموع الكلي:</span>
-                  <span className="fs-5 fw-bold text-primary">${totalAmount.toFixed(2)}</span>
+                <div className="d-flex justify-content-between fs-5 fw-bold text-primary">
+                  <span>المجموع الكلي:</span>
+                  <span>${finalAmount.toFixed(2)}</span> {/* ****** استخدام المبلغ النهائي ****** */}
                 </div>
                 <Link to="/checkout" className="btn btn-success w-100 py-2 fw-bold">
                   إتمام الشراء <i className="bi bi-arrow-right"></i>

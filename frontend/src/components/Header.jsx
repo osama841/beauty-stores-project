@@ -41,10 +41,8 @@ const Header = () => {
 
   return (
     <header className="sticky-top shadow-sm">
-      {/* شريط الهيدر الرئيسي */}
       <nav className="navbar navbar-expand-lg navbar-light bg-white">
         <div className="container">
-          {/* العلامة التجارية وزر القائمة */}
           <div className="d-flex align-items-center">
             <button
               className="navbar-toggler me-3 border-0"
@@ -59,7 +57,6 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* أيقونات الجوال السريعة */}
           <div className="d-lg-none">
             <div className="d-flex align-items-center">
               <Link to="/cart" className="btn btn-link text-dark position-relative me-2">
@@ -80,7 +77,6 @@ const Header = () => {
             </div>
           </div>
 
-          {/* القائمة الكاملة */}
           <div className={`collapse navbar-collapse ${isMenuOpen ? 'show' : ''}`}>
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
@@ -121,7 +117,6 @@ const Header = () => {
               </li>
             </ul>
 
-            {/* عناصر الجانب الأيمن */}
             <div className="d-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-3">
               {isAuthenticated ? (
                 <>
@@ -134,7 +129,6 @@ const Header = () => {
                       <FaUserShield /> لوحة المسؤول
                     </Link>
                   )}
-                  {/* ****** رابط "حسابي" كقائمة منسدلة ****** */}
                   <li className="nav-item dropdown d-none d-lg-block">
                     <a className="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                       <BiUser size={24} /> {user?.username || 'حسابي'}
@@ -158,9 +152,6 @@ const Header = () => {
                       </li>
                     </ul>
                   </li>
-                  {/* ****** نهاية رابط "حسابي" كقائمة منسدلة ****** */}
-
-                  {/* زر تسجيل الخروج للجوال (يبقى كما هو) */}
                   <button
                     onClick={() => {
                       handleLogout();
@@ -189,7 +180,6 @@ const Header = () => {
                   </Link>
                 </>
               )}
-              {/* زر سلة التسوق للشاشات الكبيرة */}
               <Link
                 to="/cart"
                 className="btn btn-warning position-relative d-none d-lg-flex align-items-center gap-2"

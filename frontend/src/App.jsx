@@ -11,7 +11,7 @@ import ProductDetailPage from './pages/Products/ProductDetailPage';
 import ShoppingCartPage from './pages/Cart/ShoppingCartPage';
 import CheckoutPage from './pages/Checkout/CheckoutPage';
 import OrderConfirmationPage from './pages/Checkout/OrderConfirmationPage';
-import StaticPage from './pages/StaticPage'; // ****** استيراد صفحة عرض المحتوى الثابت ******
+import StaticPage from './pages/StaticPage';
 
 // استيراد مكونات الهيكل الأساسي
 import Header from './components/Header';
@@ -28,7 +28,8 @@ import BrandManagement from './pages/Admin/BrandManagement';
 import OrderManagement from './pages/Admin/OrderManagement';
 import UserManagement from './pages/Admin/UserManagement';
 import ReviewManagement from './pages/Admin/ReviewManagement';
-import ContentManagement from './pages/Admin/ContentManagement'; // ****** استيراد صفحة إدارة المحتوى ******
+import ContentManagement from './pages/Admin/ContentManagement';
+import DiscountManagement from './pages/Admin/DiscountManagement'; // ****** استيراد صفحة إدارة الخصومات ******
 import AdminLayout from './components/Admin/AdminLayout';
 
 // استيراد صفحات ومكونات لوحة تحكم المستخدم
@@ -36,6 +37,7 @@ import UserDashboard from './pages/MyAccount/UserDashboard';
 import UserProfile from './pages/MyAccount/UserProfile';
 import UserAddresses from './pages/MyAccount/UserAddresses';
 import UserOrders from './pages/MyAccount/UserOrders';
+import UserWishlist from './pages/MyAccount/UserWishlist';
 import UserLayout from './components/User/UserLayout';
 
 
@@ -106,6 +108,7 @@ const AppContent = () => {
                     <Route path="profile" element={<UserProfile />} />
                     <Route path="orders" element={<UserOrders />} />
                     <Route path="addresses" element={<UserAddresses />} />
+                    <Route path="wishlist" element={<UserWishlist />} />
                   </Routes>
                 </UserLayout>
               </PrivateRoute>
@@ -126,7 +129,8 @@ const AppContent = () => {
                     <Route path="orders" element={<OrderManagement />} />
                     <Route path="users" element={<UserManagement />} />
                     <Route path="reviews" element={<ReviewManagement />} />
-                    <Route path="content" element={<ContentManagement />} /> {/* ****** إضافة مسار إدارة المحتوى ****** */}
+                    <Route path="content" element={<ContentManagement />} />
+                    <Route path="discounts" element={<DiscountManagement />} /> {/* ****** إضافة مسار إدارة الخصومات ****** */}
                     {/* أضف مسارات لوحة تحكم المسؤول الأخرى هنا: */}
                     {/* <Route path="settings" element={<StoreSettings />} /> */}
                   </Routes>
@@ -139,8 +143,7 @@ const AppContent = () => {
           <Route path="/cart" element={<ShoppingCartPage />} />
           <Route path="/checkout" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
           <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
-          {/* ****** مسارات عرض الصفحات الثابتة (عامة) ****** */}
-          <Route path="/about-us" element={<StaticPage slug="about-us" />} /> {/* ربط مسار بـ StaticPage */}
+          <Route path="/about-us" element={<StaticPage slug="about-us" />} />
           <Route path="/privacy-policy" element={<StaticPage slug="privacy-policy" />} />
           <Route path="/terms-of-service" element={<StaticPage slug="terms-of-service" />} />
           <Route path="/contact-us" element={<StaticPage slug="contact-us" />} />
