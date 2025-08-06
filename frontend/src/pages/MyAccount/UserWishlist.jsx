@@ -1,6 +1,5 @@
 // src/pages/MyAccount/UserWishlist.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom'; // ****** إضافة استيراد Link ******
 import { getWishlistItems, removeProductFromWishlist } from '../../api/wishlist';
 import { useAuth } from '../../contexts/AuthContext';
 import ProductCard from '../../components/ProductCard';
@@ -101,6 +100,7 @@ const UserWishlist = () => {
                       alt={item.product.name}
                       className="card-img-top p-3 rounded-top"
                       style={{ objectFit: 'contain', height: '200px' }}
+                      loading="lazy" // ****** إضافة Lazy Loading ******
                       onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/300x200/cccccc/333333?text=خطأ"; }}
                     />
                     <div className="card-body text-center">

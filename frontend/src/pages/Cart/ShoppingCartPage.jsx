@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getCartItems, updateCartItemQuantity, removeCartItem } from '../../api/cart';
-import { applyDiscount } from '../../api/discounts'; // ****** استيراد دالة تطبيق الخصم ******
+import { applyDiscount } from '../../api/discounts';
 import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/cart/ShoppingCartPage.css';
 
@@ -13,9 +13,9 @@ const ShoppingCartPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [discountCode, setDiscountCode] = useState(''); // ****** حالة جديدة لكود الخصم ******
-  const [discountedAmount, setDiscountedAmount] = useState(0); // ****** حالة جديدة للمبلغ المخصوم ******
-  const [discountMessage, setDiscountMessage] = useState(null); // ****** حالة جديدة لرسالة الخصم ******
+  const [discountCode, setDiscountCode] = useState('');
+  const [discountedAmount, setDiscountedAmount] = useState(0);
+  const [discountMessage, setDiscountMessage] = useState(null);
 
   const fetchCart = useCallback(async () => {
     if (!isAuthenticated) {
@@ -66,7 +66,6 @@ const ShoppingCartPage = () => {
     }
   }, [fetchCart, authLoading]);
 
-  // دالة لتطبيق الخصم
   const handleApplyDiscount = async () => {
     if (!discountCode) {
       setDiscountMessage('الرجاء إدخال كود خصم.');
@@ -92,7 +91,7 @@ const ShoppingCartPage = () => {
     try {
       await updateCartItemQuantity(cartItemId, newQuantity);
       await fetchCart();
-      setDiscountedAmount(0); // إعادة تعيين الخصم عند تغيير الكمية
+      setDiscountedAmount(0);
       setDiscountMessage(null);
     } catch (err) {
       console.error('فشل تحديث الكمية:', err);
@@ -113,7 +112,7 @@ const ShoppingCartPage = () => {
       try {
         await removeCartItem(cartItemId);
         await fetchCart();
-        setDiscountedAmount(0); // إعادة تعيين الخصم عند الإزالة
+        setDiscountedAmount(0);
         setDiscountMessage(null);
         alert('تم إزالة المنتج من السلة!');
       } catch (err) {
@@ -183,6 +182,7 @@ const ShoppingCartPage = () => {
                         alt={item.product.name}
                         className="img-thumbnail me-3"
                         style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }}
+                        loading="lazy" // ****** إضافة Lazy Loading ******
                         onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
                       />
                       <div className="flex-grow-1">
@@ -251,12 +251,12 @@ const ShoppingCartPage = () => {
                 )}
                 <div className="d-flex justify-content-between fw-bold">
                   <span>الشحن:</span>
-                  <span>مجاني</span> {/* يمكن إضافة حساب الشحن هنا */}
+                  <span>مجاني</span>
                 </div>
                 <hr />
                 <div className="d-flex justify-content-between fs-5 fw-bold text-primary">
                   <span>المجموع الكلي:</span>
-                  <span>${finalAmount.toFixed(2)}</span> {/* ****** استخدام المبلغ النهائي ****** */}
+                  <span>${finalAmount.toFixed(2)}</span>
                 </div>
                 <Link to="/checkout" className="btn btn-success w-100 py-2 fw-bold">
                   إتمام الشراء <i className="bi bi-arrow-right"></i>

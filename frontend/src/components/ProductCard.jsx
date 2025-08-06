@@ -7,10 +7,11 @@ const ProductCard = ({ product }) => {
     <div className="card h-100 shadow-sm border-0 rounded-lg">
       <Link to={`/products/${product.product_id}`} className="text-decoration-none text-dark">
         <img
-          src={product.main_image_url || 'https://placehold.co/300x200/ADD8E6/000000?text=صورة+المنتج'} // صورة افتراضية
+          src={product.main_image_url || 'https://placehold.co/300x200/ADD8E6/000000?text=صورة+المنتج'}
           alt={product.name}
           className="card-img-top p-3 rounded-top"
           style={{ objectFit: 'contain', height: '200px' }}
+          loading="lazy" // ****** إضافة Lazy Loading ******
           onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/300x200/cccccc/333333?text=خطأ"; }}
         />
         <div className="card-body text-center">

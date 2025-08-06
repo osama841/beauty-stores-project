@@ -23,7 +23,7 @@ const UserAddresses = () => {
 
   const [editingAddress, setEditingAddress] = useState(null);
   const [formError, setFormError] = useState(null);
-  const [validationErrors, setValidationErrors] = useState({});
+  const [validationErrors, setValidationErrors] = {};
   const [showModal, setShowModal] = useState(false);
 
   // جلب العناوين
@@ -33,7 +33,9 @@ const UserAddresses = () => {
     try {
       // نرسل user_id لضمان جلب عناوين المستخدم المصادق عليه فقط
       const data = await getAddresses({ user_id: user.user_id });
-      setAddresses(data);
+      // ****** تعديل: التأكد من أن data.data موجود ومصفوفة قبل استخدام map ******
+      const addressesArray = data && Array.isArray(data.data) ? data.data : [];
+      setAddresses(addressesArray); // تخزين مصفوفة العناوين فقط
     } catch (err) {
       console.error('فشل تحميل العناوين:', err);
       let errorMessage = 'حدث خطأ غير متوقع أثناء تحميل العناوين.';
@@ -151,6 +153,7 @@ const UserAddresses = () => {
     if (window.confirm('هل أنت متأكد أنك تريد حذف هذا العنوان؟')) {
       try {
         await deleteAddress(id);
+        alert('تم حذف العنوان بنجاح!');
         fetchAddresses();
       } catch (err) {
         console.error('خطأ في حذف العنوان:', err);

@@ -1,0 +1,29 @@
+/* Brand Management Styles */
+.brand-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: #f6f7fb;
+    border-radius: 1rem;
+}
+
+.brand-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    flex: 1 1 calc(33.333% - 1.5rem);
+    transition: transform 0.3s ease;
+}
+
+.brand-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 991.98px) {
+    .brand-card {
+        flex: 1 1 100%;
+    }
+}

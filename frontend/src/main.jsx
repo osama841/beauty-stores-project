@@ -14,7 +14,9 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 // عرض المكون الرئيسي App داخل وضع React StrictMode
 root.render(
   <React.StrictMode>
-    <App />
+    <div style={{ fontFamily: 'Tajawal, Cairo, sans-serif', direction: 'rtl', backgroundColor: '#f6f7fb', color: '#23272f' }}>
+      <App />
+    </div>
   </React.StrictMode>
 );
 

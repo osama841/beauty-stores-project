@@ -1,85 +1,99 @@
 /* src/styles/admin/AdminSidebar.css */
 
 /* أنماط عامة للشريط الجانبي */
+/* الشريط الجانبي العصري للوحة الإدارة */
 .admin-sidebar-container {
-    background-color: #212529; /* خلفية داكنة */
-    color: #f8f9fa; /* لون النص الفاتح */
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25); /* ظل خفيف لإبرازه */
+    background: linear-gradient(135deg, #23272f 60%, #2d3142 100%);
+    color: #f8f9fa;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;
-    height: 100vh; /* ارتفاع كامل الشاشة */
-    position: sticky; /* يلتصق عند التمرير على سطح المكتب */
+    height: 100vh;
+    position: sticky;
     top: 0;
-    z-index: 1000; /* تأكد من ظهوره فوق المحتوى العادي */
+    z-index: 1100;
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+    direction: rtl;
+    border-left: 1px solid #23272f;
 }
 
 /* عنوان لوحة المسؤول داخل الشريط الجانبي */
 .admin-sidebar-header {
     font-size: 1.8rem;
-    font-weight: bold;
-    color: #0d6efd; /* لون أزرق مميز */
+    font-weight: 700;
+    color: #007bff;
     margin-bottom: 1.5rem;
-    text-decoration: none;
     display: flex;
     align-items: center;
+    gap: 0.5rem;
 }
 
 .admin-sidebar-header i {
-    font-size: 2rem;
-    margin-inline-end: 0.75rem; /* مسافة بعد الأيقونة */
+    font-size: 1.7rem;
+    margin-inline-end: 0.5rem;
+    color: #7B61FF;
 }
 
 /* خط فاصل */
 .admin-sidebar-container hr {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin: 1.5rem 0;
+    border-top: 1px solid rgba(123, 97, 255, 0.08);
+    margin: 1.2rem 0;
 }
 
 /* قائمة التنقل */
 .admin-sidebar-nav .nav-link {
-    color: #f8f9fa;
+    color: #e0e6ed;
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    transition: background-color 0.3s ease;
     display: flex;
     align-items: center;
     font-weight: 500;
+    font-family: inherit;
+    gap: 0.7rem;
+    font-size: 1.08rem;
+    letter-spacing: 0.1px;
 }
 
 .admin-sidebar-nav .nav-link i {
-    font-size: 1.25rem;
-    margin-inline-end: 0.75rem;
+    font-size: 1.15rem;
+    margin-inline-end: 0.5rem;
+    color: #b5aaff;
+    transition: color 0.18s;
 }
 
 .admin-sidebar-nav .nav-link:hover {
-    background-color: #343a40; /* لون خلفية عند التحويم */
-    color: #ffffff;
+    background-color: rgba(0, 123, 255, 0.1);
+    color: #007bff;
 }
 
 .admin-sidebar-nav .nav-link.active {
-    background-color: #0d6efd; /* لون خلفية للعنصر النشط */
-    color: #ffffff;
+    background: linear-gradient(90deg, #7B61FF 60%, #6a50e0 100%);
+    color: #fff;
     font-weight: bold;
+    box-shadow: 0 2px 8px 0 rgba(123, 97, 255, 0.08);
 }
 
 /* قسم المستخدم في الأسفل */
 .admin-sidebar-user-dropdown {
-    margin-top: auto; /* يدفع هذا القسم إلى الأسفل */
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(123, 97, 255, 0.08);
 }
 
 .admin-sidebar-user-dropdown .dropdown-toggle {
-    color: #f8f9fa;
+    color: #e0e6ed;
     text-decoration: none;
     display: flex;
     align-items: center;
+    font-size: 1.05rem;
+    gap: 0.5rem;
 }
 
 .admin-sidebar-user-dropdown .dropdown-toggle img {
-    border: 2px solid #0d6efd; /* إطار أزرق حول الصورة */
+    border: 2px solid #7B61FF;
+    box-shadow: 0 2px 8px 0 rgba(123, 97, 255, 0.08);
 }
 
 /* --------------------------------------------------- */
@@ -89,60 +103,97 @@
 /* إخفاء الشريط الجانبي على الجوال افتراضياً */
 @media (max-width: 991.98px) {
     .admin-sidebar-container {
-        position: fixed;
-        top: 0;
-        right: 0;
-        transform: translateX(-100%); /* مخفي خارج الشاشة */
-        transition: transform 0.3s ease-in-out;
-        z-index: 1050; /* يظهر فوق المحتوى */
+        height: auto;
+        position: relative;
+        padding: 1rem;
     }
-
     .admin-sidebar-container.show {
-        transform: translateX(0%); /* يظهر على الشاشة */
+        transform: translateX(0%);
     }
-
-    /* زر الهمبرغر على الجوال */
+    /* overlay سوداء خلف القائمة */
+    .admin-sidebar-overlay {
+        position: fixed;
+        top: 0; right: 0; left: 0; bottom: 0;
+        background: rgba(30, 30, 40, 0.55);
+        z-index: 1200;
+        transition: opacity 0.2s;
+        cursor: pointer;
+        backdrop-filter: blur(1.5px);
+    }
     .admin-sidebar-toggler {
         position: fixed;
-        top: 1rem;
-        right: 1rem;
-        z-index: 1040;
+        top: 1.1rem;
+        right: 1.1rem;
+        z-index: 1300;
+        background: #fff;
+        color: #7B61FF;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        box-shadow: 0 2px 8px 0 rgba(123, 97, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        font-size: 1.5rem;
+        transition: background 0.18s, color 0.18s;
     }
-
-    /* تأثير الدفع على المحتوى الرئيسي */
+    .admin-sidebar-toggler:active,
+    .admin-sidebar-toggler:focus {
+        background: #f3f0ff;
+        color: #6a50e0;
+    }
     .admin-content-wrapper {
-        transition: margin-left 0.3s ease-in-out;
-        margin-right: 0; /* لا يوجد هامش افتراضياً */
+        transition: margin-left 0.3s cubic-bezier(.77,0,.18,1);
+        margin-right: 0;
     }
-
-    /* عند فتح الشريط الجانبي، ادفع المحتوى */
     body.sidebar-open-mobile .admin-content-wrapper {
-        margin-left: 280px; /* يدفع المحتوى بمقدار عرض الشريط الجانبي */
+        margin-left: 80vw;
+        max-width: 100vw;
     }
-
-    /* منع التمرير على الجسم عندما يكون الشريط الجانبي مفتوحاً */
     body.sidebar-open-mobile {
         overflow: hidden;
+    }
+    /* زر إغلاق جانبي صغير وجميل */
+    .admin-close-menu-btn {
+        background: #fff;
+        color: #7B61FF;
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        box-shadow: 0 2px 8px 0 rgba(123, 97, 255, 0.08);
+        transition: background 0.18s, color 0.18s;
+        margin-left: 0.5rem;
+    }
+    .admin-close-menu-btn:active,
+    .admin-close-menu-btn:focus {
+        background: #f3f0ff;
+        color: #6a50e0;
     }
 }
 
 /* الشريط الجانبي على شاشات سطح المكتب (lg فأكبر) */
 @media (min-width: 992px) {
     .admin-sidebar-container {
-        position: sticky; /* يلتصق عند التمرير */
+        position: sticky;
         top: 0;
         height: 100vh;
-        width: 280px;
+        width: 260px;
         flex-shrink: 0;
+        border-radius: 0 0.8rem 0.8rem 0;
     }
-
-    /* ادفع المحتوى الرئيسي على سطح المكتب */
     .admin-content-wrapper {
-        margin-left: 280px; /* يدفع المحتوى بمقدار عرض الشريط الجانبي */
+        margin-left: 260px;
     }
-
-    /* إخفاء زر الهمبرغر على سطح المكتب */
     .admin-sidebar-toggler {
+        display: none !important;
+    }
+    .admin-close-menu-btn {
         display: none !important;
     }
 }

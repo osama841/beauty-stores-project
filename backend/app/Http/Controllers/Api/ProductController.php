@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\Order; // لاستيراد نموذج الطلب
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth; // لاستخدام Auth::id()
 
 class ProductController extends Controller
 {
@@ -24,24 +27,27 @@ class ProductController extends Controller
         $query = Product::with(['category', 'brand']);
 
         // Filtering - التصفية (تطبيق الشرط فقط إذا كانت القيمة موجودة وغير فارغة)
-        if ($request->filled('category_id')) { // ****** استخدام filled() ******
+        if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
-        if ($request->filled('brand_id')) { // ****** استخدام filled() ******
+        if ($request->filled('brand_id')) {
             $query->where('brand_id', $request->brand_id);
         }
-        if ($request->filled('min_price')) { // ****** استخدام filled() ******
+        if ($request->filled('min_price')) {
             $query->where('price', '>=', $request->min_price);
         }
-        if ($request->filled('max_price')) { // ****** استخدام filled() ******
+        if ($request->filled('max_price')) {
             $query->where('price', '<=', $request->max_price);
         }
-        if ($request->filled('search')) { // ****** استخدام filled() ******
+        if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('description', 'like', '%' . $request->search . '%')
                   ->orWhere('short_description', 'like', '%' . $request->search . '%');
             });
+        }
+        if ($request->filled('low_stock') && $request->low_stock == 'true') {
+            $query->whereColumn('stock_quantity', '<=', 'low_stock_threshold');
         }
 
         // Sorting - الفرز
@@ -60,7 +66,7 @@ class ProductController extends Controller
      * Store a newly created product in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate->Http->JsonResponse
      */
     public function store(Request $request)
     {
@@ -74,6 +80,7 @@ class ProductController extends Controller
                 'compare_at_price' => 'nullable|numeric|min:0',
                 'cost_price' => 'nullable|numeric|min:0',
                 'stock_quantity' => 'required|integer|min:0',
+                'low_stock_threshold' => 'required|integer|min:0',
                 'sku' => 'nullable|string|max:100|unique:products,sku',
                 'weight' => 'nullable|numeric|min:0',
                 'length' => 'nullable|numeric|min:0',
@@ -103,6 +110,7 @@ class ProductController extends Controller
                 'compare_at_price' => $request->compare_at_price,
                 'cost_price' => $request->cost_price,
                 'stock_quantity' => $request->stock_quantity,
+                'low_stock_threshold' => $request->low_stock_threshold,
                 'sku' => $request->sku,
                 'weight' => $request->weight,
                 'length' => $request->length,
@@ -125,6 +133,17 @@ class ProductController extends Controller
                 }
             }
 
+            if ($request->filled('removed_additional_image_ids')) {
+                foreach ($request->input('removed_additional_image_ids') as $imageId) {
+                    $productImage = ProductImage::find($imageId);
+                    if ($productImage && $productImage->product_id === $product->product_id) {
+                        $oldPath = Str::after($productImage->image_url, config('app.url') . '/storage/');
+                        Storage::disk('public')->delete($oldPath);
+                        $productImage->delete();
+                    }
+                }
+            }
+
             return response()->json([
                 'message' => 'Product created successfully',
                 'product' => $product,
@@ -135,7 +154,7 @@ class ProductController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-            \Log::error('Error creating product: ' . $e->getMessage());
+            Log::error('Error creating product: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while creating the product.',
                 'error' => $e->getMessage(),
@@ -145,9 +164,6 @@ class ProductController extends Controller
 
     /**
      * Display the specified product.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Product $product)
     {
@@ -157,10 +173,6 @@ class ProductController extends Controller
 
     /**
      * Update the specified product in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, Product $product)
     {
@@ -174,6 +186,7 @@ class ProductController extends Controller
                 'compare_at_price' => 'nullable|numeric|min:0',
                 'cost_price' => 'nullable|numeric|min:0',
                 'stock_quantity' => 'sometimes|required|integer|min:0',
+                'low_stock_threshold' => 'sometimes|required|integer|min:0',
                 'sku' => 'nullable|string|max:100|unique:products,sku,' . $product->product_id . ',product_id',
                 'weight' => 'nullable|numeric|min:0',
                 'length' => 'nullable|numeric|min:0',
@@ -217,6 +230,7 @@ class ProductController extends Controller
                 'compare_at_price' => $request->compare_at_price,
                 'cost_price' => $request->cost_price,
                 'stock_quantity' => $request->stock_quantity,
+                'low_stock_threshold' => $request->low_stock_threshold,
                 'sku' => $request->sku,
                 'weight' => $request->weight,
                 'length' => $request->length,
@@ -260,7 +274,7 @@ class ProductController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-            \Log::error('Error updating product: ' . $e->getMessage());
+            Log::error('Error updating product: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while updating the product.',
                 'error' => $e->getMessage(),
@@ -270,9 +284,6 @@ class ProductController extends Controller
 
     /**
      * Remove the specified product from storage.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Product $product)
     {
@@ -292,11 +303,68 @@ class ProductController extends Controller
                 'message' => 'Product deleted successfully',
             ], 204);
         } catch (\Exception $e) {
-            \Log::error('Error deleting product: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while deleting the product.',
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Get recommended products for the authenticated user based on their purchase history.
+     */
+    public function getRecommendations(Request $request)
+    {
+        // التحقق من المصادقة: هذا المتحكم يقع خلف middleware 'auth:sanctum'
+        // لذا لا حاجة للتحقق هنا مرة أخرى.
+        $user = Auth::user();
+
+        // 1. جلب المنتجات التي اشتراها المستخدم
+        $purchasedProductIds = Order::where('user_id', $user->user_id)
+                                    ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
+                                    ->pluck('order_items.product_id')
+                                    ->unique();
+
+        if ($purchasedProductIds->isEmpty()) {
+            // إذا لم يشترِ المستخدم أي شيء، يمكننا إرجاع منتجات مميزة أو الأكثر مبيعًا
+            return Product::where('is_featured', true)
+                          ->with(['category', 'brand'])
+                          ->inRandomOrder()
+                          ->limit(10)
+                          ->get();
+        }
+
+        // 2. جلب الفئات والعلامات التجارية للمنتجات التي اشتراها المستخدم
+        $purchasedCategories = Product::whereIn('product_id', $purchasedProductIds)
+                                      ->pluck('category_id')
+                                      ->unique();
+        $purchasedBrands = Product::whereIn('product_id', $purchasedProductIds)
+                                  ->pluck('brand_id')
+                                  ->unique();
+
+        // 3. البحث عن منتجات أخرى في نفس الفئات أو من نفس العلامات التجارية
+        $recommendations = Product::whereNotIn('product_id', $purchasedProductIds) // استبعاد المنتجات التي اشتراها بالفعل
+                                  ->where(function($query) use ($purchasedCategories, $purchasedBrands) {
+                                      $query->whereIn('category_id', $purchasedCategories)
+                                            ->orWhereIn('brand_id', $purchasedBrands);
+                                  })
+                                  ->with(['category', 'brand'])
+                                  ->inRandomOrder() // ترتيب عشوائي للتوصيات
+                                  ->limit(10) // عدد محدود من التوصيات
+                                  ->get();
+
+        // إذا لم يتم العثور على توصيات كافية، يمكن إضافة منتجات مميزة
+        if ($recommendations->count() < 10) {
+            $featuredProducts = Product::where('is_featured', true)
+                                       ->whereNotIn('product_id', $purchasedProductIds)
+                                       ->whereNotIn('product_id', $recommendations->pluck('product_id'))
+                                       ->with(['category', 'brand'])
+                                       ->inRandomOrder()
+                                       ->limit(10 - $recommendations->count())
+                                       ->get();
+            $recommendations = $recommendations->merge($featuredProducts);
+        }
+
+        return response()->json($recommendations);
     }
 }

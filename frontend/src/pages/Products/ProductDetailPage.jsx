@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getProductById } from '../../api/products';
 import { getReviewsByProductId, addReview } from '../../api/reviews';
 import { addProductToCart } from '../../api/cart';
-import { addProductToWishlist } from '../../api/wishlist'; // ****** استيراد دالة إضافة لقائمة الرغبات ******
+import { addProductToWishlist } from '../../api/wishlist';
 import ReviewForm from '../../components/ReviewForm';
 import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/products/ProductDetailPage.css';
@@ -20,7 +20,6 @@ const ProductDetailPage = () => {
   const [mainDisplayImage, setMainDisplayImage] = useState(null);
   const [quantity, setQuantity] = useState(1);
 
-  // دالة لجلب تفاصيل المنتج والمراجعات
   const fetchProductDetails = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -33,9 +32,9 @@ const ProductDetailPage = () => {
         cost_price: productData.cost_price ? parseFloat(productData.cost_price) : null,
         stock_quantity: parseInt(productData.stock_quantity),
         weight: productData.weight ? parseFloat(productData.weight) : null,
-        length: product.length ? parseFloat(productData.length) : null,
-        width: product.width ? parseFloat(productData.width) : null,
-        height: product.height ? parseFloat(product.height) : null,
+        length: productData.length ? parseFloat(productData.length) : null,
+        width: productData.width ? parseFloat(productData.width) : null,
+        height: productData.height ? parseFloat(productData.height) : null,
       };
       setProduct(processedProduct);
       setMainDisplayImage(processedProduct.main_image_url || 'https://placehold.co/600x400/cccccc/333333?text=لا+توجد+صورة');
@@ -65,7 +64,6 @@ const ProductDetailPage = () => {
     fetchProductDetails();
   }, [fetchProductDetails]);
 
-  // دالة لإضافة المنتج إلى السلة
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       alert('الرجاء تسجيل الدخول لإضافة منتجات إلى السلة.');
@@ -89,7 +87,6 @@ const ProductDetailPage = () => {
     }
   };
 
-  // ****** دالة لإضافة المنتج إلى قائمة الرغبات ******
   const handleAddToWishlist = async () => {
     if (!isAuthenticated) {
       alert('الرجاء تسجيل الدخول لإضافة منتجات إلى قائمة الرغبات.');
@@ -104,7 +101,6 @@ const ProductDetailPage = () => {
     }
   };
 
-  // دالة لإرسال المراجعة من ReviewForm
   const handleReviewSubmit = async (reviewData) => {
     try {
       const newReview = await addReview({ ...reviewData, product_id: id });
@@ -117,7 +113,6 @@ const ProductDetailPage = () => {
     }
   };
 
-  // دالة لحساب متوسط التقييم
   const calculateAverageRating = () => {
     if (reviews.length === 0) return 0;
     const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
@@ -166,6 +161,7 @@ const ProductDetailPage = () => {
               alt={product.name}
               className="img-fluid rounded mb-3"
               style={{ maxHeight: '450px', objectFit: 'contain' }}
+              loading="lazy" // ****** إضافة Lazy Loading ******
               onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/600x400/cccccc/333333?text=لا+توجد+صورة"; }}
             />
             {/* صور إضافية (معرض الصور المصغرة) */}
@@ -178,6 +174,7 @@ const ProductDetailPage = () => {
                         className="img-thumbnail"
                         style={{ width: '80px', height: '80px', objectFit: 'cover' }}
                         onClick={() => setMainDisplayImage(product.main_image_url)}
+                        loading="lazy" // ****** إضافة Lazy Loading ******
                         onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
                     />
                 )}
@@ -189,6 +186,7 @@ const ProductDetailPage = () => {
                     className="img-thumbnail"
                     style={{ width: '80px', height: '80px', objectFit: 'cover' }}
                     onClick={() => setMainDisplayImage(image.image_url)}
+                    loading="lazy" // ****** إضافة Lazy Loading ******
                     onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
                   />
                 ))}
@@ -277,7 +275,7 @@ const ProductDetailPage = () => {
                 </button>
                 <button
                   className="btn btn-outline-danger btn-lg d-flex align-items-center justify-content-center"
-                  onClick={handleAddToWishlist} // ****** تفعيل زر قائمة الرغبات ******
+                  onClick={handleAddToWishlist}
                 >
                   <i className="bi bi-heart"></i>
                 </button>

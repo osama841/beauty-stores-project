@@ -70,30 +70,16 @@ const ErrorHandler = ({ error, onRetry, showRetry = true }) => {
   const errorMessage = getErrorMessage(error);
 
   return (
-    <div className={`alert alert-${errorType} alert-dismissible fade show`} role="alert">
-      <div className="d-flex align-items-center">
-        <div className="flex-grow-1">
-          <strong>Error: </strong>
-          {errorMessage}
-        </div>
-        <div className="ms-3">
-          {showRetry && onRetry && (
-            <button
-              type="button"
-              className="btn btn-sm btn-outline-secondary me-2"
-              onClick={onRetry}
-            >
-              Retry
-            </button>
-          )}
-          <button
-            type="button"
-            className="btn-close"
-            onClick={() => setShowError(false)}
-            aria-label="Close"
-          />
-        </div>
-      </div>
+    <div className="error-handler" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f8d7da', color: '#721c24', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem' }}>
+      <p style={{ margin: '0', fontSize: '1rem', lineHeight: '1.6' }}>{errorMessage}</p>
+      {showRetry && (
+        <button
+          onClick={onRetry}
+          style={{ backgroundColor: '#007bff', color: '#ffffff', border: 'none', borderRadius: '0.5rem', padding: '0.75rem 1.5rem', marginTop: '1rem' }}
+        >
+          إعادة المحاولة
+        </button>
+      )}
     </div>
   );
 };
@@ -162,4 +148,4 @@ export const AuthError = ({ error, onLogin }) => {
   );
 };
 
-export default ErrorHandler; 
+export default ErrorHandler;

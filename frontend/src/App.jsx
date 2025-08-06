@@ -123,6 +123,7 @@ const AppContent = () => {
                 <AdminLayout>
                   <Routes>
                     <Route index element={<AdminDashboard />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="categories" element={<CategoryManagement />} />
                     <Route path="products" element={<ProductManagement />} />
                     <Route path="brands" element={<BrandManagement />} />

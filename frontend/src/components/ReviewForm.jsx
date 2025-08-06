@@ -36,20 +36,21 @@ const ReviewForm = ({ onSubmit, product_id, user }) => {
   };
 
   return (
-    <div className="card shadow-sm mb-4 border-0 rounded-lg">
-      <div className="card-header bg-light fw-bold py-3">
+    <div className="card shadow-sm mb-4 border-0 rounded-lg" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f6f7fb' }}>
+      <div className="card-header bg-light fw-bold py-3" style={{ color: '#23272f', fontSize: '1.2rem' }}>
         اكتب مراجعتك {user?.username ? `(${user.username})` : ''}
       </div>
       <div className="card-body p-4">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="mb-3">
-            <label htmlFor="rating" className="form-label">التقييم:</label>
+            <label htmlFor="rating" className="form-label" style={{ color: '#23272f', fontWeight: '500' }}>التقييم:</label>
             <select
               id="rating"
               className={`form-select ${validationErrors.rating ? 'is-invalid' : ''}`}
               value={rating}
               onChange={(e) => setRating(Number(e.target.value))}
               required
+              style={{ borderRadius: '0.5rem', padding: '0.75rem', borderColor: '#e0e6ed' }}
             >
               <option value="1">1 نجمة</option>
               <option value="2">2 نجوم</option>
@@ -68,6 +69,7 @@ const ReviewForm = ({ onSubmit, product_id, user }) => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength="255"
+              style={{ borderRadius: '0.5rem', padding: '0.75rem', borderColor: '#e0e6ed' }}
             />
             {validationErrors.title && <div className="invalid-feedback">{validationErrors.title[0]}</div>}
           </div>
@@ -80,13 +82,24 @@ const ReviewForm = ({ onSubmit, product_id, user }) => {
               onChange={(e) => setComment(e.target.value)}
               required
               rows="5"
+              style={{ borderRadius: '0.5rem', padding: '0.75rem', borderColor: '#e0e6ed' }}
             ></textarea>
             {validationErrors.comment && <div className="invalid-feedback">{validationErrors.comment[0]}</div>}
           </div>
-          {formError && <div className="alert alert-danger">{formError}</div>}
-          <button type="submit" disabled={loading} className="btn btn-primary">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ backgroundColor: '#007bff', borderRadius: '0.5rem', padding: '0.75rem 1.5rem', color: '#ffffff' }}
+          >
             {loading ? 'جاري الإرسال...' : 'إرسال المراجعة'}
           </button>
+
+          {formError && (
+            <div className="alert alert-danger mt-3" style={{ borderRadius: '0.5rem', padding: '0.75rem', color: '#dc3545' }}>
+              {formError}
+            </div>
+          )}
         </form>
       </div>
     </div>

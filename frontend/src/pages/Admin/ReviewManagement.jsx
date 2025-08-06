@@ -2,21 +2,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getAllReviews, approveReview, deleteReview } from '../../api/reviews';
 import '../../styles/admin/ReviewManagement.css';
+import { FaCheckCircle, FaTrashAlt, FaStar, FaStarHalfAlt, FaRegStar, FaFilter, FaSyncAlt } from 'react-icons/fa';
 
 const ReviewManagement = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterStatus, setFilterStatus] = useState(''); // لتصفية المراجعات (مثلاً: 'pending', 'approved')
+  const [filterStatus, setFilterStatus] = useState('');
 
   // دالة لجلب المراجعات
   const fetchReviews = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = { status: filterStatus }; // إرسال حالة التصفية
+      const params = { status: filterStatus };
       const data = await getAllReviews(params);
-      setReviews(data); // API يُرجع مصفوفة مباشرة (وليس paginate object هنا)
+      setReviews(data);
     } catch (err) {
       console.error('فشل تحميل المراجعات. الرجاء المحاولة لاحقاً:', err);
       let errorMessage = 'حدث خطأ غير متوقع أثناء تحميل المراجعات.';
@@ -34,7 +35,7 @@ const ReviewManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [filterStatus]); // أعد جلب المراجعات عند تغيير حالة التصفية
+  }, [filterStatus]);
 
   useEffect(() => {
     fetchReviews();
@@ -46,7 +47,7 @@ const ReviewManagement = () => {
       try {
         await approveReview(reviewId);
         alert('تمت الموافقة على المراجعة بنجاح!');
-        fetchReviews(); // إعادة جلب المراجعات لتحديث القائمة
+        fetchReviews();
       } catch (err) {
         console.error('فشل الموافقة على المراجعة:', err);
         alert('فشل الموافقة على المراجعة: ' + (err.message || JSON.stringify(err)));
@@ -60,7 +61,7 @@ const ReviewManagement = () => {
       try {
         await deleteReview(reviewId);
         alert('تم حذف المراجعة بنجاح!');
-        fetchReviews(); // إعادة جلب المراجعات لتحديث القائمة
+        fetchReviews();
       } catch (err) {
         console.error('فشل حذف المراجعة:', err);
         alert('فشل حذف المراجعة: ' + (err.message || JSON.stringify(err)));
@@ -68,9 +69,36 @@ const ReviewManagement = () => {
     }
   };
 
+  // دالة مساعدة لعرض النجوم
+  const renderRatingStars = (rating) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    return (
+      <div className="review-rating d-inline-block">
+        {Array.from({ length: fullStars }, (_, i) => (
+          <FaStar key={`full-${i}`} className="text-warning" />
+        ))}
+        {hasHalfStar && <FaStarHalfAlt className="text-warning" />}
+        {Array.from({ length: emptyStars }, (_, i) => (
+          <FaRegStar key={`empty-${i}`} className="text-muted" />
+        ))}
+      </div>
+    );
+  };
+  
+  const getStatusBadgeClass = (isApproved) => {
+    return isApproved ? 'bg-success' : 'bg-warning text-dark';
+  };
+
+  const getStatusText = (isApproved) => {
+    return isApproved ? 'معتمدة' : 'معلقة';
+  };
+
   if (loading) {
     return (
-      <div className="container-fluid text-center my-5">
+      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">جاري تحميل المراجعات...</span>
         </div>
@@ -81,7 +109,7 @@ const ReviewManagement = () => {
 
   if (error) {
     return (
-      <div className="container-fluid text-center my-5">
+      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
@@ -90,86 +118,136 @@ const ReviewManagement = () => {
   }
 
   return (
-    <div className="container-fluid">
-      <h1 className="mb-4 fw-bold text-success">إدارة المراجعات</h1>
+    <div className="container-fluid py-4" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f8f9fa' }}>
+      <h1 className="mb-4 fw-bold text-success text-center text-md-start" style={{ color: '#60c78c' }}>إدارة المراجعات</h1>
 
-      {/* شريط التصفية */}
-      <div className="mb-4">
-        <label htmlFor="filterStatus" className="form-label">تصفية حسب الحالة:</label>
-        <select
-          id="filterStatus"
-          className="form-select w-auto"
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-        >
-          <option value="">جميع المراجعات</option>
-          <option value="pending">معلقة</option>
-          <option value="approved">معتمدة</option>
-          {/* يمكن إضافة 'rejected' إذا كان لديك هذا الخيار في DB */}
-        </select>
+      <div className="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <div className="w-100 mb-3 mb-md-0">
+          <label htmlFor="filterStatus" className="form-label small text-muted">تصفية حسب الحالة:</label>
+          <select
+            id="filterStatus"
+            className="form-select form-select-sm w-auto"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
+          >
+            <option value="">جميع المراجعات</option>
+            <option value="pending">معلقة</option>
+            <option value="approved">معتمدة</option>
+          </select>
+        </div>
+        <button className="btn btn-sm btn-outline-primary d-flex align-items-center shadow-sm" onClick={fetchReviews} style={{ color: '#6a8eec', borderColor: '#6a8eec' }}>
+          <FaSyncAlt className="me-2" />
+          تحديث القائمة
+        </button>
       </div>
 
-      {/* قائمة المراجعات الحالية */}
       <div className="card shadow-lg border-0 rounded-lg">
-        <div className="card-header bg-primary text-white fw-bold py-3">
+        <div className="card-header bg-success text-white fw-bold py-3 text-center" style={{ backgroundColor: '#60c78c' }}>
           المراجعات الحالية
         </div>
         <div className="card-body p-0">
           {reviews.length === 0 ? (
             <p className="text-center text-muted py-4 mb-0">لا توجد مراجعات حتى الآن.</p>
           ) : (
-            <div className="table-responsive">
-              <table className="table table-hover mb-0">
-                <thead>
-                  <tr>
-                    <th>معرف المراجعة</th>
-                    <th>المنتج</th>
-                    <th>المستخدم</th>
-                    <th>التقييم</th>
-                    <th>العنوان/التعليق</th>
-                    <th>التاريخ</th>
-                    <th>الحالة</th>
-                    <th>الإجراءات</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <>
+              {/* عرض الجدول للشاشات الكبيرة */}
+              <div className="d-none d-lg-block">
+                <div className="table-responsive">
+                  <table className="table table-hover mb-0">
+                    <thead>
+                      <tr>
+                        <th>المنتج</th>
+                        <th>المستخدم</th>
+                        <th>التقييم</th>
+                        <th>العنوان/التعليق</th>
+                        <th>التاريخ</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reviews.map((review) => (
+                        <tr key={review.review_id}>
+                          <td><h6 className="mb-0 fw-bold" style={{ color: '#343a40' }}>{review.product ? review.product.name : 'منتج غير معروف'}</h6></td>
+                          <td><span className="text-muted small">{review.user ? review.user.username : 'مستخدم غير معروف'}</span></td>
+                          <td>{renderRatingStars(review.rating)}</td>
+                          <td>
+                            <h6 className="mb-0 fw-bold small" style={{ color: '#343a40' }}>{review.title || 'لا يوجد عنوان'}</h6>
+                            <p className="mb-0 small text-muted">{review.comment.substring(0, 50)}...</p>
+                          </td>
+                          <td><span className="text-muted small">{new Date(review.review_date).toLocaleDateString('ar-SA')}</span></td>
+                          <td>
+                            <span className={`badge ${getStatusBadgeClass(review.is_approved)}`} style={{ backgroundColor: review.is_approved ? '#60c78c' : '#ffc107' }}>
+                              {getStatusText(review.is_approved)}
+                            </span>
+                          </td>
+                          <td>
+                            {!review.is_approved && (
+                              <button className="btn btn-sm btn-success text-white me-2 shadow-sm" onClick={() => handleApprove(review.review_id)} style={{ backgroundColor: '#60c78c', borderColor: '#60c78c' }}>
+                                <FaCheckCircle /> موافقة
+                              </button>
+                            )}
+                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(review.review_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                              <FaTrashAlt /> حذف
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* عرض Accordion للشاشات الصغيرة */}
+              <div className="d-lg-none p-3">
+                <div className="accordion" id="reviewAccordion">
                   {reviews.map((review) => (
-                    <tr key={review.review_id}>
-                      <td>{review.review_id}</td>
-                      <td>{review.product ? review.product.name : 'منتج غير معروف'}</td>
-                      <td>{review.user ? review.user.username : 'مستخدم غير معروف'}</td>
-                      <td>
-                        <div className="review-rating">
-                          {Array.from({ length: 5 }, (_, i) => (
-                            <i key={i} className={`bi ${i < review.rating ? 'bi-star-fill' : 'bi-star'}`}></i>
-                          ))}
-                        </div>
-                      </td>
-                      <td>
-                        <h6 className="mb-0 fw-bold">{review.title || 'لا يوجد عنوان'}</h6>
-                        <p className="mb-0 small text-muted">{review.comment}</p>
-                      </td>
-                      <td>{new Date(review.review_date).toLocaleDateString()}</td>
-                      <td>
-                        <span className={`badge ${review.is_approved ? 'bg-success' : 'bg-warning text-dark'}`}>
-                          {review.is_approved ? 'معتمدة' : 'معلقة'}
-                        </span>
-                      </td>
-                      <td>
-                        {!review.is_approved && (
-                          <button className="btn btn-sm btn-success text-white me-2" onClick={() => handleApprove(review.review_id)}>
-                            <i className="bi bi-check-circle"></i> موافقة
-                          </button>
-                        )}
-                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(review.review_id)}>
-                          <i className="bi bi-trash"></i> حذف
+                    <div key={review.review_id} className="accordion-item mb-2 rounded-lg shadow-sm border" style={{ borderColor: '#dee2e6' }}>
+                      <h2 className="accordion-header" id={`heading${review.review_id}`}>
+                        <button 
+                          className="accordion-button collapsed py-3" 
+                          type="button" 
+                          data-bs-toggle="collapse" 
+                          data-bs-target={`#collapse${review.review_id}`} 
+                          aria-expanded="false" 
+                          aria-controls={`collapse${review.review_id}`}
+                          style={{ backgroundColor: '#ffffff', color: '#343a40' }}
+                        >
+                          <div className="d-flex align-items-center w-100">
+                            <div className="flex-grow-1">
+                              <h6 className="mb-0 fw-bold" style={{ color: '#343a40' }}>{review.product ? review.product.name : 'منتج غير معروف'}</h6>
+                              <p className="text-muted small mb-0">{review.user ? review.user.username : 'مستخدم غير معروف'}</p>
+                            </div>
+                            <span className={`badge ms-2 ${getStatusBadgeClass(review.is_approved)}`} style={{ backgroundColor: review.is_approved ? '#60c78c' : '#ffc107' }}>
+                              {getStatusText(review.is_approved)}
+                            </span>
+                          </div>
                         </button>
-                      </td>
-                    </tr>
+                      </h2>
+                      <div id={`collapse${review.review_id}`} className="accordion-collapse collapse" aria-labelledby={`heading${review.review_id}`} data-bs-parent="#reviewAccordion">
+                        <div className="accordion-body" style={{ backgroundColor: '#f8f9fa', color: '#343a40' }}>
+                          <p className="text-muted small mb-1"><strong>التقييم:</strong> {renderRatingStars(review.rating)}</p>
+                          <p className="text-muted small mb-1"><strong>العنوان:</strong> {review.title || 'لا يوجد عنوان'}</p>
+                          <p className="text-muted small mb-1"><strong>التعليق:</strong> {review.comment}</p>
+                          <p className="text-muted small mb-3"><strong>التاريخ:</strong> {new Date(review.review_date).toLocaleDateString('ar-SA')}</p>
+                          <div className="d-flex justify-content-end gap-2 mt-3">
+                            {!review.is_approved && (
+                              <button className="btn btn-sm btn-success text-white shadow-sm" onClick={() => handleApprove(review.review_id)} style={{ backgroundColor: '#60c78c', borderColor: '#60c78c' }}>
+                                <FaCheckCircle /> موافقة
+                              </button>
+                            )}
+                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(review.review_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                              <FaTrashAlt /> حذف
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

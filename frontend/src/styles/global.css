@@ -1,130 +1,53 @@
-/* === BASE === */
+/* === Unified Global Styles === */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Cairo:wght@400;700&display=swap');
+
 body {
+  font-family: 'Tajawal', 'Cairo', Arial, sans-serif;
   margin: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: #f4f6f9;
-  line-height: 1.5;
+  background: #f6f7fb;
+  line-height: 1.6;
+  color: #23272f;
+  direction: rtl;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+button {
+  font-family: inherit;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #007bff;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-/* === Layout === */
-.admin-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+button:hover {
+  background-color: #0056b3;
 }
 
-/* === Sidebar === */
-.admin-sidebar-desktop {
-  display: block;
-  width: 280px;
-  background-color: #2c3e50;
-  color: white;
-  position: fixed;
-  top: 60px;
-  bottom: 0;
-  left: 0;
-  padding: 1rem;
-  z-index: 1000;
-}
-
-.admin-sidebar-mobile {
-  position: fixed;
-  top: 60px;
-  bottom: 0;
-  left: 0;
+input, textarea {
+  font-family: inherit;
+  border: 1px solid #e0e6ed;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
   width: 100%;
-  background-color: #2c3e50;
-  color: white;
-  padding: 1rem;
-  z-index: 1100;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
+  box-sizing: border-box;
 }
 
-.admin-sidebar-mobile.show {
-  transform: translateX(0);
-}
-
-/* === Navbar === */
-.admin-navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: #2c3e50;
-  color: white;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 1200;
-  height: 60px;
-}
-
-/* === Content === */
-.admin-content {
-  flex: 1;
-  padding: 1rem;
-  margin-top: 60px;
-  margin-bottom: 60px;
-}
-
-/* === Navigation Links === */
-.nav-link {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  color: #ecf0f1;
-  text-decoration: none;
-  border-radius: 0.375rem;
-  transition: background 0.3s ease;
-}
-
-.nav-link.bg-primary {
-  background-color: #2980b9;
-}
-
-.nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.nav-item i {
-  margin-right: 0.5rem;
+input:focus, textarea:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
 /* === Responsive === */
-/* @media (min-width: 992px) {
-  .admin-layout {
-    flex-direction: row;
+@media (max-width: 991.98px) {
+  body {
+    font-size: 0.9rem;
   }
 
-  .admin-content {
-    margin-left: 280px;
-    margin-bottom: 0;
-  }
-
-  .admin-sidebar-desktop {
-    display: block;
-  }
-
-  .admin-sidebar-mobile {
-    display: none;
+  button {
+    padding: 0.5rem 1rem;
   }
 }
-
-@media (max-width: 991px) {
-  .admin-sidebar-desktop {
-    display: none;
-  }
-
-  .admin-sidebar-mobile {
-    display: block;
-  }
-}
- */

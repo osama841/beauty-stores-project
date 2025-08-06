@@ -1,102 +1,160 @@
-/* Header Styles */
-.top-bar {
-  font-size: 0.85rem;
+/* Make sure you have the variables from Header.css, or define them globally */
+:root {
+  --primary-color: #E6B4B4;
+  --footer-bg: #2C2C2C; /* Darker Slate */
+  --footer-text: #a0a0a0;
+  --footer-title: #ffffff;
+  --footer-link-hover: #ffffff;
 }
 
-.navbar-brand {
-  transition: all 0.3s ease;
-}
-
-.navbar-brand:hover {
-  transform: scale(1.05);
-}
-
-.nav-link {
-  font-weight: 500;
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.nav-link:hover {
-  color: #6f42c1 !important;
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background-color: #6f42c1;
-  transition: width 0.3s ease;
-}
-
-.nav-link:hover::after {
-  width: 100%;
-}
-
-.dropdown-menu {
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.avatar-sm {
-  width: 32px;
-  height: 32px;
-  font-size: 0.9rem;
-}
-
-/* Footer Styles */
-.hover-text-purple:hover {
-  color: #6f42c1 !important;
-  transform: translateX(-5px);
-}
-
-.text-purple {
-  color: #6f42c1 !important;
-}
-
-.bg-purple {
-  background-color: #6f42c1 !important;
+.site-footer {
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+  padding: 60px 0 20px 0;
+  font-size: 0.95rem;
 }
 
 .footer-brand {
-  transition: all 0.3s ease;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
 }
 
-.footer-brand:hover {
-  transform: scale(1.05);
+.footer-text {
+  line-height: 1.8;
 }
 
-.social-icons a {
-  transition: all 0.3s ease;
+.footer-title {
+  color: var(--footer-title);
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 25px;
+  position: relative;
 }
 
-.social-icons a:hover {
-  background-color: rgba(111, 66, 193, 0.8) !important;
+.footer-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 0;
+    width: 30px;
+    height: 2px;
+    background-color: var(--primary-color);
+}
+
+
+/* Social Icons */
+.social-icons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: all 0.3s ease-in-out;
+}
+
+.social-icon:hover {
+  background-color: var(--primary-color);
+  color: #fff;
   transform: translateY(-3px);
 }
 
+/* Footer Links */
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: var(--footer-text);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: var(--footer-link-hover);
+  padding-right: 5px;
+}
+
+/* Contact Info */
+.contact-info li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  gap: 15px;
+}
+
+.contact-info .icon {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+  margin-top: 4px;
+}
+
+.contact-info a {
+  color: var(--footer-text);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.contact-info a:hover {
+  color: var(--footer-link-hover);
+}
+
+
+/* Footer Bottom */
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 25px;
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.copyright-text {
+  margin: 0;
+}
+
+.payment-icons {
+  display: flex;
+  gap: 15px;
+  color: #555;
+}
+
+.payment-icons svg {
+    transition: color 0.3s ease;
+}
+.payment-icons svg:hover {
+    color: #fff;
+}
+
+
 /* Responsive Adjustments */
-@media (max-width: 991.98px) {
-  .navbar-collapse {
-    padding: 20px 0;
-    background-color: white;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    border-radius: 10px;
-    margin-top: 10px;
-  }
-  
-  .nav-item {
-    margin-bottom: 5px;
-  }
-  
-  .nav-link {
-    padding: 10px 15px !important;
-  }
+@media (max-width: 767.98px) {
+    .site-footer {
+        text-align: center;
+    }
+    .footer-title::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .social-icons, .payment-icons {
+        justify-content: center;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        justify-content: center;
+    }
+    .contact-info li {
+        justify-content: center;
+    }
 }
