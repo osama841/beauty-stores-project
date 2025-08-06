@@ -30,8 +30,8 @@ const Footer = () => {
             <ul className="list-unstyled footer-links">
               <li><Link to="/">الرئيسية</Link></li>
               <li><Link to="/products">المنتجات</Link></li>
-              <li><Link to="/about">عن المتجر</Link></li>
-              <li><Link to="/contact">اتصل بنا</Link></li>
+              <li><Link to="/pages/about-us">عن المتجر</Link></li> {/* ****** تصحيح الرابط ****** */}
+              <li><Link to="/pages/contact-us">اتصل بنا</Link></li> {/* ****** تصحيح الرابط ****** */}
               <li><Link to="/faq">الأسئلة الشائعة</Link></li>
             </ul>
           </div>
@@ -41,9 +41,9 @@ const Footer = () => {
             <h5 className="footer-title">خدمة العملاء</h5>
             <ul className="list-unstyled footer-links">
               <li><Link to="/my-account">حسابي</Link></li>
-              <li><Link to="/track-order">تتبع الطلب</Link></li>
+              <li><Link to="/orders">تتبع الطلب</Link></li>
               <li><Link to="/return-policy">سياسة الإرجاع</Link></li>
-              <li><Link to="/privacy-policy">سياسة الخصوصية</Link></li>
+              <li><Link to="/pages/privacy-policy">سياسة الخصوصية</Link></li> {/* ****** تصحيح الرابط ****** */}
             </ul>
           </div>
 

@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { getCategories } from '../api/categories';
 import { BiUser, BiShoppingBag, BiLogOut, BiLogIn, BiUserPlus, BiMenu, BiX, BiChevronDown } from 'react-icons/bi';
 import { FaUserShield } from 'react-icons/fa';
-import './../styles/header.css';// استيراد ملف التصميم الجديد
+import { toast } from 'react-toastify';
+import './../styles/header.css';
 
 const Header = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -29,9 +30,10 @@ const Header = () => {
     try {
       await logout();
       navigate('/login');
+      toast.success('تم تسجيل الخروج بنجاح!');
     } catch (error) {
       console.error('Logout failed:', error);
-      alert('فشل تسجيل الخروج. الرجاء المحاولة مرة أخرى.');
+      toast.error('فشل تسجيل الخروج. الرجاء المحاولة مرة أخرى.');
     }
   };
 
@@ -67,7 +69,7 @@ const Header = () => {
               <li><Link to="/about" className="nav-link" onClick={closeMenu}>عن المتجر</Link></li>
               <li><Link to="/contact" className="nav-link" onClick={closeMenu}>اتصل بنا</Link></li>
             </ul>
-             {/* --- User Actions for Mobile --- */}
+
             <div className="nav-actions-mobile d-lg-none">
               {isAuthenticated ? (
                 <>
@@ -87,20 +89,23 @@ const Header = () => {
             <div className="d-none d-lg-flex align-items-center gap-2">
               {isAuthenticated ? (
                 <>
-                   {user?.is_admin && (
+                  {user?.is_admin && (
                     <Link className="btn-admin" to="/admin" onClick={closeMenu}>
                       <FaUserShield /> <span>لوحة المسؤول</span>
                     </Link>
                   )}
                   <div className="nav-item-dropdown user-dropdown">
-                     <a className="nav-link" href="#"><BiUser size={22} /> {user?.username || 'حسابي'} <BiChevronDown/></a>
-                     <ul className="dropdown-content">
-                        <li><Link to="/my-account" onClick={closeMenu}>لوحة التحكم</Link></li>
-                        <li><Link to="/my-account/profile" onClick={closeMenu}>الملف الشخصي</Link></li>
-                        <li><Link to="/my-account/orders" onClick={closeMenu}>طلباتي</Link></li>
-                        <li><hr/></li>
-                        <li><button onClick={() => { handleLogout(); closeMenu(); }}>تسجيل الخروج</button></li>
-                     </ul>
+                    <a className="nav-link" href="#"><BiUser size={22} /> {user?.username || 'حسابي'} <BiChevronDown/></a>
+                    <ul className="dropdown-content">
+                      <li><Link to="/my-account" onClick={closeMenu}>لوحة التحكم</Link></li>
+                      <li><Link to="/my-account/profile" onClick={closeMenu}>الملف الشخصي</Link></li>
+                      <li><Link to="/my-account/orders" onClick={closeMenu}>طلباتي</Link></li>
+                      <li><Link to="/my-account/addresses" onClick={closeMenu}>عناويني</Link></li>
+                      <li><Link to="/my-account/wishlist" onClick={closeMenu}>قائمة الرغبات</Link></li> {/* ****** إضافة رابط قائمة الرغبات ****** */}
+                      {user?.is_admin && (<li><hr/><Link to="/admin" onClick={closeMenu}>لوحة المسؤول</Link></li>)}
+                      <li><hr/></li>
+                      <li><button onClick={() => { handleLogout(); closeMenu(); }}>تسجيل الخروج</button></li>
+                    </ul>
                   </div>
                 </>
               ) : (
@@ -110,9 +115,9 @@ const Header = () => {
                 </>
               )}
             </div>
-             <Link to="/cart" className="cart-icon" onClick={closeMenu}>
-                <BiShoppingBag size={26} />
-                <span className="cart-badge">0</span>
+            <Link to="/cart" className="cart-icon" onClick={closeMenu}>
+              <BiShoppingBag size={26} />
+              <span className="cart-badge">0</span>
             </Link>
             <button className="menu-toggle d-lg-none" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               <BiMenu size={28} />

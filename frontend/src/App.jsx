@@ -29,7 +29,7 @@ import OrderManagement from './pages/Admin/OrderManagement';
 import UserManagement from './pages/Admin/UserManagement';
 import ReviewManagement from './pages/Admin/ReviewManagement';
 import ContentManagement from './pages/Admin/ContentManagement';
-import DiscountManagement from './pages/Admin/DiscountManagement'; // ****** استيراد صفحة إدارة الخصومات ******
+import DiscountManagement from './pages/Admin/DiscountManagement';
 import AdminLayout from './components/Admin/AdminLayout';
 
 // استيراد صفحات ومكونات لوحة تحكم المستخدم
@@ -123,7 +123,6 @@ const AppContent = () => {
                 <AdminLayout>
                   <Routes>
                     <Route index element={<AdminDashboard />} />
-                    <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="categories" element={<CategoryManagement />} />
                     <Route path="products" element={<ProductManagement />} />
                     <Route path="brands" element={<BrandManagement />} />
@@ -131,7 +130,7 @@ const AppContent = () => {
                     <Route path="users" element={<UserManagement />} />
                     <Route path="reviews" element={<ReviewManagement />} />
                     <Route path="content" element={<ContentManagement />} />
-                    <Route path="discounts" element={<DiscountManagement />} /> {/* ****** إضافة مسار إدارة الخصومات ****** */}
+                    <Route path="discounts" element={<DiscountManagement />} />
                     {/* أضف مسارات لوحة تحكم المسؤول الأخرى هنا: */}
                     {/* <Route path="settings" element={<StoreSettings />} /> */}
                   </Routes>
@@ -144,10 +143,17 @@ const AppContent = () => {
           <Route path="/cart" element={<ShoppingCartPage />} />
           <Route path="/checkout" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
           <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
-          <Route path="/about-us" element={<StaticPage slug="about-us" />} />
-          <Route path="/privacy-policy" element={<StaticPage slug="privacy-policy" />} />
-          <Route path="/terms-of-service" element={<StaticPage slug="terms-of-service" />} />
-          <Route path="/contact-us" element={<StaticPage slug="contact-us" />} />
+          {/* ****** مسارات الصفحات الثابتة (عامة) ****** */}
+          {/* هنا نستخدم مسارًا ديناميكيًا واحدًا لجميع الصفحات الثابتة */}
+          <Route path="/pages/:slug" element={<StaticPage />} /> {/* هذا المسار سيتطابق مع /pages/about-us, /pages/privacy-policy, إلخ. */}
+          
+          {/* مسارات الفوتر القديمة التي كانت تستخدم /about-us مباشرة */}
+          {/* يجب أن يتم تحديث روابط الفوتر لاستخدام /pages/about-us */}
+          <Route path="/about-us" element={<Navigate to="/pages/about-us" replace />} /> {/* إعادة توجيه */}
+          <Route path="/privacy-policy" element={<Navigate to="/pages/privacy-policy" replace />} /> {/* إعادة توجيه */}
+          <Route path="/terms-of-service" element={<Navigate to="/pages/terms-of-service" replace />} /> {/* إعادة توجيه */}
+          <Route path="/contact-us" element={<Navigate to="/pages/contact-us" replace />} /> {/* إعادة توجيه */}
+
           <Route path="/forgot-password" element={<div className="container text-center mt-5"><p className="text-muted">صفحة نسيت كلمة المرور (قريباً)</p></div>} />
         </Routes>
       </main>
