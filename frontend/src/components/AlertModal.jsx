@@ -2,12 +2,11 @@
 import React from 'react';
 
 const AlertModal = ({ show, title, message, onClose }) => {
-  if (!show) {
-    return null;
-  }
+  if (!show) return null;
 
   return (
-    <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div className="modal fade show d-block" tabIndex="-1">
+      <div className="modal-backdrop-custom" />
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-header">

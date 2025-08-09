@@ -1,0 +1,9 @@
+/* Cards grid spacing for mobile */
+.user-cards { row-gap: 1rem; }
+.user-card .btn { min-width: 88px; }
+.user-card .bi { font-size: 1.1rem; }
+
+@media (max-width: 575.98px) {
+  .user-card .card-body { padding: 1rem; }
+}
+

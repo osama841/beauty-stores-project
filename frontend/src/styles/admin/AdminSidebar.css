@@ -12,7 +12,7 @@
     height: 100vh;
     position: sticky;
     top: 0;
-    z-index: 1100;
+    z-index: 1301;
     font-family: 'Tajawal', 'Cairo', sans-serif;
     direction: rtl;
     border-left: 1px solid #23272f;
@@ -103,9 +103,15 @@
 /* إخفاء الشريط الجانبي على الجوال افتراضياً */
 @media (max-width: 991.98px) {
     .admin-sidebar-container {
-        height: auto;
-        position: relative;
+        height: 100vh;
+        position: fixed;
+        top: 0; right: 0;
+        width: 80vw;
+        max-width: 360px;
+        transform: translateX(100%);
         padding: 1rem;
+        overflow-y: auto;
+        border-radius: 0 0 0 0.8rem;
     }
     .admin-sidebar-container.show {
         transform: translateX(0%);
@@ -143,17 +149,7 @@
         background: #f3f0ff;
         color: #6a50e0;
     }
-    .admin-content-wrapper {
-        transition: margin-left 0.3s cubic-bezier(.77,0,.18,1);
-        margin-right: 0;
-    }
-    body.sidebar-open-mobile .admin-content-wrapper {
-        margin-left: 80vw;
-        max-width: 100vw;
-    }
-    body.sidebar-open-mobile {
-        overflow: hidden;
-    }
+    body.sidebar-open-mobile { overflow: hidden; }
     /* زر إغلاق جانبي صغير وجميل */
     .admin-close-menu-btn {
         background: #fff;
@@ -198,3 +194,23 @@
     }
 }
 
+@media (max-width: 991.98px) {
+    .admin-sidebar-container,
+    .admin-sidebar-overlay,
+    .admin-sidebar-toggler,
+    .admin-close-menu-btn {
+      display: none !important;
+    }
+  
+    /* لا تترك أي عرض زائد أو ترانسفورم قديم */
+    .admin-sidebar-container {
+      transform: none !important;
+      width: 0 !important;
+      overflow: hidden !important;
+    }
+  }
+  
+  /* Keep desktop behavior */
+  @media (min-width: 992px) {
+    .admin-sidebar-container { position: sticky; top: 0; height: 100vh; width: 260px; flex-shrink: 0; border-radius: 0 0.8rem 0.8rem 0; }
+  }

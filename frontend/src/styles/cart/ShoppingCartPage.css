@@ -1,0 +1,10 @@
+/* صور عناصر السلة */
+.cart-item-img {
+  object-fit: cover;
+}
+
+/* حقل الكمية */
+.qty-input {
+  max-width: 80px;
+}
+

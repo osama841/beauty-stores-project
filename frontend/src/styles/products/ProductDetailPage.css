@@ -2,6 +2,12 @@
 
 /* أنماط مخصصة لصفحة تفاصيل المنتج */
 
+/* الصورة الرئيسية */
+.product-main-image {
+    max-height: 450px;
+    object-fit: contain;
+}
+
 /* لضمان أن الصور الإضافية تظهر بشكل جيد في المعرض */
 .product-additional-images img {
     cursor: pointer;
@@ -11,6 +17,13 @@
 
 .product-additional-images img:hover {
     border-color: #0d6efd; /* لون أزرق عند التحويم */
+}
+
+/* الصور المصغرة */
+.product-thumb {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
 }
 
 /* أنماط التقييمات */

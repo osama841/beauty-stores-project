@@ -2,25 +2,25 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { BiEnvelope, BiPhone, BiMap } from 'react-icons/bi';
 import { FaFacebookF, FaInstagram, FaTwitter, FaPinterestP, FaCcVisa, FaCcMastercard, FaCcPaypal } from 'react-icons/fa';
-import './../styles/Footer.css';
+import './../styles/footer.css';
 
 
 const Footer = () => {
   return (
-    <footer className="site-footer" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#23272f', color: '#f8f9fa', padding: '2rem 0' }}>
+    <footer className="site-footer">
       <div className="container">
         <div className="row g-5">
           {/* About Column */}
           <div className="col-lg-4 col-md-12">
-            <h5 className="footer-brand mb-3" style={{ fontSize: '1.5rem', fontWeight: '700', color: '#007bff' }}>لمسة روز</h5>
-            <p className="footer-text mb-4" style={{ fontSize: '1rem', lineHeight: '1.6', color: '#e0e6ed' }}>
+            <h5 className="footer-brand mb-3">لمسة روز</h5>
+            <p className="footer-text mb-4">
               متجرك الشامل لأدوات التجميل عالية الجودة. نحن ملتزمون بتقديم الأفضل لك في مستحضرات التجميل والعناية بالبشرة.
             </p>
-            <div className="social-icons" style={{ display: 'flex', gap: '1rem' }}>
-              <a href="#" className="social-icon" style={{ color: '#007bff', fontSize: '1.2rem' }}><FaFacebookF /></a>
-              <a href="#" className="social-icon" style={{ color: '#007bff', fontSize: '1.2rem' }}><FaInstagram /></a>
-              <a href="#" className="social-icon" style={{ color: '#007bff', fontSize: '1.2rem' }}><FaTwitter /></a>
-              <a href="#" className="social-icon" style={{ color: '#007bff', fontSize: '1.2rem' }}><FaPinterestP /></a>
+            <div className="social-icons">
+              <a href="#" className="social-icon"><FaFacebookF /></a>
+              <a href="#" className="social-icon"><FaInstagram /></a>
+              <a href="#" className="social-icon"><FaTwitter /></a>
+              <a href="#" className="social-icon"><FaPinterestP /></a>
             </div>
           </div>
 

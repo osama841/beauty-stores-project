@@ -98,7 +98,7 @@ const ReviewManagement = () => {
 
   if (loading) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">جاري تحميل المراجعات...</span>
         </div>
@@ -109,7 +109,7 @@ const ReviewManagement = () => {
 
   if (error) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
@@ -118,32 +118,31 @@ const ReviewManagement = () => {
   }
 
   return (
-    <div className="container-fluid py-4" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f8f9fa' }}>
-      <h1 className="mb-4 fw-bold text-success text-center text-md-start" style={{ color: '#60c78c' }}>إدارة المراجعات</h1>
+    <div className="container-fluid py-4">
+      <h1 className="mb-4 fw-bold text-primary text-center text-md-start">إدارة المراجعات</h1>
 
       <div className="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
         <div className="w-100 mb-3 mb-md-0">
           <label htmlFor="filterStatus" className="form-label small text-muted">تصفية حسب الحالة:</label>
-          <select
+           <select
             id="filterStatus"
             className="form-select form-select-sm w-auto"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
           >
             <option value="">جميع المراجعات</option>
             <option value="pending">معلقة</option>
             <option value="approved">معتمدة</option>
           </select>
         </div>
-        <button className="btn btn-sm btn-outline-primary d-flex align-items-center shadow-sm" onClick={fetchReviews} style={{ color: '#6a8eec', borderColor: '#6a8eec' }}>
+        <button className="btn btn-sm btn-outline-primary d-flex align-items-center shadow-sm" onClick={fetchReviews}>
           <FaSyncAlt className="me-2" />
           تحديث القائمة
         </button>
       </div>
 
-      <div className="card shadow-lg border-0 rounded-lg">
-        <div className="card-header bg-success text-white fw-bold py-3 text-center" style={{ backgroundColor: '#60c78c' }}>
+      <div className="card shadow-lg border-0 rounded-4">
+        <div className="card-header bg-primary text-white fw-bold py-3 text-center">
           المراجعات الحالية
         </div>
         <div className="card-body p-0">
@@ -169,26 +168,26 @@ const ReviewManagement = () => {
                     <tbody>
                       {reviews.map((review) => (
                         <tr key={review.review_id}>
-                          <td><h6 className="mb-0 fw-bold" style={{ color: '#343a40' }}>{review.product ? review.product.name : 'منتج غير معروف'}</h6></td>
+                           <td><h6 className="mb-0 fw-bold">{review.product ? review.product.name : 'منتج غير معروف'}</h6></td>
                           <td><span className="text-muted small">{review.user ? review.user.username : 'مستخدم غير معروف'}</span></td>
                           <td>{renderRatingStars(review.rating)}</td>
                           <td>
-                            <h6 className="mb-0 fw-bold small" style={{ color: '#343a40' }}>{review.title || 'لا يوجد عنوان'}</h6>
+                           <h6 className="mb-0 fw-bold small">{review.title || 'لا يوجد عنوان'}</h6>
                             <p className="mb-0 small text-muted">{review.comment.substring(0, 50)}...</p>
                           </td>
                           <td><span className="text-muted small">{new Date(review.review_date).toLocaleDateString('ar-SA')}</span></td>
                           <td>
-                            <span className={`badge ${getStatusBadgeClass(review.is_approved)}`} style={{ backgroundColor: review.is_approved ? '#60c78c' : '#ffc107' }}>
+                             <span className={`badge ${getStatusBadgeClass(review.is_approved)}`}>
                               {getStatusText(review.is_approved)}
                             </span>
                           </td>
                           <td>
-                            {!review.is_approved && (
-                              <button className="btn btn-sm btn-success text-white me-2 shadow-sm" onClick={() => handleApprove(review.review_id)} style={{ backgroundColor: '#60c78c', borderColor: '#60c78c' }}>
+                             {!review.is_approved && (
+                               <button className="btn btn-sm btn-success text-white me-2 shadow-sm" onClick={() => handleApprove(review.review_id)}>
                                 <FaCheckCircle /> موافقة
                               </button>
                             )}
-                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(review.review_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                             <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(review.review_id)}>
                               <FaTrashAlt /> حذف
                             </button>
                           </td>
@@ -203,7 +202,7 @@ const ReviewManagement = () => {
               <div className="d-lg-none p-3">
                 <div className="accordion" id="reviewAccordion">
                   {reviews.map((review) => (
-                    <div key={review.review_id} className="accordion-item mb-2 rounded-lg shadow-sm border" style={{ borderColor: '#dee2e6' }}>
+                    <div key={review.review_id} className="accordion-item mb-2 rounded-4 shadow-sm border">
                       <h2 className="accordion-header" id={`heading${review.review_id}`}>
                         <button 
                           className="accordion-button collapsed py-3" 
@@ -212,32 +211,32 @@ const ReviewManagement = () => {
                           data-bs-target={`#collapse${review.review_id}`} 
                           aria-expanded="false" 
                           aria-controls={`collapse${review.review_id}`}
-                          style={{ backgroundColor: '#ffffff', color: '#343a40' }}
+                          
                         >
                           <div className="d-flex align-items-center w-100">
                             <div className="flex-grow-1">
-                              <h6 className="mb-0 fw-bold" style={{ color: '#343a40' }}>{review.product ? review.product.name : 'منتج غير معروف'}</h6>
+                               <h6 className="mb-0 fw-bold">{review.product ? review.product.name : 'منتج غير معروف'}</h6>
                               <p className="text-muted small mb-0">{review.user ? review.user.username : 'مستخدم غير معروف'}</p>
                             </div>
-                            <span className={`badge ms-2 ${getStatusBadgeClass(review.is_approved)}`} style={{ backgroundColor: review.is_approved ? '#60c78c' : '#ffc107' }}>
+                             <span className={`badge ms-2 ${getStatusBadgeClass(review.is_approved)}`}>
                               {getStatusText(review.is_approved)}
                             </span>
                           </div>
                         </button>
                       </h2>
                       <div id={`collapse${review.review_id}`} className="accordion-collapse collapse" aria-labelledby={`heading${review.review_id}`} data-bs-parent="#reviewAccordion">
-                        <div className="accordion-body" style={{ backgroundColor: '#f8f9fa', color: '#343a40' }}>
+                        <div className="accordion-body">
                           <p className="text-muted small mb-1"><strong>التقييم:</strong> {renderRatingStars(review.rating)}</p>
                           <p className="text-muted small mb-1"><strong>العنوان:</strong> {review.title || 'لا يوجد عنوان'}</p>
                           <p className="text-muted small mb-1"><strong>التعليق:</strong> {review.comment}</p>
                           <p className="text-muted small mb-3"><strong>التاريخ:</strong> {new Date(review.review_date).toLocaleDateString('ar-SA')}</p>
                           <div className="d-flex justify-content-end gap-2 mt-3">
-                            {!review.is_approved && (
-                              <button className="btn btn-sm btn-success text-white shadow-sm" onClick={() => handleApprove(review.review_id)} style={{ backgroundColor: '#60c78c', borderColor: '#60c78c' }}>
+                              {!review.is_approved && (
+                                <button className="btn btn-sm btn-success text-white shadow-sm" onClick={() => handleApprove(review.review_id)}>
                                 <FaCheckCircle /> موافقة
                               </button>
                             )}
-                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(review.review_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                              <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(review.review_id)}>
                               <FaTrashAlt /> حذف
                             </button>
                           </div>

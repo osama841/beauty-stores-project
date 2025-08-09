@@ -220,7 +220,8 @@ const UserAddresses = () => {
       )}
 
       {/* Modal لإضافة/تعديل العنوان */}
-      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showModal ? 'rgba(0,0,0,0.5)' : '' }} aria-modal="true" role="dialog">
+      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1">
+        {showModal && <div className="modal-backdrop-custom" />}
         <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
           <div className="modal-content">
             <div className="modal-header bg-primary text-white py-3">

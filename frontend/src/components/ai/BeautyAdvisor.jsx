@@ -1,7 +1,7 @@
 // frontend/src/components/ai/BeautyAdvisor.jsx
 
 import React, { useState } from 'react';
-import apiClient from '../../api/axiosConfig'; // استيراد مثيل Axios
+import axiosInstance from '../../api/axiosInstance';
 import { Link } from 'react-router-dom'; // لإنشاء روابط التنقل
 
 function BeautyAdvisor() {
@@ -33,58 +33,50 @@ function BeautyAdvisor() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          AI Beauty Advisor ✨
-        </h2>
-        <p className="text-center text-gray-600 mb-6">
-          Ask me anything about beauty, skincare, makeup, or product ingredients!
-        </p>
+    <div className="container my-5">
+      <div className="row justify-content-center">
+        <div className="col-lg-7">
+          <div className="card shadow-sm border-0 rounded-4">
+            <div className="card-body p-4">
+              <h2 className="h3 fw-bold text-center text-primary mb-3">مستشار الجمال الذكي ✨</h2>
+              <p className="text-center text-muted mb-4">اسألني عن الروتين، المكونات، أو اختيار المنتجات المناسبة لنوع بشرتك.</p>
 
-        <form onSubmit={handleSubmit} className="mb-6">
-          <div className="mb-4">
-            <label htmlFor="question" className="block text-gray-700 text-sm font-bold mb-2">
-              Your Question:
-            </label>
-            <textarea
-              id="question"
-              name="question"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              className="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline resize-y h-24"
-              placeholder="e.g., What's a good skincare routine for oily skin?"
-              required
-            ></textarea>
+              <form onSubmit={handleSubmit} className="mb-4">
+                <div className="mb-3">
+                  <label htmlFor="question" className="form-label">سؤالك</label>
+                  <textarea
+                    id="question"
+                    name="question"
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    className="form-control"
+                    rows={4}
+                    placeholder="مثال: ما أفضل روتين للعناية بالبشرة الدهنية؟"
+                    required
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+                  {loading ? 'جاري السؤال...' : 'اسأل المستشار'}
+                </button>
+              </form>
+
+              {error && (
+                <div className="alert alert-danger" role="alert">{error}</div>
+              )}
+
+              {answer && (
+                <div className="alert alert-info" role="alert">
+                  <h3 className="h6 fw-bold mb-2">إجابة المستشار:</h3>
+                  <p className="mb-0" style={{ whiteSpace: 'pre-wrap' }}>{answer}</p>
+                </div>
+              )}
+
+              <p className="text-center text-muted small mt-3">
+                <Link to="/">العودة للرئيسية</Link>
+              </p>
+            </div>
           </div>
-          <button
-            type="submit"
-            className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline transition duration-300 w-full"
-            disabled={loading}
-          >
-            {loading ? 'Asking AI...' : 'Ask AI Advisor'}
-          </button>
-        </form>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <strong className="font-bold">Error!</strong>
-            <span className="block sm:inline">{error}</span>
-          </div>
-        )}
-
-        {answer && (
-          <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg relative mt-6">
-            <h3 className="font-bold mb-2">AI Advisor's Answer:</h3>
-            <p className="whitespace-pre-wrap">{answer}</p>
-          </div>
-        )}
-
-        <p className="text-center text-gray-600 text-sm mt-6">
-          <Link to="/logout" className="text-red-500 hover:text-red-700 font-bold">
-            Logout
-          </Link> (Logout functionality not yet implemented, but you can add it later)
-        </p>
+        </div>
       </div>
     </div>
   );

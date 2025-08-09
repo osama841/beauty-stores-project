@@ -1,12 +1,44 @@
-# React + Vite
+## الواجهة الأمامية — React 19 + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+واجهة المستخدم لمشروع Beauty Store مبنية على React 19 وVite، وتستهلك الـ API الخاص بـ Laravel عبر Axios. تم تنظيم الصفحات والمكونات لتغطية تجربة المستخدم والمتجر ولوحة الإدارة.
 
-Currently, two official plugins are available:
+### المتطلبات
+- Node.js 18+
+- npm
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### الإعداد السريع
+1) تثبيت التبعيات:
+   - `npm install`
+2) تشغيل بيئة التطوير:
+   - `npm run dev`
+   - افتح `http://localhost:5173`
 
-## Expanding the ESLint configuration
+### الربط مع الـ API
+- ملف `src/api/axiosInstance.js` مضبوط على `http://localhost:8000/api` كعنوان أساسي.
+- إذا غيّرت منفذ خادم Laravel أو النطاق، حدّث القيمة هناك.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### بنية المجلدات المهمة
+- `src/api/`: وحدات استهلاك API (auth, users, products, categories, orders, cart, reviews, pages, wishlist, discounts...).
+- `src/components/`: مكونات جاهزة مثل `Header`, `Footer`, `ProductCard`, نماذج وإطارات تخطيط.
+- `src/contexts/AuthContext.jsx`: سياق المصادقة وتخزين التوكن.
+- `src/pages/`:
+  - `Admin/`: إدارة المستخدمين، المنتجات، الفئات، الطلبات، الخصومات، المحتوى، المراجعات.
+  - `Auth/`: تسجيل الدخول والتسجيل.
+  - `Cart/`, `Checkout/`, `Products/`, `MyAccount/`, `StaticPage.jsx`, `Homepage.jsx`.
+- `src/styles/`: ملفات CSS منظمة حسب الوحدات والصفحات.
+
+### المصادقة وإدارة الجلسة
+- التوكن يُخزن في `localStorage` باسم `authToken`.
+- الاعتراضات في `axiosInstance.js` تضيف ترويسة `Authorization` تلقائيًا وتتعامل مع حالات 401/403.
+
+### نصائح وتجهيزات
+- تأكد من تفعيل CORS في الواجهة الخلفية ليستقبل منشأ Vite (`http://localhost:5173`).
+- حدّث روابط التوجيه في React Router بحال تغيير مسارات الصفحات.
+
+### أوامر npm
+- `npm run dev`: تشغيل بيئة التطوير.
+- `npm run build`: إنتاج نسخة جاهزة للنشر.
+- `npm run preview`: معاينة البناء محليًا.
+- `npm run lint`: فحص الشيفرة وفق ESLint.
+
+

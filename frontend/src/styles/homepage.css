@@ -1,9 +1,4 @@
-/* ألوان مخصصة */
-:root {
-  --purple: #6f42c1;
-  --purple-light: #f0e6ff;
-  --purple-dark: #5a32a3;
-}
+/* استخدام ألوان النظام العالمي من global.css (Bootstrap variables) */
 
 /* تنسيقات عامة */
 .homepage-container {
@@ -13,6 +8,10 @@
 /* Hero Section */
 .hero-section {
   position: relative;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, var(--bs-primary), rgba(var(--bs-primary-rgb), 0.85)), url('https://placehold.co/1200x400/ffe8f2/333?text=متجر+الجمال');
+  background-size: cover;
+  background-position: center;
 }
 
 .hero-content {
@@ -37,27 +36,7 @@
 }
 
 /* الأزرار المخصصة */
-.btn-purple {
-  background-color: var(--purple);
-  color: white;
-  border-color: var(--purple);
-}
-
-.btn-purple:hover {
-  background-color: var(--purple-dark);
-  border-color: var(--purple-dark);
-  color: white;
-}
-
-.btn-outline-purple {
-  color: var(--purple);
-  border-color: var(--purple);
-}
-
-.btn-outline-purple:hover {
-  background-color: var(--purple);
-  color: white;
-}
+/* الأزرار تتبع Bootstrap (لا نحتاج أصناف مخصصة هنا) */
 
 /* العناوين */
 .section-title {
@@ -72,7 +51,7 @@
   transform: translate(-50%, -50%);
   font-size: 4rem;
   font-weight: 900;
-  color: rgba(111, 66, 193, 0.05);
+  color: rgba(var(--bs-primary-rgb), 0.06);
   white-space: nowrap;
   z-index: 0;
 }

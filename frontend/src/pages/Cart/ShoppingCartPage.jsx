@@ -180,10 +180,11 @@ const ShoppingCartPage = () => {
                       <img
                         src={item.product.main_image_url || 'https://placehold.co/80x80/cccccc/333333?text=صورة'}
                         alt={item.product.name}
-                        className="img-thumbnail me-3"
-                        style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }}
-                        loading="lazy" // ****** إضافة Lazy Loading ******
+                        className="img-thumbnail me-3 rounded cart-item-img"
+                        loading="lazy"
                         onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
+                        width={80}
+                        height={80}
                       />
                       <div className="flex-grow-1">
                         <h6 className="mb-1 fw-bold">{item.product.name}</h6>
@@ -192,8 +193,7 @@ const ShoppingCartPage = () => {
                       <div className="d-flex align-items-center">
                         <input
                           type="number"
-                          className="form-control text-center me-2"
-                          style={{ width: '70px' }}
+                          className="form-control text-center me-2 qty-input"
                           value={item.quantity}
                           onChange={(e) => handleQuantityChange(item.cart_id, parseInt(e.target.value) || 0)}
                           min="0"

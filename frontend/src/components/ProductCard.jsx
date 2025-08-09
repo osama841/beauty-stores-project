@@ -4,13 +4,12 @@ import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
   return (
-    <div className="card h-100 shadow-sm border-0 rounded-lg">
+    <div className="card h-100 shadow-sm border-0 rounded-4 product-card">
       <Link to={`/products/${product.product_id}`} className="text-decoration-none text-dark">
         <img
           src={product.main_image_url || 'https://placehold.co/300x200/ADD8E6/000000?text=صورة+المنتج'}
           alt={product.name}
           className="card-img-top p-3 rounded-top"
-          style={{ objectFit: 'contain', height: '200px' }}
           loading="lazy" // ****** إضافة Lazy Loading ******
           onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/300x200/cccccc/333333?text=خطأ"; }}
         />
@@ -26,7 +25,7 @@ const ProductCard = ({ product }) => {
         </div>
       </Link>
       <div className="card-footer bg-transparent border-top-0 text-center">
-        <button className="btn btn-warning w-100 fw-bold" disabled={product.stock_quantity === 0}>
+        <button className="btn btn-primary w-100 fw-bold" disabled={product.stock_quantity === 0}>
           {product.stock_quantity > 0 ? 'أضف إلى السلة' : 'نفد المخزون'}
         </button>
       </div>

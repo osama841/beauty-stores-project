@@ -186,7 +186,7 @@ const BrandManagement = () => {
 
   if (loading) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">جاري تحميل العلامات التجارية...</span>
         </div>
@@ -197,7 +197,7 @@ const BrandManagement = () => {
 
   if (error) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
@@ -206,17 +206,17 @@ const BrandManagement = () => {
   }
 
   return (
-    <div className="container-fluid py-4" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f8f9fa' }}>
-      <h1 className="mb-4 fw-bold text-primary text-center text-md-start" style={{ color: '#6a8eec' }}>إدارة العلامات التجارية</h1>
+    <div className="container-fluid py-4">
+      <h1 className="mb-4 fw-bold text-primary text-center text-md-start">إدارة العلامات التجارية</h1>
 
       <div className="d-flex justify-content-center justify-content-md-start">
-        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddBrandClick} style={{ backgroundColor: '#6a8eec', borderColor: '#6a8eec' }}>
+        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddBrandClick}>
           <FaPlusCircle className="me-2" /> إضافة علامة تجارية جديدة
         </button>
       </div>
 
-      <div className="card shadow-lg border-0 rounded-lg">
-        <div className="card-header bg-primary text-white fw-bold py-3 text-center" style={{ backgroundColor: '#6a8eec' }}>
+      <div className="card shadow-lg border-0 rounded-4">
+        <div className="card-header bg-primary text-white fw-bold py-3 text-center">
           العلامات التجارية الحالية
         </div>
         <div className="card-body p-0">
@@ -246,7 +246,9 @@ const BrandManagement = () => {
                                 src={brand.logo_url}
                                 alt={brand.name}
                                 className="img-thumbnail rounded"
-                                style={{ width: '50px', height: '50px', objectFit: 'contain', border: '1px solid #dee2e6' }}
+                                width={50}
+                                height={50}
+                                style={{ objectFit: 'contain' }}
                                 onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/50x50/cccccc/333333?text=خطأ"; }}
                               />
                             ) : (
@@ -254,20 +256,20 @@ const BrandManagement = () => {
                             )}
                           </td>
                           <td>
-                            <h6 className="mb-0 fw-bold" style={{ color: '#343a40' }}>{brand.name}</h6>
-                            <span className="badge bg-light text-dark" style={{ backgroundColor: '#e9ecef', color: '#495057' }}>{brand.slug}</span>
+                            <h6 className="mb-0 fw-bold">{brand.name}</h6>
+                            <span className="badge bg-light text-dark">{brand.slug}</span>
                           </td>
                           <td><span className="text-muted small">{brand.description || 'لا يوجد وصف'}</span></td>
                           <td>
-                            <span className={`badge ${brand.status === 'active' ? 'bg-success' : 'bg-danger'}`} style={{ backgroundColor: brand.status === 'active' ? '#60c78c' : '#e74c3c' }}>
+                            <span className={`badge ${brand.status === 'active' ? 'bg-success' : 'bg-danger'}`}>
                               {brand.status === 'active' ? 'نشط' : 'غير نشط'}
                             </span>
                           </td>
                           <td>
-                            <button className="btn btn-sm btn-info text-white me-2 shadow-sm" onClick={() => handleEditClick(brand)} style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}>
+                            <button className="btn btn-sm btn-success text-white me-2 shadow-sm" onClick={() => handleEditClick(brand)}>
                               <FaPencilAlt /> تعديل
                             </button>
-                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(brand.brand_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(brand.brand_id)}>
                               <FaTrashAlt /> حذف
                             </button>
                           </td>
@@ -281,7 +283,7 @@ const BrandManagement = () => {
               {/* عرض البطاقات للشاشات الصغيرة */}
               <div className="d-lg-none p-3">
                 {brands.map((brand) => (
-                  <div key={brand.brand_id} className="card mb-3 shadow-sm border-0 rounded-lg">
+                  <div key={brand.brand_id} className="card mb-3 shadow-sm border-0 rounded-4">
                     <div className="card-body">
                       <div className="d-flex align-items-center mb-3">
                         {brand.logo_url && (
@@ -289,13 +291,15 @@ const BrandManagement = () => {
                             src={brand.logo_url}
                             alt={brand.name}
                             className="img-thumbnail me-3 rounded"
-                            style={{ width: '60px', height: '60px', objectFit: 'contain', border: '1px solid #dee2e6' }}
+                            width={60}
+                            height={60}
+                            style={{ objectFit: 'contain' }}
                             onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/60x60/cccccc/333333?text=خطأ"; }}
                           />
                         )}
                         <div className="flex-grow-1">
-                          <h5 className="card-title fw-bold mb-1" style={{ color: '#343a40' }}>{brand.name}</h5>
-                          <span className="badge bg-light text-dark" style={{ backgroundColor: '#e9ecef', color: '#495057' }}>{brand.slug}</span>
+                          <h5 className="card-title fw-bold mb-1">{brand.name}</h5>
+                          <span className="badge bg-light text-dark">{brand.slug}</span>
                         </div>
                         <span className={`badge ms-auto ${brand.status === 'active' ? 'bg-success' : 'bg-danger'}`} style={{ backgroundColor: brand.status === 'active' ? '#60c78c' : '#e74c3c' }}>
                           {brand.status === 'active' ? 'نشط' : 'غير نشط'}
@@ -305,10 +309,10 @@ const BrandManagement = () => {
                         {brand.description || 'لا يوجد وصف'}
                       </p>
                       <div className="d-flex justify-content-end mt-3 gap-2">
-                        <button className="btn btn-sm btn-info text-white shadow-sm" onClick={() => handleEditClick(brand)} style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}>
+                        <button className="btn btn-sm btn-success text-white shadow-sm" onClick={() => handleEditClick(brand)}>
                           <FaPencilAlt /> تعديل
                         </button>
-                        <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(brand.brand_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                        <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(brand.brand_id)}>
                           <FaTrashAlt /> حذف
                         </button>
                       </div>
@@ -322,11 +326,12 @@ const BrandManagement = () => {
       </div>
 
       {/* Modal لإضافة/تعديل العلامات التجارية */}
-      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showModal ? 'rgba(0,0,0,0.5)' : '' }} aria-modal="true" role="dialog">
+      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1">
+        {showModal && <div className="modal-backdrop-custom" />}
         <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div className="modal-content rounded-lg shadow-lg" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
-            <div className="modal-header bg-primary text-white py-3" style={{ backgroundColor: '#6a8eec' }}>
-              <h5 className="modal-title fw-bold" style={{ fontSize: '1.25rem' }}>{editingBrand ? 'تعديل علامة تجارية' : 'إضافة علامة تجارية'}</h5>
+          <div className="modal-content rounded-4 shadow-lg">
+            <div className="modal-header bg-primary text-white py-3">
+              <h5 className="modal-title fw-bold">{editingBrand ? 'تعديل علامة تجارية' : 'إضافة علامة تجارية'}</h5>
               <button type="button" className="btn-close btn-close-white" aria-label="Close" onClick={handleCloseModal}></button>
             </div>
             <div className="modal-body p-4">
@@ -340,7 +345,6 @@ const BrandManagement = () => {
                     value={newBrandName}
                     onChange={handleNameChange}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.name && <div className="invalid-feedback">{validationErrors.name[0]}</div>}
                 </div>
@@ -353,7 +357,6 @@ const BrandManagement = () => {
                     value={newBrandSlug}
                     onChange={(e) => setNewBrandSlug(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.slug && <div className="invalid-feedback">{validationErrors.slug[0]}</div>}
                 </div>
@@ -366,7 +369,6 @@ const BrandManagement = () => {
                     value={newBrandDescription}
                     onChange={(e) => setNewBrandDescription(e.target.value)}
                     rows="3"
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   ></textarea>
                   {validationErrors.description && <div className="invalid-feedback">{validationErrors.description[0]}</div>}
                 </div>
@@ -380,21 +382,22 @@ const BrandManagement = () => {
                     onChange={handleLogoChange}
                     ref={fileInputRef}
                     accept="image/*"
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.logo && <div className="invalid-feedback">{validationErrors.logo[0]}</div>}
                   {(newBrandLogoPreview || (editingBrand && editingBrand.logo_url && !logoRemoved)) && (
-                    <div className="mt-2 text-center border p-2 rounded bg-light" style={{ borderColor: '#e9ecef', backgroundColor: '#f8f9fa' }}>
+                    <div className="mt-2 text-center border p-2 rounded bg-light">
                       <img
                         src={newBrandLogoPreview || (editingBrand && editingBrand.logo_url)}
                         alt="معاينة الشعار"
                         className="img-thumbnail"
-                        style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'contain', border: '1px solid #dee2e6' }}
+                        width={100}
+                        height={100}
+                        style={{ objectFit: 'contain' }}
                         onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/100x100/cccccc/333333?text=خطأ"; }}
                       />
                       <p className="small text-muted mt-1">معاينة الشعار</p>
                       {(newBrandLogoPreview || (editingBrand && editingBrand.logo_url)) && (
-                          <button type="button" className="btn btn-sm btn-outline-danger mt-1" onClick={handleRemoveLogo} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+                          <button type="button" className="btn btn-sm btn-outline-danger mt-1" onClick={handleRemoveLogo}>
                               إزالة الشعار
                           </button>
                       )}
@@ -410,7 +413,6 @@ const BrandManagement = () => {
                     value={newBrandStatus}
                     onChange={(e) => setNewBrandStatus(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   >
                     <option value="active">نشط</option>
                     <option value="inactive">غير نشط</option>
@@ -420,10 +422,10 @@ const BrandManagement = () => {
 
                 {formError && <div className="alert alert-danger small">{formError}</div>}
                 <div className="d-flex justify-content-between mt-4">
-                  <button type="submit" className="btn btn-primary btn-sm shadow-sm" style={{ backgroundColor: '#6a8eec', borderColor: '#6a8eec' }}>
+                  <button type="submit" className="btn btn-primary btn-sm shadow-sm">
                     {editingBrand ? 'تحديث' : 'إضافة'}
                   </button>
-                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal} style={{ backgroundColor: '#6c757d', borderColor: '#6c757d' }}>
+                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal}>
                     إغلاق
                   </button>
                 </div>

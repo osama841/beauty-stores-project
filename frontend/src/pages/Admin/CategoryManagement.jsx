@@ -194,7 +194,7 @@ const CategoryManagement = () => {
 
   if (loading) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">جاري تحميل الأقسام...</span>
         </div>
@@ -205,7 +205,7 @@ const CategoryManagement = () => {
 
   if (error) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
@@ -214,17 +214,17 @@ const CategoryManagement = () => {
   }
 
   return (
-    <div className="container-fluid py-4" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f8f9fa' }}>
-      <h1 className="mb-4 fw-bold text-success text-center text-md-start" style={{ color: '#60c78c' }}>إدارة الأقسام</h1>
+    <div className="container-fluid py-4">
+      <h1 className="mb-4 fw-bold text-primary text-center text-md-start">إدارة الأقسام</h1>
 
       <div className="d-flex justify-content-center justify-content-md-start">
-        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddClick} style={{ backgroundColor: '#6a8eec', borderColor: '#6a8eec' }}>
+        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddClick}>
           <FaPlusCircle className="me-2" /> إضافة قسم جديد
         </button>
       </div>
       
-      <div className="card shadow-lg border-0 rounded-lg">
-        <div className="card-header bg-success text-white fw-bold py-3 text-center" style={{ backgroundColor: '#60c78c' }}>
+      <div className="card shadow-lg border-0 rounded-4">
+        <div className="card-header bg-primary text-white fw-bold py-3 text-center">
           الأقسام الحالية
         </div>
         <div className="card-body p-0">
@@ -254,8 +254,7 @@ const CategoryManagement = () => {
                               <img
                                 src={category.image_url}
                                 alt={category.name}
-                                className="img-thumbnail rounded"
-                                style={{ width: '50px', height: '50px', objectFit: 'cover', border: '1px solid #dee2e6' }}
+                                className="img-thumbnail rounded thumb-50"
                                 onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/50x50/cccccc/333333?text=خطأ"; }}
                               />
                             ) : (
@@ -263,27 +262,27 @@ const CategoryManagement = () => {
                             )}
                           </td>
                           <td>
-                            <h6 className="mb-0 fw-bold" style={{ color: '#343a40' }}>{category.name}</h6>
-                            <span className="badge bg-light text-dark" style={{ backgroundColor: '#e9ecef', color: '#495057' }}>{category.slug}</span>
+                            <h6 className="mb-0 fw-bold">{category.name}</h6>
+                            <span className="badge bg-light text-dark">{category.slug}</span>
                           </td>
                           <td><span className="text-muted small">{category.description || 'لا يوجد وصف'}</span></td>
                           <td>
                             {category.parent ? (
-                              <span className="badge bg-secondary" style={{ backgroundColor: '#6c757d', color: '#ffffff' }}>{category.parent.name}</span>
+                              <span className="badge bg-secondary text-white">{category.parent.name}</span>
                             ) : (
                               <span className="text-muted">لا يوجد</span>
                             )}
                           </td>
                           <td>
-                            <span className={`badge ${category.status === 'active' ? 'bg-success' : 'bg-danger'}`} style={{ backgroundColor: category.status === 'active' ? '#60c78c' : '#e74c3c' }}>
+                            <span className={`badge ${category.status === 'active' ? 'bg-success' : 'bg-danger'}`}>
                               {category.status === 'active' ? 'نشط' : 'غير نشط'}
                             </span>
                           </td>
                           <td>
-                            <button className="btn btn-sm btn-info text-white me-2 shadow-sm" onClick={() => handleEditClick(category)} style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}>
+                            <button className="btn btn-sm btn-success text-white me-2 shadow-sm" onClick={() => handleEditClick(category)}>
                               <FaPencilAlt /> تعديل
                             </button>
-                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(category.category_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(category.category_id)}>
                               <FaTrashAlt /> حذف
                             </button>
                           </td>
@@ -295,59 +294,49 @@ const CategoryManagement = () => {
               </div>
 
               {/* عرض القائمة للشاشات الصغيرة */}
+              {/* عرض هرمي للأقسام على الجوال: قائمة عمودية مع طيّ الفروع */}
               <div className="d-lg-none p-3">
-                <div className="accordion" id="categoryAccordion">
-                  {categories.map((category) => (
-                    <div key={category.category_id} className="accordion-item mb-2 rounded-lg shadow-sm border" style={{ borderColor: '#dee2e6' }}>
-                      <h2 className="accordion-header" id={`heading${category.category_id}`}>
-                        <button 
-                          className="accordion-button collapsed py-3" 
-                          type="button" 
-                          data-bs-toggle="collapse" 
-                          data-bs-target={`#collapse${category.category_id}`} 
-                          aria-expanded="false" 
-                          aria-controls={`collapse${category.category_id}`}
-                          style={{ backgroundColor: '#ffffff', color: '#343a40' }}
-                        >
-                          <div className="d-flex align-items-center w-100">
-                            {category.image_url && (
-                              <img
-                                src={category.image_url}
-                                alt={category.name}
-                                className="img-thumbnail me-3 rounded"
-                                style={{ width: '50px', height: '50px', objectFit: 'cover', border: '1px solid #dee2e6' }}
-                                onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/50x50/cccccc/333333?text=خطأ"; }}
-                              />
+                <ul className="list-group">
+                  {categories
+                    .filter(c => !c.parent_id)
+                    .map(parent => (
+                      <li key={parent.category_id} className="list-group-item">
+                        <div className="d-flex align-items-center justify-content-between">
+                          <div className="d-flex align-items-center">
+                            {parent.image_url && (
+                              <img src={parent.image_url} alt={parent.name} className="img-thumbnail me-2 rounded thumb-50" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/50x50/cccccc/333333?text=خطأ'; }} />
                             )}
-                            <div className="flex-grow-1">
-                              <h6 className="mb-0 fw-bold" style={{ color: '#343a40' }}>{category.name}</h6>
-                              {category.parent && (
-                                <span className="badge bg-secondary mt-1" style={{ backgroundColor: '#6c757d', color: '#ffffff' }}>{category.parent.name}</span>
-                              )}
+                            <div>
+                              <h6 className="mb-0 fw-bold">{parent.name}</h6>
+                              <small className="text-muted">{parent.slug}</small>
                             </div>
-                            <span className={`badge ms-2 ${category.status === 'active' ? 'bg-success' : 'bg-danger'}`} style={{ backgroundColor: category.status === 'active' ? '#60c78c' : '#e74c3c' }}>
-                              {category.status === 'active' ? 'نشط' : 'غير نشط'}
-                            </span>
                           </div>
-                        </button>
-                      </h2>
-                      <div id={`collapse${category.category_id}`} className="accordion-collapse collapse" aria-labelledby={`heading${category.category_id}`} data-bs-parent="#categoryAccordion">
-                        <div className="accordion-body" style={{ backgroundColor: '#f8f9fa', color: '#343a40' }}>
-                          <p className="text-muted small mb-1"><strong>الوصف:</strong> {category.description || 'لا يوجد وصف'}</p>
-                          <p className="text-muted small mb-3"><strong>الرابط:</strong> {category.slug}</p>
-                          <div className="d-flex justify-content-end gap-2 mt-3">
-                            <button className="btn btn-sm btn-info text-white shadow-sm" onClick={() => handleEditClick(category)} style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}>
-                              <FaPencilAlt /> تعديل
-                            </button>
-                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(category.category_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
-                              <FaTrashAlt /> حذف
-                            </button>
-                          </div>
+                          <button className="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target={`#sub-${parent.category_id}`}>
+                            عرض الأقسام الفرعية
+                          </button>
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                        <div id={`sub-${parent.category_id}`} className="collapse mt-2">
+                          <ul className="list-group list-group-flush">
+                            {categories.filter(c => c.parent_id === parent.category_id).map(child => (
+                              <li key={child.category_id} className="list-group-item d-flex align-items-center justify-content-between">
+                                <div>
+                                  <h6 className="mb-0">{child.name}</h6>
+                                  <small className="text-muted">{child.slug}</small>
+                                </div>
+                                <div className="d-flex gap-2">
+                                  <button className="btn btn-sm btn-success" onClick={() => handleEditClick(child)}><FaPencilAlt/> تعديل</button>
+                                  <button className="btn btn-sm btn-danger" onClick={() => handleDelete(child.category_id)}><FaTrashAlt/> حذف</button>
+                                </div>
+                              </li>
+                            ))}
+                            {categories.filter(c => c.parent_id === parent.category_id).length === 0 && (
+                              <li className="list-group-item text-muted small">لا توجد أقسام فرعية</li>
+                            )}
+                          </ul>
+                        </div>
+                      </li>
+                    ))}
+                </ul>
               </div>
             </>
           )}
@@ -355,11 +344,12 @@ const CategoryManagement = () => {
       </div>
 
       {/* Modal لإضافة/تعديل الأقسام */}
-      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showModal ? 'rgba(0,0,0,0.5)' : '' }} aria-modal="true" role="dialog">
-        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div className="modal-content rounded-lg shadow-lg" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
-            <div className="modal-header bg-success text-white py-3" style={{ backgroundColor: '#60c78c' }}>
-              <h5 className="modal-title fw-bold" style={{ fontSize: '1.25rem' }}>{editingCategory ? 'تعديل قسم' : 'إضافة قسم'}</h5>
+      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1">
+        {showModal && <div className="modal-backdrop-custom" />}
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+          <div className="modal-content rounded-4 shadow-lg">
+            <div className="modal-header bg-primary text-white py-3">
+              <h5 className="modal-title fw-bold">{editingCategory ? 'تعديل قسم' : 'إضافة قسم'}</h5>
               <button type="button" className="btn-close btn-close-white" aria-label="Close" onClick={handleCloseModal}></button>
             </div>
             <div className="modal-body p-4">
@@ -373,7 +363,6 @@ const CategoryManagement = () => {
                     value={newCategoryName}
                     onChange={handleNameChange}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.name && <div className="invalid-feedback">{validationErrors.name[0]}</div>}
                 </div>
@@ -386,7 +375,6 @@ const CategoryManagement = () => {
                     value={newCategorySlug}
                     onChange={(e) => setNewCategorySlug(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.slug && <div className="invalid-feedback">{validationErrors.slug[0]}</div>}
                 </div>
@@ -398,7 +386,6 @@ const CategoryManagement = () => {
                     value={newCategoryDescription}
                     onChange={(e) => setNewCategoryDescription(e.target.value)}
                     rows="3"
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   ></textarea>
                   {validationErrors.description && <div className="invalid-feedback">{validationErrors.description[0]}</div>}
                 </div>
@@ -410,7 +397,6 @@ const CategoryManagement = () => {
                     className={`form-select form-select-sm ${validationErrors.parent_id ? 'is-invalid' : ''}`}
                     value={newCategoryParentId}
                     onChange={(e) => setNewCategoryParentId(e.target.value)}
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   >
                     <option value="">لا يوجد فئة أم</option>
                     {categories.filter(cat => cat.category_id !== (editingCategory ? editingCategory.category_id : null)).map((cat) => (
@@ -431,21 +417,19 @@ const CategoryManagement = () => {
                     onChange={handleImageChange}
                     ref={fileInputRef}
                     accept="image/*"
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.image && <div className="invalid-feedback">{validationErrors.image[0]}</div>}
                   {(newCategoryImagePreview || (editingCategory && editingCategory.image_url && !imageRemoved)) && (
-                    <div className="mt-2 text-center border p-2 rounded bg-light" style={{ borderColor: '#e9ecef', backgroundColor: '#f8f9fa' }}>
+                    <div className="mt-2 text-center border p-2 rounded bg-light preview-box">
                       <img
                         src={newCategoryImagePreview || (editingCategory && editingCategory.image_url)}
                         alt="معاينة الصورة"
-                        className="img-thumbnail"
-                        style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover', border: '1px solid #dee2e6' }}
+                        className="img-thumbnail thumb-100"
                         onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/100x100/cccccc/333333?text=خطأ"; }}
                       />
                       <p className="small text-muted mt-1">معاينة الصورة</p>
                       {(newCategoryImagePreview || (editingCategory && editingCategory.image_url)) && (
-                          <button type="button" className="btn btn-sm btn-outline-danger mt-1" onClick={handleRemoveImage} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+                          <button type="button" className="btn btn-sm btn-outline-danger mt-1" onClick={handleRemoveImage}>
                               إزالة الصورة
                           </button>
                       )}
@@ -461,7 +445,6 @@ const CategoryManagement = () => {
                     value={newCategoryStatus}
                     onChange={(e) => setNewCategoryStatus(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   >
                     <option value="active">نشط</option>
                     <option value="inactive">غير نشط</option>
@@ -472,10 +455,10 @@ const CategoryManagement = () => {
                 {formError && <div className="alert alert-danger small">{formError}</div>}
                 
                 <div className="d-flex justify-content-between mt-4">
-                  <button type="submit" className="btn btn-success btn-sm shadow-sm" style={{ backgroundColor: '#60c78c', borderColor: '#60c78c' }}>
+                  <button type="submit" className="btn btn-primary btn-sm shadow-sm">
                     {editingCategory ? 'تحديث' : 'إضافة'}
                   </button>
-                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal} style={{ backgroundColor: '#6c757d', borderColor: '#6c757d' }}>
+                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal}>
                     إغلاق
                   </button>
                 </div>

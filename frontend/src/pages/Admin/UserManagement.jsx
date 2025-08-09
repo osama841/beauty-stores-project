@@ -151,7 +151,7 @@ const UserManagement = () => {
 
   if (loading) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">جاري تحميل المستخدمين...</span>
         </div>
@@ -162,7 +162,7 @@ const UserManagement = () => {
 
   if (error) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
@@ -171,17 +171,17 @@ const UserManagement = () => {
   }
 
   return (
-    <div className="container-fluid px-2 py-4" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f8f9fa' }}>
-      <h1 className="mb-4 fw-bold text-primary text-center text-md-start" style={{ color: '#6a8eec' }}>إدارة المستخدمين</h1>
+    <div className="container-fluid px-2 py-4">
+      <h1 className="mb-4 fw-bold text-primary text-center text-md-start">إدارة المستخدمين</h1>
 
       <div className="d-flex justify-content-center justify-content-md-start">
-        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddUserClick} style={{ backgroundColor: '#6a8eec', borderColor: '#6a8eec' }}>
+        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddUserClick}>
           <FaPlusCircle className="me-2" /> إضافة مستخدم جديد
         </button>
       </div>
 
-      <div className="card shadow-lg border-0 rounded-lg">
-        <div className="card-header bg-primary text-white fw-bold py-3 text-center" style={{ backgroundColor: '#6a8eec' }}>
+      <div className="card shadow-lg border-0 rounded-4">
+        <div className="card-header bg-primary text-white fw-bold py-3 text-center">
           المستخدمون الحاليون
         </div>
         <div className="card-body p-0">
@@ -207,32 +207,32 @@ const UserManagement = () => {
                     <tbody>
                       {users.map((userItem) => (
                         <tr key={userItem.user_id}>
-                          <td><h6 className="mb-0 fw-bold" style={{ color: '#343a40' }}>{userItem.first_name} {userItem.last_name}</h6></td>
+                           <td><h6 className="mb-0 fw-bold">{userItem.first_name} {userItem.last_name}</h6></td>
                           <td><span className="text-muted small">{userItem.username}</span></td>
                           <td><span className="text-muted small">{userItem.email}</span></td>
                           <td><span className="text-muted small">{userItem.phone_number || 'N/A'}</span></td>
                           <td>
-                            {userItem.is_admin ? (
-                              <i className="bi bi-check-circle-fill text-success" style={{ color: '#60c78c' }}></i>
-                            ) : (
-                              <i className="bi bi-x-circle-fill text-danger" style={{ color: '#e74c3c' }}></i>
-                            )}
+                             {userItem.is_admin ? (
+                               <i className="bi bi-check-circle-fill text-success"></i>
+                             ) : (
+                               <i className="bi bi-x-circle-fill text-danger"></i>
+                             )}
                           </td>
                           <td>
-                            <span className={`badge ${
+                             <span className={`badge ${
                               userItem.status === 'active' ? 'bg-success' :
                               userItem.status === 'inactive' ? 'bg-secondary' :
                               'bg-danger'
-                            }`} style={{ backgroundColor: userItem.status === 'active' ? '#60c78c' : userItem.status === 'inactive' ? '#6c757d' : '#e74c3c' }}>
+                             }`}>
                               {userItem.status === 'active' ? 'نشط' :
                               userItem.status === 'inactive' ? 'غير نشط' : 'معلق'}
                             </span>
                           </td>
                           <td>
-                            <button className="btn btn-sm btn-info text-white me-2 shadow-sm" onClick={() => handleEditClick(userItem)} style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}>
+                             <button className="btn btn-sm btn-success text-white me-2 shadow-sm" onClick={() => handleEditClick(userItem)}>
                               <FaPencilAlt /> تعديل
                             </button>
-                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(userItem.user_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                             <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(userItem.user_id)}>
                               <FaTrashAlt /> حذف
                             </button>
                           </td>
@@ -246,12 +246,12 @@ const UserManagement = () => {
               {/* عرض القائمة للشاشات الصغيرة */}
               <div className="d-lg-none p-3">
                 {users.map((userItem) => (
-                  <div key={userItem.user_id} className="card mb-3 shadow-sm border-0 rounded-lg">
+                  <div key={userItem.user_id} className="card mb-3 shadow-sm border-0 rounded-4">
                     <div className="card-body">
                       <div className="d-flex align-items-center mb-3">
-                        <i className="bi bi-person-circle fs-3 me-3 text-secondary" style={{ color: '#6c757d' }}></i>
+                        <i className="bi bi-person-circle fs-3 me-3 text-secondary"></i>
                         <div className="flex-grow-1">
-                          <h6 className="card-title fw-bold mb-1" style={{ color: '#343a40' }}>{userItem.first_name} {userItem.last_name}</h6>
+                          <h6 className="card-title fw-bold mb-1">{userItem.first_name} {userItem.last_name}</h6>
                           <p className="card-text text-muted small mb-0">{userItem.username}</p>
                         </div>
                         <span className={`badge ms-2 ${
@@ -285,14 +285,14 @@ const UserManagement = () => {
                         <button
                           className="btn btn-sm btn-info text-white shadow-sm"
                           onClick={() => handleEditClick(userItem)}
-                          style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}
+                          
                         >
                           <FaPencilAlt /> تعديل
                         </button>
                         <button
                           className="btn btn-sm btn-danger shadow-sm"
                           onClick={() => handleDelete(userItem.user_id)}
-                          style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}
+                          
                         >
                           <FaTrashAlt /> حذف
                         </button>
@@ -307,11 +307,12 @@ const UserManagement = () => {
       </div>
 
       {/* Modal لإضافة/تعديل المستخدمين */}
-      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showModal ? 'rgba(0,0,0,0.5)' : '' }} aria-modal="true" role="dialog">
+      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1">
+        {showModal && <div className="modal-backdrop-custom" />}
         <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div className="modal-content rounded-lg shadow-lg" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
-            <div className="modal-header bg-primary text-white py-3" style={{ backgroundColor: '#6a8eec' }}>
-              <h5 className="modal-title fw-bold" style={{ fontSize: '1.25rem' }}>{editingUser ? 'تعديل مستخدم' : 'إضافة مستخدم'}</h5>
+          <div className="modal-content rounded-4 shadow-lg">
+            <div className="modal-header bg-primary text-white py-3">
+              <h5 className="modal-title fw-bold">{editingUser ? 'تعديل مستخدم' : 'إضافة مستخدم'}</h5>
               <button type="button" className="btn-close btn-close-white" aria-label="Close" onClick={handleCloseModal}></button>
             </div>
             <div className="modal-body p-4">
@@ -325,7 +326,6 @@ const UserManagement = () => {
                     value={newFirstName}
                     onChange={(e) => setNewFirstName(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.first_name && <div className="invalid-feedback">{validationErrors.first_name[0]}</div>}
                 </div>
@@ -338,7 +338,6 @@ const UserManagement = () => {
                     value={newLastName}
                     onChange={(e) => setNewLastName(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.last_name && <div className="invalid-feedback">{validationErrors.last_name[0]}</div>}
                 </div>
@@ -351,7 +350,6 @@ const UserManagement = () => {
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.username && <div className="invalid-feedback">{validationErrors.username[0]}</div>}
                 </div>
@@ -364,7 +362,6 @@ const UserManagement = () => {
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.email && <div className="invalid-feedback">{validationErrors.email[0]}</div>}
                 </div>
@@ -378,7 +375,6 @@ const UserManagement = () => {
                     onChange={(e) => setNewPassword(e.target.value)}
                     required={!editingUser}
                     min="8"
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.password && <div className="invalid-feedback">{validationErrors.password[0]}</div>}
                 </div>
@@ -390,7 +386,6 @@ const UserManagement = () => {
                     className={`form-control form-control-sm ${validationErrors.phone_number ? 'is-invalid' : ''}`}
                     value={newPhoneNumber}
                     onChange={(e) => setNewPhoneNumber(e.target.value)}
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.phone_number && <div className="invalid-feedback">{validationErrors.phone_number[0]}</div>}
                 </div>
@@ -402,7 +397,7 @@ const UserManagement = () => {
                     id="isAdmin"
                     checked={newIsAdmin}
                     onChange={(e) => setNewIsAdmin(e.target.checked)}
-                    style={{ fontSize: '1.2rem' }}
+                    
                   />
                   <label className="form-check-label small text-muted" htmlFor="isAdmin">
                     هل هو مسؤول؟
@@ -417,7 +412,6 @@ const UserManagement = () => {
                     value={newStatus}
                     onChange={(e) => setNewStatus(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   >
                     <option value="active">نشط</option>
                     <option value="inactive">غير نشط</option>
@@ -429,10 +423,10 @@ const UserManagement = () => {
                 {formError && <div className="alert alert-danger small">{formError}</div>}
                 
                 <div className="d-flex justify-content-between mt-4">
-                  <button type="submit" className="btn btn-primary btn-sm shadow-sm" style={{ backgroundColor: '#6a8eec', borderColor: '#6a8eec' }}>
+                  <button type="submit" className="btn btn-primary btn-sm shadow-sm">
                     {editingUser ? 'تحديث' : 'إضافة'}
                   </button>
-                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal} style={{ backgroundColor: '#6c757d', borderColor: '#6c757d' }}>
+                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal}>
                     إغلاق
                   </button>
                 </div>

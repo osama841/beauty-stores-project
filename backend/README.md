@@ -1,66 +1,56 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## الواجهة الخلفية — Laravel 12 API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+هذه الواجهة هي نواة الـ API الخاص بمشروع Beauty Store، مبنية على Laravel 12 ومهيأة لدعم مصادقة Sanctum، حدود المعدل Rate Limiting، سياسات الوصول، والتحقق من البريد الإلكتروني.
 
-## About Laravel
+### المتطلبات
+- PHP 8.2+
+- Composer
+- MySQL/MariaDB (أو SQLite)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### الإعداد السريع
+1) تثبيت التبعيات:
+   - `composer install`
+2) ملف البيئة:
+   - إن وُجد `/.env.example` انسخه إلى `.env`. وإن لم يوجد، أنشئ `.env` واضبط المتغيرات الأساسية:
+     - `APP_KEY` (يُولّد عبر الأمر التالي)
+     - إعدادات قاعدة البيانات (`DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`)
+3) توليد مفتاح التطبيق:
+   - `php artisan key:generate`
+4) الترحيلات والبذور:
+   - `php artisan migrate --seed`
+   - سيتم إنشاء مستخدم مشرف تلقائيًا (راجع `DatabaseSeeder` و`AdminUserSeeder`).
+5) تشغيل الخادم:
+   - `php artisan serve --port=8000`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### بنية المجلدات المهمة
+- `app/Http/Controllers/Api/`: جميع وحدات التحكم الخاصة بالـ API، منها: المستخدمون، الفئات، العلامات، المنتجات، الصور، السمات، العناوين، الطلبات، عناصر الطلب، المراجعات، المدفوعات، الصفحات، الخصومات، السلة، قائمة الرغبات، ومستشار الجمال.
+- `app/Models/`: نماذج Eloquent لكل كيان رئيسي.
+- `app/Policies/`: سياسات الوصول لكل نموذج لضبط الأذونات.
+- `routes/api.php`: تعريف نقاط النهاية العامة والمحميّة.
+- `database/migrations/`: جميع الجداول اللازمة للنظام.
+- `database/seeders/`: بذور البيانات، ومنها إنشاء حساب المشرف.
+- `config/`: إعدادات التطبيق، المصادقة، Sanctum، CORS، الحدود…
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### نقاط نهاية رئيسية (مختصر)
+- مصادقة: `POST /api/register`, `POST /api/login`, `POST /api/logout`, `GET /api/user`
+- تحقق البريد: `GET /api/email/verify/{id}/{hash}`, `POST /api/email/resend`
+- عامة: `GET /api/categories`, `GET /api/brands`, `GET /api/products`, `GET /api/products/{id}`, `GET /api/products/{id}/reviews`, `GET /api/pages`, `GET /api/pages/{slug}`
+- محمية (Sanctum): CRUD للفئات، العلامات، المنتجات، العناوين، الطلبات، المراجعات، الصفحات، الخصومات، قائمة الرغبات، ومستشار الجمال.
 
-## Learning Laravel
+### حساب المشرف الافتراضي
+- البريد: `albdany054@gmail.com`
+- كلمة المرور: `12345678`
+- يوجد Seeder إضافي قد ينشئ بريدًا آخر: `aalbdany054@gmail.com` عند استخدام `AdminUserSeeder`.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### نصائح أمنية
+- حدّث `APP_KEY` وبيانات قاعدة البيانات في `.env`.
+- اضبط CORS وSanctum بحسب نطاق الواجهة الأمامية.
+- راجع السياسات في `app/Policies/` لضمان صحة الأذونات.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### أوامر مفيدة
+- تشغيل الاختبارات: `php artisan test`
+- تحديث الحزم: `composer update`
+- تشغيل وضع التطوير المتزامن (حسب سكربت composer إن وُضع): `composer run dev`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### رخصة
+يعتمد هذا الجزء على Laravel ويخضع لرخصة MIT الخاصة بحزم Laravel المعتمدة.

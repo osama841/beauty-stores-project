@@ -159,9 +159,8 @@ const ProductDetailPage = () => {
             <img
               src={mainDisplayImage}
               alt={product.name}
-              className="img-fluid rounded mb-3"
-              style={{ maxHeight: '450px', objectFit: 'contain' }}
-              loading="lazy" // ****** إضافة Lazy Loading ******
+              className="img-fluid rounded mb-3 product-main-image"
+              loading="lazy"
               onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/600x400/cccccc/333333?text=لا+توجد+صورة"; }}
             />
             {/* صور إضافية (معرض الصور المصغرة) */}
@@ -179,16 +178,15 @@ const ProductDetailPage = () => {
                     />
                 )}
                 {product.images.map((image) => (
-                  <img
-                    key={image.image_id}
-                    src={image.image_url}
-                    alt={image.alt_text || product.name}
-                    className="img-thumbnail"
-                    style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                    onClick={() => setMainDisplayImage(image.image_url)}
-                    loading="lazy" // ****** إضافة Lazy Loading ******
-                    onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
-                  />
+                      <img
+                        key={image.image_id}
+                        src={image.image_url}
+                        alt={image.alt_text || product.name}
+                        className="img-thumbnail product-thumb"
+                        onClick={() => setMainDisplayImage(image.image_url)}
+                        loading="lazy"
+                        onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
+                      />
                 ))}
               </div>
             )}

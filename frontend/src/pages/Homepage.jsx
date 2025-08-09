@@ -93,11 +93,11 @@ const Homepage = () => {
   return (
     <div className="homepage-container">
       {/* قسم البطل (Hero Section) */}
-      <section className="hero-section text-white text-center py-5 mb-5" style={{ backgroundColor: '#6f42c1', borderRadius: '15px', backgroundImage: 'url(https://placehold.co/1200x400/8A2BE2/FFFFFF?text=متجر+الجمال+الرئيسية)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <section className="hero-section text-white text-center py-5 mb-5">
         <div className="container py-5">
           <h1 className="display-4 fw-bold mb-3">اكتشف جمالك مع لمسة روز</h1>
           <p className="lead mb-4">أفضل المنتجات التجميلية والعناية بالبشرة في مكان واحد.</p>
-          <Link to="/products" className="btn btn-warning btn-lg fw-bold shadow-sm">
+          <Link to="/products" className="btn btn-primary btn-lg fw-bold shadow-sm">
             تسوق الآن <i className="bi bi-arrow-right"></i>
           </Link>
         </div>

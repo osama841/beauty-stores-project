@@ -143,7 +143,7 @@ const DiscountManagement = () => {
 
   if (loading) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">جاري تحميل الخصومات...</span>
         </div>
@@ -154,7 +154,7 @@ const DiscountManagement = () => {
 
   if (error) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
@@ -163,17 +163,17 @@ const DiscountManagement = () => {
   }
 
   return (
-    <div className="container-fluid py-4" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f8f9fa' }}>
-      <h1 className="mb-4 fw-bold text-success text-center text-md-start" style={{ color: '#60c78c' }}>إدارة الخصومات</h1>
+    <div className="container-fluid py-4">
+      <h1 className="mb-4 fw-bold text-primary text-center text-md-start">إدارة الخصومات</h1>
 
       <div className="d-flex justify-content-center justify-content-md-start">
-        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddDiscountClick} style={{ backgroundColor: '#6a8eec', borderColor: '#6a8eec' }}>
+        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddDiscountClick}>
           <FaPlusCircle className="me-2" /> إضافة خصم جديد
         </button>
       </div>
 
-      <div className="card shadow-lg border-0 rounded-lg">
-        <div className="card-header bg-success text-white fw-bold py-3 text-center" style={{ backgroundColor: '#60c78c' }}>
+      <div className="card shadow-lg border-0 rounded-4">
+        <div className="card-header bg-primary text-white fw-bold py-3 text-center">
           أكواد الخصومات الحالية
         </div>
         <div className="card-body p-0">
@@ -215,15 +215,15 @@ const DiscountManagement = () => {
                           <td><span className="text-muted small">{discount.uses_count}/{discount.max_uses || 'بلا حد'}</span></td>
                           <td><span className="text-muted small">{discount.end_date ? new Date(discount.end_date).toLocaleDateString('ar-SA') : 'بلا تاريخ'}</span></td>
                           <td>
-                            <span className={`badge ${discount.status === 'active' ? 'bg-success' : 'bg-danger'}`} style={{ backgroundColor: discount.status === 'active' ? '#60c78c' : '#e74c3c' }}>
+                            <span className={`badge ${discount.status === 'active' ? 'bg-success' : 'bg-danger'}`}>
                               {discount.status === 'active' ? 'نشط' : 'غير نشط'}
                             </span>
                           </td>
                           <td>
-                            <button className="btn btn-sm btn-info text-white me-2 shadow-sm" onClick={() => handleEditClick(discount)} style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}>
+                            <button className="btn btn-sm btn-success text-white me-2 shadow-sm" onClick={() => handleEditClick(discount)}>
                               <FaPencilAlt /> تعديل
                             </button>
-                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(discount.discount_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(discount.discount_id)}>
                               <FaTrashAlt /> حذف
                             </button>
                           </td>
@@ -237,7 +237,7 @@ const DiscountManagement = () => {
               {/* عرض القائمة للشاشات الصغيرة */}
               <div className="d-lg-none p-3">
                 {discounts.map((discount) => (
-                  <div key={discount.discount_id} className="card mb-3 shadow-sm border-0 rounded-lg">
+                  <div key={discount.discount_id} className="card mb-3 shadow-sm border-0 rounded-4">
                     <div className="card-body">
                       <h5 className="card-title fw-bold mb-1" style={{ color: '#343a40' }}>{discount.code}</h5>
                       <p className="card-text small text-muted mb-1">
@@ -253,14 +253,14 @@ const DiscountManagement = () => {
                       <p className="card-text small text-muted mb-3">
                         تاريخ الانتهاء: {discount.end_date ? new Date(discount.end_date).toLocaleDateString('ar-SA') : 'بلا تاريخ'}
                       </p>
-                      <span className={`badge ${discount.status === 'active' ? 'bg-success' : 'bg-danger'} mb-3`} style={{ backgroundColor: discount.status === 'active' ? '#60c78c' : '#e74c3c' }}>
+                       <span className={`badge ${discount.status === 'active' ? 'bg-success' : 'bg-danger'} mb-3`}>
                         {discount.status === 'active' ? 'نشط' : 'غير نشط'}
                       </span>
                       <div className="d-flex justify-content-end gap-2 mt-3">
-                        <button className="btn btn-sm btn-info text-white shadow-sm" onClick={() => handleEditClick(discount)} style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}>
+                        <button className="btn btn-sm btn-success text-white shadow-sm" onClick={() => handleEditClick(discount)}>
                           <FaPencilAlt /> تعديل
                         </button>
-                        <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(discount.discount_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                        <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(discount.discount_id)}>
                           <FaTrashAlt /> حذف
                         </button>
                       </div>
@@ -274,11 +274,12 @@ const DiscountManagement = () => {
       </div>
 
       {/* Modal لإضافة/تعديل الخصومات */}
-      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showModal ? 'rgba(0,0,0,0.5)' : '' }} aria-modal="true" role="dialog">
+      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1">
+        {showModal && <div className="modal-backdrop-custom" />}
         <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div className="modal-content rounded-lg shadow-lg" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
-            <div className="modal-header bg-success text-white py-3" style={{ backgroundColor: '#60c78c' }}>
-              <h5 className="modal-title fw-bold" style={{ fontSize: '1.25rem' }}>{editingDiscount ? 'تعديل خصم' : 'إضافة خصم'}</h5>
+          <div className="modal-content rounded-4 shadow-lg">
+            <div className="modal-header bg-primary text-white py-3">
+              <h5 className="modal-title fw-bold">{editingDiscount ? 'تعديل خصم' : 'إضافة خصم'}</h5>
               <button type="button" className="btn-close btn-close-white" aria-label="Close" onClick={handleCloseModal}></button>
             </div>
             <div className="modal-body p-4">
@@ -292,7 +293,6 @@ const DiscountManagement = () => {
                     value={newCode}
                     onChange={(e) => setNewCode(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.code && <div className="invalid-feedback">{validationErrors.code[0]}</div>}
                 </div>
@@ -304,7 +304,6 @@ const DiscountManagement = () => {
                     value={newType}
                     onChange={(e) => setNewType(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   >
                     <option value="percentage">نسبة مئوية</option>
                     <option value="fixed_amount">مبلغ ثابت</option>
@@ -322,7 +321,6 @@ const DiscountManagement = () => {
                     onChange={(e) => setNewValue(e.target.value)}
                     step="0.01"
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.value && <div className="invalid-feedback">{validationErrors.value[0]}</div>}
                 </div>
@@ -334,7 +332,6 @@ const DiscountManagement = () => {
                     className={`form-control form-control-sm ${validationErrors.start_date ? 'is-invalid' : ''}`}
                     value={newStartDate}
                     onChange={(e) => setNewStartDate(e.target.value)}
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.start_date && <div className="invalid-feedback">{validationErrors.start_date[0]}</div>}
                 </div>
@@ -346,7 +343,6 @@ const DiscountManagement = () => {
                     className={`form-control form-control-sm ${validationErrors.end_date ? 'is-invalid' : ''}`}
                     value={newEndDate}
                     onChange={(e) => setNewEndDate(e.target.value)}
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.end_date && <div className="invalid-feedback">{validationErrors.end_date[0]}</div>}
                 </div>
@@ -360,7 +356,6 @@ const DiscountManagement = () => {
                     onChange={(e) => setNewMinPurchaseAmount(e.target.value)}
                     step="0.01"
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.min_purchase_amount && <div className="invalid-feedback">{validationErrors.min_purchase_amount[0]}</div>}
                 </div>
@@ -372,7 +367,6 @@ const DiscountManagement = () => {
                     className={`form-control form-control-sm ${validationErrors.max_uses ? 'is-invalid' : ''}`}
                     value={newMaxUses}
                     onChange={(e) => setNewMaxUses(e.target.value)}
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.max_uses && <div className="invalid-feedback">{validationErrors.max_uses[0]}</div>}
                 </div>
@@ -384,7 +378,6 @@ const DiscountManagement = () => {
                     value={newStatus}
                     onChange={(e) => setNewStatus(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   >
                     <option value="active">نشط</option>
                     <option value="inactive">غير نشط</option>
@@ -395,10 +388,10 @@ const DiscountManagement = () => {
                 {formError && <div className="alert alert-danger small">{formError}</div>}
                 
                 <div className="d-flex justify-content-between mt-4">
-                  <button type="submit" className="btn btn-success btn-sm shadow-sm" disabled={loading} style={{ backgroundColor: '#60c78c', borderColor: '#60c78c' }}>
+                  <button type="submit" className="btn btn-primary btn-sm shadow-sm" disabled={loading}>
                     {editingDiscount ? 'تحديث' : 'إضافة'}
                   </button>
-                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal} style={{ backgroundColor: '#6c757d', borderColor: '#6c757d' }}>
+                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal}>
                     إغلاق
                   </button>
                 </div>

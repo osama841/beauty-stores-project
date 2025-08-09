@@ -70,16 +70,15 @@
     const errorMessage = getErrorMessage(error);
 
     return (
-      <div className="error-handler" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f8d7da', color: '#721c24', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem' }}>
-        <p style={{ margin: '0', fontSize: '1rem', lineHeight: '1.6' }}>{errorMessage}</p>
-        {showRetry && (
-          <button
-            onClick={onRetry}
-            style={{ backgroundColor: '#007bff', color: '#ffffff', border: 'none', borderRadius: '0.5rem', padding: '0.75rem 1.5rem', marginTop: '1rem' }}
-          >
-            إعادة المحاولة
-          </button>
-        )}
+      <div className={`alert alert-${errorType}`} role="alert">
+        <div className="d-flex align-items-center justify-content-between">
+          <p className="mb-0">{errorMessage}</p>
+          {showRetry && (
+            <button type="button" className="btn btn-sm btn-primary ms-3" onClick={onRetry}>
+              إعادة المحاولة
+            </button>
+          )}
+        </div>
       </div>
     );
   };

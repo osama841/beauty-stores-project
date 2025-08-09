@@ -1,7 +1,7 @@
 /* Make sure you have the variables from Header.css, or define them globally */
 :root {
-  --primary-color: #E6B4B4;
-  --footer-bg: #2C2C2C; /* Darker Slate */
+  --primary-color: var(--bs-primary);
+  --footer-bg: #2C2C2C;
   --footer-text: #a0a0a0;
   --footer-title: #ffffff;
   --footer-link-hover: #ffffff;
@@ -133,9 +133,7 @@
 .payment-icons svg {
     transition: color 0.3s ease;
 }
-.payment-icons svg:hover {
-    color: #fff;
-}
+.payment-icons svg:hover { color: #fff; }
 
 
 /* Responsive Adjustments */

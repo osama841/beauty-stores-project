@@ -1,53 +1,105 @@
-/* === Unified Global Styles === */
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Cairo:wght@400;700&display=swap');
+/* === Global Design Tokens & Bootstrap Overrides === */
+@import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;600;700&display=swap');
 
-body {
-  font-family: 'Tajawal', 'Cairo', Arial, sans-serif;
-  margin: 0;
-  background: #f6f7fb;
-  line-height: 1.6;
-  color: #23272f;
+:root {
+  /* Feminine luxurious palette */
+  --rose-primary: #d7b9c8; /* rose */
+  --mauve-secondary: #5C5470; /* deep mauve */
+  --sage-success: #6BB187; /* soft green */
+  --gold-warning: #F2C14E; /* golden */
+  --coral-danger: #E76161; /* coral red */
+  --sky-info: #6EC1E4; /* light sky */
+  --soft-light: #FFF6FA; /* light pink */
+  --deep-dark: #2B2333; /* deep plum */
+
+  /* Bootstrap variable overrides */
+  --bs-body-font-family: 'El Messiri', Arial, sans-serif;
+  --bs-body-bg: var(--soft-light);
+  --bs-body-color: var(--deep-dark);
+  --bs-primary: var(--rose-primary);
+  --bs-primary-rgb: 215, 109, 162;
+  --bs-secondary: var(--mauve-secondary);
+  --bs-secondary-rgb: 92, 84, 112;
+  --bs-success: var(--sage-success);
+  --bs-success-rgb: 107, 177, 135;
+  --bs-warning: var(--gold-warning);
+  --bs-warning-rgb: 242, 193, 78;
+  --bs-danger: var(--coral-danger);
+  --bs-danger-rgb: 231, 97, 97;
+  --bs-info: var(--sky-info);
+  --bs-info-rgb: 110, 193, 228;
+  --bs-dark: var(--deep-dark);
+  --bs-light: var(--soft-light);
+}
+
+html[dir='rtl'] body {
+  font-family: var(--bs-body-font-family);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
   direction: rtl;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-button {
+/* Form elements alignment with Bootstrap theme */
+input, textarea, select {
   font-family: inherit;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background-color: #007bff;
-  color: #ffffff;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
-button:hover {
-  background-color: #0056b3;
+/* Utility: custom modal backdrop for non-BS toggled modals */
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
 }
 
-input, textarea {
-  font-family: inherit;
-  border: 1px solid #e0e6ed;
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  width: 100%;
-  box-sizing: border-box;
+/* Mobile-friendly full-screen modals */
+@media (max-width: 576px) {
+  .modal-fullscreen-sm-down .modal-content {
+    border-radius: 0;
+    min-height: 100vh;
+  }
+  .modal-fullscreen-sm-down .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .modal-fullscreen-sm-down .modal-body {
+    max-height: calc(100vh - 140px);
+    overflow: auto;
+  }
 }
 
-input:focus, textarea:focus {
-  border-color: #007bff;
-  outline: none;
+/* Product card shared styling */
+.product-card .card-img-top {
+  object-fit: contain;
+  height: 200px;
 }
 
-/* === Responsive === */
+/* Headings aesthetics */
+.section-title {
+  letter-spacing: 0.3px;
+}
+
+/* Responsive typography tweak */
 @media (max-width: 991.98px) {
-  body {
-    font-size: 0.9rem;
-  }
-
-  button {
-    padding: 0.5rem 1rem;
-  }
+  body { font-size: 0.95rem; }
 }
+
+/* Utilities */
+.text-prewrap { white-space: pre-wrap; }
+.object-cover { object-fit: cover; }
+.object-contain { object-fit: contain; }
+
+/* Legacy helper mappings to avoid Tailwind dependency */
+.rounded-lg { border-radius: 0.5rem; }
+.rounded-full { border-radius: 9999px; }
+.min-h-screen { min-height: 100vh; }
+.max-w-2xl { max-width: 42rem; }
+.bg-gray-100 { background-color: var(--soft-light) !important; }
+.text-gray-800 { color: var(--deep-dark) !important; }
+.text-gray-700 { color: #444 !important; }
+.text-gray-600 { color: #6c757d !important; }
+

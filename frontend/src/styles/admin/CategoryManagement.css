@@ -1,0 +1,27 @@
+/* Category Management — Bootstrap-only helpers */
+
+.thumb-50 {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+}
+
+.thumb-100 {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.preview-box {
+  border: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+}
+
+.rounded-lg { /* replace Tailwind-like with Bootstrap approx */
+  border-radius: 0.5rem;
+}
+
+/* ضبط عناصر القائمة الهرمية على الجوال */
+.list-group-item .btn-outline-primary { border-color: var(--bs-primary); color: var(--bs-primary); }
+.list-group-item .btn-outline-primary:hover { background-color: var(--bs-primary); color: #fff; }
+

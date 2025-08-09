@@ -1,7 +1,7 @@
 // src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './styles/global.css'; // استيراد ملف الـ CSS العام
+import './styles/global.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 

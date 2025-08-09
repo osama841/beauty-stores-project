@@ -147,7 +147,7 @@ const ContentManagement = () => {
 
   if (loading) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">جاري تحميل الصفحات...</span>
         </div>
@@ -158,7 +158,7 @@ const ContentManagement = () => {
 
   if (error) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+      <div className="container-fluid text-center my-5">
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
@@ -167,17 +167,17 @@ const ContentManagement = () => {
   }
 
   return (
-    <div className="container-fluid py-4" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f8f9fa' }}>
-      <h1 className="mb-4 fw-bold text-success text-center text-md-start" style={{ color: '#60c78c' }}>إدارة المحتوى</h1>
+    <div className="container-fluid py-4">
+      <h1 className="mb-4 fw-bold text-primary text-center text-md-start">إدارة المحتوى</h1>
 
       <div className="d-flex justify-content-center justify-content-md-start">
-        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddPageClick} style={{ backgroundColor: '#6a8eec', borderColor: '#6a8eec' }}>
+        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddPageClick}>
           <FaPlusCircle className="me-2" /> إضافة صفحة جديدة
         </button>
       </div>
       
-      <div className="card shadow-lg border-0 rounded-lg">
-        <div className="card-header bg-success text-white fw-bold py-3 text-center" style={{ backgroundColor: '#60c78c' }}>
+      <div className="card shadow-lg border-0 rounded-4">
+        <div className="card-header bg-primary text-white fw-bold py-3 text-center">
           الصفحات الحالية
         </div>
         <div className="card-body p-0">
@@ -230,7 +230,7 @@ const ContentManagement = () => {
               <div className="d-lg-none p-3">
                 <div className="accordion" id="contentAccordion">
                   {pages.map((page) => (
-                    <div key={page.page_id} className="accordion-item mb-2 rounded-lg shadow-sm border" style={{ borderColor: '#dee2e6' }}>
+                    <div key={page.page_id} className="accordion-item mb-2 rounded-4 shadow-sm border">
                       <h2 className="accordion-header" id={`heading${page.page_id}`}>
                         <button 
                           className="accordion-button collapsed py-3" 
@@ -239,28 +239,28 @@ const ContentManagement = () => {
                           data-bs-target={`#collapse${page.page_id}`} 
                           aria-expanded="false" 
                           aria-controls={`collapse${page.page_id}`}
-                          style={{ backgroundColor: '#ffffff', color: '#343a40' }}
+                          
                         >
                           <div className="d-flex align-items-center w-100">
                             <div className="flex-grow-1">
-                              <h6 className="mb-0 fw-bold" style={{ color: '#343a40' }}>{page.title}</h6>
-                              <span className="badge bg-light text-dark" style={{ backgroundColor: '#e9ecef', color: '#495057' }}>{page.slug}</span>
+                               <h6 className="mb-0 fw-bold">{page.title}</h6>
+                               <span className="badge bg-light text-dark">{page.slug}</span>
                             </div>
-                            <span className={`badge ms-2 ${page.status === 'published' ? 'bg-success' : 'bg-secondary'}`} style={{ backgroundColor: page.status === 'published' ? '#60c78c' : '#6c757d' }}>
+                             <span className={`badge ms-2 ${page.status === 'published' ? 'bg-success' : 'bg-secondary'}`}>
                               {page.status === 'published' ? 'منشورة' : 'مسودة'}
                             </span>
                           </div>
                         </button>
                       </h2>
                       <div id={`collapse${page.page_id}`} className="accordion-collapse collapse" aria-labelledby={`heading${page.page_id}`} data-bs-parent="#contentAccordion">
-                        <div className="accordion-body" style={{ backgroundColor: '#f8f9fa', color: '#343a40' }}>
+                        <div className="accordion-body">
                           <p className="text-muted small mb-1"><strong>آخر تحديث:</strong> {new Date(page.updated_at).toLocaleDateString('ar-SA')}</p>
                           <p className="text-muted small mb-3"><strong>المحتوى:</strong> {page.content.substring(0, 100)}...</p> {/* عرض جزء من المحتوى */}
                           <div className="d-flex justify-content-end gap-2 mt-3">
-                            <button className="btn btn-sm btn-info text-white shadow-sm" onClick={() => handleEditClick(page)} style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}>
+                            <button className="btn btn-sm btn-success text-white shadow-sm" onClick={() => handleEditClick(page)}>
                               <FaPencilAlt /> تعديل
                             </button>
-                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(page.page_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
+                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(page.page_id)}>
                               <FaTrashAlt /> حذف
                             </button>
                           </div>
@@ -276,11 +276,12 @@ const ContentManagement = () => {
       </div>
 
       {/* Modal لإضافة/تعديل الصفحات */}
-      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showModal ? 'rgba(0,0,0,0.5)' : '' }} aria-modal="true" role="dialog">
+      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1">
+        {showModal && <div className="modal-backdrop-custom" />}
         <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div className="modal-content rounded-lg shadow-lg" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
-            <div className="modal-header bg-success text-white py-3" style={{ backgroundColor: '#60c78c' }}>
-              <h5 className="modal-title fw-bold" style={{ fontSize: '1.25rem' }}>{editingPage ? 'تعديل صفحة' : 'إضافة صفحة'}</h5>
+          <div className="modal-content rounded-4 shadow-lg">
+            <div className="modal-header bg-primary text-white py-3">
+              <h5 className="modal-title fw-bold">{editingPage ? 'تعديل صفحة' : 'إضافة صفحة'}</h5>
               <button type="button" className="btn-close btn-close-white" aria-label="Close" onClick={handleCloseModal}></button>
             </div>
             <div className="modal-body p-4">
@@ -294,7 +295,6 @@ const ContentManagement = () => {
                     value={newTitle}
                     onChange={handleTitleChange}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.title && <div className="invalid-feedback">{validationErrors.title[0]}</div>}
                 </div>
@@ -307,7 +307,6 @@ const ContentManagement = () => {
                     value={newSlug}
                     onChange={(e) => setNewSlug(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   />
                   {validationErrors.slug && <div className="invalid-feedback">{validationErrors.slug[0]}</div>}
                 </div>
@@ -320,7 +319,6 @@ const ContentManagement = () => {
                     onChange={(e) => setNewContent(e.target.value)}
                     rows="10"
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   ></textarea>
                   {validationErrors.content && <div className="invalid-feedback">{validationErrors.content[0]}</div>}
                 </div>
@@ -332,7 +330,6 @@ const ContentManagement = () => {
                     value={newStatus}
                     onChange={(e) => setNewStatus(e.target.value)}
                     required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                   >
                     <option value="published">منشورة</option>
                     <option value="draft">مسودة</option>
@@ -343,10 +340,10 @@ const ContentManagement = () => {
                 {formError && <div className="alert alert-danger small">{formError}</div>}
                 
                 <div className="d-flex justify-content-between mt-4">
-                  <button type="submit" className="btn btn-success btn-sm shadow-sm" disabled={loading} style={{ backgroundColor: '#60c78c', borderColor: '#60c78c' }}>
+                  <button type="submit" className="btn btn-primary btn-sm shadow-sm" disabled={loading}>
                     {editingPage ? 'تحديث' : 'إضافة'}
                   </button>
-                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal} style={{ backgroundColor: '#6c757d', borderColor: '#6c757d' }}>
+                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal}>
                     إغلاق
                   </button>
                 </div>

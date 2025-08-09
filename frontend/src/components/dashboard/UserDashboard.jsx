@@ -1,7 +1,7 @@
 // frontend/src/components/dashboard/UserDashboard.jsx
 
 import React, { useState, useEffect } from 'react';
-import apiClient from '../../api/axiosConfig'; // استيراد مثيل Axios
+import axiosInstance from '../../api/axiosInstance';
 import { useNavigate, Link } from 'react-router-dom'; // للتنقل وإنشاء الروابط
 
 function UserDashboard() {
@@ -14,7 +14,7 @@ function UserDashboard() {
     // جلب بيانات المستخدم المصادق عليه
     const fetchUser = async () => {
       try {
-        const response = await apiClient.get('/user'); // مسار API لجلب بيانات المستخدم
+        const response = await axiosInstance.get('/user');
         setUser(response.data);
       } catch (err) {
         console.error('Error fetching user data:', err);
@@ -35,7 +35,7 @@ function UserDashboard() {
   // دالة لتسجيل الخروج
   const handleLogout = async () => {
     try {
-      await apiClient.post('/logout'); // إرسال طلب تسجيل الخروج إلى API
+      await axiosInstance.post('/logout');
       setUser(null); // مسح بيانات المستخدم من الحالة
       navigate('/login'); // إعادة توجيه المستخدم إلى صفحة تسجيل الدخول
     } catch (err) {
@@ -46,56 +46,52 @@ function UserDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-gray-700 text-lg">Loading user dashboard...</p>
+      <div className="container text-center my-5">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">جاري التحميل...</span>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Error!</strong>
-          <span className="block sm:inline"> {error}</span>
-          <button onClick={() => navigate('/login')} className="ml-4 text-blue-700 hover:underline">Go to Login</button>
+      <div className="container my-5">
+        <div className="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+          <div>حدث خطأ: {error}</div>
+          <button onClick={() => navigate('/login')} className="btn btn-sm btn-primary">اذهب لتسجيل الدخول</button>
         </div>
       </div>
     );
   }
 
   if (!user) {
-    // إذا لم يكن هناك مستخدم بعد التحميل، أعد التوجيه إلى صفحة تسجيل الدخول
-    return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p>Redirecting to login...</p></div>;
+    return (
+      <div className="container text-center my-5">
+        <p className="text-muted">إعادة التوجيه إلى تسجيل الدخول...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">
-          Welcome, {user.username}!
-        </h2>
-        <p className="text-gray-600 mb-6">This is your personalized dashboard.</p>
+    <div className="container my-5">
+      <div className="row justify-content-center">
+        <div className="col-lg-8">
+          <div className="card shadow-sm border-0 rounded-4 text-center p-4">
+            <h2 className="h3 fw-bold mb-2">مرحبًا، {user.username}!</h2>
+            <p className="text-muted mb-4">هذه هي لوحة التحكم الخاصة بك.</p>
 
-        <div className="space-y-4 mb-6">
-          <Link
-            to="/beauty-advisor"
-            className="block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 shadow-md"
-          >
-            Go to AI Beauty Advisor ✨
-          </Link>
-          {/* يمكنك إضافة روابط أخرى هنا لصفحات المتجر */}
-          {/* <Link to="/products" className="block bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 shadow-md">
-            View Products
-          </Link> */}
+            <div className="d-grid gap-3 mb-4">
+              <Link to="/beauty-advisor" className="btn btn-primary btn-lg">
+                الذهاب إلى مستشار الجمال الذكي ✨
+              </Link>
+            </div>
+
+            <button onClick={handleLogout} className="btn btn-outline-danger">
+              تسجيل الخروج
+            </button>
+          </div>
         </div>
-
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 focus:outline-none focus:shadow-outline"
-        >
-          Logout
-        </button>
       </div>
     </div>
   );
