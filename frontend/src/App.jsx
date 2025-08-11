@@ -31,7 +31,7 @@ import ReviewManagement from './pages/Admin/ReviewManagement';
 import ContentManagement from './pages/Admin/ContentManagement';
 import DiscountManagement from './pages/Admin/DiscountManagement';
 import AdminLayout from './components/Admin/AdminLayout';
-
+import AdminSidebar from './pages/Admin/AdminSidebar';
 // استيراد صفحات ومكونات لوحة تحكم المستخدم
 import UserDashboard from './pages/MyAccount/UserDashboard';
 import UserProfile from './pages/MyAccount/UserProfile';
@@ -88,6 +88,8 @@ const AppContent = () => {
   return (
     <div className="d-flex flex-column min-vh-100 bg-light">
       <Header />
+      <AdminSidebar mode="mobile" />
+
       <main className="flex-grow-1 py-4">
         <Routes>
           {/* مسارات المستخدم العامة */}

@@ -3,7 +3,7 @@
 
 :root {
   /* Feminine luxurious palette */
-  --rose-primary: #d7b9c8; /* rose */
+  --rose-primary: #e0dede; /* rose */
   --mauve-secondary: #5C5470; /* deep mauve */
   --sage-success: #6BB187; /* soft green */
   --gold-warning: #F2C14E; /* golden */
@@ -102,4 +102,106 @@ input, textarea, select {
 .text-gray-800 { color: var(--deep-dark) !important; }
 .text-gray-700 { color: #444 !important; }
 .text-gray-600 { color: #6c757d !important; }
+
+/* ===== تحسينات منع التمرير الأفقي + مميزات إضافية ===== */
+
+/* 1) أوقف أي تمرير أفقي نهائياً */
+html, body {
+  overflow-x: hidden;
+  touch-action: pan-y; /* يمنع السحب الأفقي باللمس */
+}
+
+/* 2) احسب الحواف داخل العرض لتفادي الزيادة */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* 3) الصور/الفيديو لا يكسروا التخطيط */
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 4) عناصر عريضة جداً (خاصة صفوف البوتستراب أو السلايدر) */
+.container, .container-fluid {
+  overflow-x: clip; /* أفضل من hidden للأداء */
+}
+
+/* 5) أي عنصر يستخدم 100vw يسبب overflow على الجوال بسبب شريط التمرير */
+.hero, .home-hero, .full-bleed, [data-fullwidth="true"] {
+  width: 100% !important; /* بدلاً من 100vw */
+}
+
+/* 6) درج الجوال لا يصنع تمرير أفقي أثناء الإغلاق أو الفتح */
+.nav-menu {
+  will-change: transform;
+  transition: transform 0.35s ease-in-out, opacity 0.3s ease;
+  opacity: 0;
+}
+.nav-menu.is-open {
+  opacity: 1;
+}
+
+/* 7) إخفاء شريط التمرير الأفقي بالكامل */
+html {
+  scrollbar-width: thin; /* للفايرفوكس */
+}
+html::-webkit-scrollbar {
+  height: 0px; /* إخفاء التمرير الأفقي */
+}
+
+/* 8) دعم أجهزة النوتش (iPhone Safe Areas) */
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* 9) كود اختبار لتحديد العناصر المسببة للـ Overflow (للاستخدام المؤقت) */
+/*
+@supports (outline: red solid 2px) {
+  body * {
+    outline: 2px dashed rgba(255, 0, 0, 0.3);
+    outline-offset: -2px;
+  }
+}
+*/
+
+
+/* ===== Extra polish: overflow & UX ===== */
+/* Stop horizontal scroll entirely */
+html, body { overflow-x: hidden; }
+
+/* Border-box everywhere */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Media shouldn't break layout */
+img, video { max-width: 100%; height: auto; display: block; }
+
+/* Clip overly-wide children inside containers */
+.container, .container-fluid { overflow-x: clip; }
+
+/* Avoid 100vw on mobile full-bleed sections */
+.hero, .home-hero, .full-bleed, [data-fullwidth="true"] { width: 100% !important; }
+
+/* Smoother drawer animation + fade */
+@media(max-width:991.98px){
+  .nav-menu{ transition: transform .35s ease-in-out, opacity .3s ease; opacity:0; }
+  .nav-menu.is-open{ opacity:1; }
+}
+
+/* Hide horizontal scrollbar visuals */
+html { scrollbar-width: thin; }
+html::-webkit-scrollbar { height: 0px; }
+
+/* Touch behavior: vertical pan only (reduce sideways pan) */
+html, body { touch-action: pan-y; }
+
+/* Respect iPhone safe areas */
+body { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+
+/* Optional debug: add .overflow-debug على <body> أثناء التطوير */
+.overflow-debug * { outline: 2px dashed rgba(255,0,0,.25); outline-offset: -2px; }
+
+
 

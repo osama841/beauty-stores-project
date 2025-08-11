@@ -1,216 +1,112 @@
-/* src/styles/admin/AdminSidebar.css */
-
-/* أنماط عامة للشريط الجانبي */
-/* الشريط الجانبي العصري للوحة الإدارة */
-.admin-sidebar-container {
-    background: linear-gradient(135deg, #23272f 60%, #2d3142 100%);
-    color: #f8f9fa;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    z-index: 1301;
-    font-family: 'Tajawal', 'Cairo', sans-serif;
-    direction: rtl;
-    border-left: 1px solid #23272f;
+/* ===== src/styles/admin/AdminSidebar.css (CLEAN + STABLE) ===== */
+:root{
+  --admin-sidebar-w: 280px;
+  --primary-color: #6a8eec;   /* match header */
+  --dark-color: #343a40;      /* match header */
+  --text-main: #343a40;
+  --text-muted: #6c757d;
+  --border-light: #e9ecef;
+  --border-dark: #2b2f33;     /* <-- كان ناقص */
+  --header-height: 84px;      /* keep in sync with header */
 }
 
-/* عنوان لوحة المسؤول داخل الشريط الجانبي */
-.admin-sidebar-header {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #007bff;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.admin-sidebar-header i {
-    font-size: 1.7rem;
-    margin-inline-end: 0.5rem;
-    color: #7B61FF;
-}
-
-/* خط فاصل */
-.admin-sidebar-container hr {
-    border-top: 1px solid rgba(123, 97, 255, 0.08);
-    margin: 1.2rem 0;
-}
-
-/* قائمة التنقل */
-.admin-sidebar-nav .nav-link {
-    color: #e0e6ed;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.3s ease;
-    display: flex;
-    align-items: center;
-    font-weight: 500;
-    font-family: inherit;
-    gap: 0.7rem;
-    font-size: 1.08rem;
-    letter-spacing: 0.1px;
-}
-
-.admin-sidebar-nav .nav-link i {
-    font-size: 1.15rem;
-    margin-inline-end: 0.5rem;
-    color: #b5aaff;
-    transition: color 0.18s;
-}
-
-.admin-sidebar-nav .nav-link:hover {
-    background-color: rgba(0, 123, 255, 0.1);
-    color: #007bff;
-}
-
-.admin-sidebar-nav .nav-link.active {
-    background: linear-gradient(90deg, #7B61FF 60%, #6a50e0 100%);
-    color: #fff;
-    font-weight: bold;
-    box-shadow: 0 2px 8px 0 rgba(123, 97, 255, 0.08);
-}
-
-/* قسم المستخدم في الأسفل */
-.admin-sidebar-user-dropdown {
-    margin-top: auto;
-    padding-top: 1.1rem;
-    border-top: 1px solid rgba(123, 97, 255, 0.08);
-}
-
-.admin-sidebar-user-dropdown .dropdown-toggle {
-    color: #e0e6ed;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    font-size: 1.05rem;
-    gap: 0.5rem;
-}
-
-.admin-sidebar-user-dropdown .dropdown-toggle img {
-    border: 2px solid #7B61FF;
-    box-shadow: 0 2px 8px 0 rgba(123, 97, 255, 0.08);
-}
-
-/* --------------------------------------------------- */
-/* أنماط الشريط الجانبي المتجاوبة (للدفع) */
-/* --------------------------------------------------- */
-
-/* إخفاء الشريط الجانبي على الجوال افتراضياً */
-@media (max-width: 991.98px) {
-    .admin-sidebar-container {
-        height: 100vh;
-        position: fixed;
-        top: 0; right: 0;
-        width: 80vw;
-        max-width: 360px;
-        transform: translateX(100%);
-        padding: 1rem;
-        overflow-y: auto;
-        border-radius: 0 0 0 0.8rem;
-    }
-    .admin-sidebar-container.show {
-        transform: translateX(0%);
-    }
-    /* overlay سوداء خلف القائمة */
-    .admin-sidebar-overlay {
-        position: fixed;
-        top: 0; right: 0; left: 0; bottom: 0;
-        background: rgba(30, 30, 40, 0.55);
-        z-index: 1200;
-        transition: opacity 0.2s;
-        cursor: pointer;
-        backdrop-filter: blur(1.5px);
-    }
-    .admin-sidebar-toggler {
-        position: fixed;
-        top: 1.1rem;
-        right: 1.1rem;
-        z-index: 1300;
-        background: #fff;
-        color: #7B61FF;
-        border-radius: 50%;
-        width: 44px;
-        height: 44px;
-        box-shadow: 0 2px 8px 0 rgba(123, 97, 255, 0.08);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        font-size: 1.5rem;
-        transition: background 0.18s, color 0.18s;
-    }
-    .admin-sidebar-toggler:active,
-    .admin-sidebar-toggler:focus {
-        background: #f3f0ff;
-        color: #6a50e0;
-    }
-    body.sidebar-open-mobile { overflow: hidden; }
-    /* زر إغلاق جانبي صغير وجميل */
-    .admin-close-menu-btn {
-        background: #fff;
-        color: #7B61FF;
-        border: none;
-        border-radius: 50%;
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        box-shadow: 0 2px 8px 0 rgba(123, 97, 255, 0.08);
-        transition: background 0.18s, color 0.18s;
-        margin-left: 0.5rem;
-    }
-    .admin-close-menu-btn:active,
-    .admin-close-menu-btn:focus {
-        background: #f3f0ff;
-        color: #6a50e0;
-    }
-}
-
-/* الشريط الجانبي على شاشات سطح المكتب (lg فأكبر) */
-@media (min-width: 992px) {
-    .admin-sidebar-container {
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        width: 260px;
-        flex-shrink: 0;
-        border-radius: 0 0.8rem 0.8rem 0;
-    }
-    .admin-content-wrapper {
-        margin-left: 260px;
-    }
-    .admin-sidebar-toggler {
-        display: none !important;
-    }
-    .admin-close-menu-btn {
-        display: none !important;
-    }
-}
-
-@media (max-width: 991.98px) {
-    .admin-sidebar-container,
-    .admin-sidebar-overlay,
-    .admin-sidebar-toggler,
-    .admin-close-menu-btn {
-      display: none !important;
-    }
-  
-    /* لا تترك أي عرض زائد أو ترانسفورم قديم */
-    .admin-sidebar-container {
-      transform: none !important;
-      width: 0 !important;
-      overflow: hidden !important;
-    }
+/* ثبّت عرض العمود في صفحات الأدمن على >= lg */
+@media (min-width: 992px){
+  .admin-layout-root > aside{
+    flex: 0 0 var(--admin-sidebar-w);
+    max-width: var(--admin-sidebar-w);
   }
-  
-  /* Keep desktop behavior */
-  @media (min-width: 992px) {
-    .admin-sidebar-container { position: sticky; top: 0; height: 100vh; width: 260px; flex-shrink: 0; border-radius: 0 0.8rem 0.8rem 0; }
-  }
+}
+
+/* أساسيات مشتركة */
+.admin-sidebar{
+  width: var(--admin-sidebar-w);
+  color: #fff;
+  font-family: 'Tajawal','Cairo',sans-serif;
+  overflow-x: clip; /* أمان ضد التمرير الأفقي */
+}
+
+.admin-sidebar__inner{
+  position: sticky;                 /* يبقى تحت الهيدر الستكي */
+  top: var(--header-height);
+  height: calc(100dvh - var(--header-height));
+  background: var(--dark-color);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 14px;
+  gap: 10px;
+  overflow-y: auto;
+  overflow-x: clip;
+  border-inline-end: 1px solid var(--border-dark);
+  box-shadow: 0 4px 18px rgba(0,0,0,.18);
+}
+
+/* براند وروابط */
+.admin-sidebar__brand{
+  display:flex; align-items:center; gap:10px;
+  color:#fff; font-weight:800;
+}
+.admin-sidebar__brand i{ color: var(--primary-color); font-size:1.25rem; }
+
+.admin-sidebar__nav{
+  list-style:none; margin:8px 0 0; padding:0;
+  display:flex; flex-direction:column; gap:6px;
+}
+
+.admin-sidebar__link{
+  display:flex; align-items:center; gap:10px;
+  color:#e9ecef; text-decoration:none;
+  padding:10px 12px; border-radius:10px;
+  transition: background-color .15s ease, color .15s ease;
+  background: transparent; border: none; cursor: pointer; text-align: right;
+}
+.admin-sidebar__link:hover{ background:#2b2f33; color:#fff; }
+.admin-sidebar__link.is-active{
+  background: linear-gradient(90deg, rgba(106,142,236,.18), rgba(106,142,236,.05));
+  color:#ffffff; outline:1px solid rgba(106,142,236,.45);
+}
+
+.admin-sidebar__userbtn{
+  width:100%; display:flex; align-items:center; gap:10px;
+  color:#f8f9fa; background:transparent; border:none;
+}
+
+/* خلفية معتمة للجوال */
+.admin-backdrop{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35);
+  opacity: 0; visibility: hidden;
+  transition: opacity .2s ease, visibility 0s linear .2s;
+  z-index: 1060;
+}
+.admin-backdrop.show{ opacity: 1; visibility: visible; transition-delay: 0s; }
+
+/* نسخة الجوال: Drawer */
+.admin-sidebar--mobile{
+  position: fixed;
+  top: var(--header-height);
+  right: 0; left: auto;                 /* ثبّت على يمين الشاشة */
+  width: min(88vw, var(--admin-sidebar-w));
+  height: calc(100dvh - var(--header-height));
+  transform: translateX(100%);          /* يدخل من اليمين */
+  transition: transform .3s ease;
+  z-index: 1065;                        /* أعلى من الخلفية */
+  box-shadow: -4px 0 16px rgba(0,0,0,.25);
+}
+.admin-sidebar--mobile.is-open{ transform: translateX(0); }
+
+.admin-sidebar__close{
+  position: absolute; top: 8px; inset-inline-start: 8px;
+  background: transparent; border: none; color: #fff; font-size: 1.1rem;
+}
+
+/* إخفِ الدروار على الديسكتوب */
+@media (min-width: 992px){
+  .admin-sidebar--mobile { display: none !important; }
+}
+
+/* أمان إضافي لمنع تمرير أفقي على الشاشات الأصغر */
+@media (max-width: 1199.98px){
+  .admin-sidebar{ overflow-x: clip; }
+}
