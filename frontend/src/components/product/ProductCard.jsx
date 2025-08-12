@@ -10,6 +10,7 @@ import {
   BiStarHalf 
 } from 'react-icons/bi';
 import { useToast } from '../common/Toast';
+import Button from '../common/Button';
 
 const ProductCard = ({ 
   product, 
@@ -220,29 +221,33 @@ const ProductCard = ({
 
         {/* أزرار الإجراءات */}
         <div className="product-card-actions">
-          <button
+          <Button
+            variant={isOutOfStock ? 'secondary' : 'primary'}
+            size="sm"
             className="product-add-to-cart"
             onClick={handleAddToCart}
             disabled={isOutOfStock || loading}
+            loading={loading}
+            icon={<BiShoppingBag />}
             aria-label={`إضافة ${name} للسلة`}
           >
-            <BiShoppingBag />
             {isOutOfStock ? 'نفذت الكمية' : 'أضف للسلة'}
-          </button>
+          </Button>
 
           {showWishlist && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               className={`product-wishlist ${isInWishlist ? 'active' : ''}`}
               onClick={handleToggleWishlist}
               disabled={loading}
+              icon={isInWishlist ? <BiHeartFill /> : <BiHeart />}
               aria-label={
                 isInWishlist 
                   ? `إزالة ${name} من قائمة الرغبات`
                   : `إضافة ${name} لقائمة الرغبات`
               }
-            >
-              {isInWishlist ? <BiHeartFill /> : <BiHeart />}
-            </button>
+            />
           )}
         </div>
       </div>

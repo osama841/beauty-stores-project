@@ -1,138 +1,361 @@
-/* استخدام ألوان النظام العالمي من global.css (Bootstrap variables) */
+/* ===== Homepage Styles ===== */
+/* أنماط الصفحة الرئيسية */
 
-/* تنسيقات عامة */
 .homepage-container {
-  overflow-x: hidden;
+  min-height: 100vh;
 }
 
-/* Hero Section */
+/* === Hero Section === */
 .hero-section {
+  background: linear-gradient(135deg, #6a8eec 0%, #60c78c 100%);
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
   position: relative;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, var(--bs-primary), rgba(var(--bs-primary-rgb), 0.85)), url('https://placehold.co/1200x400/ffe8f2/333?text=متجر+الجمال');
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px, 30px 30px;
+  opacity: 0.6;
 }
 
 .hero-content {
-  z-index: 2;
-}
-
-.wave-divider {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
-  transform: rotate(180deg);
-}
-
-.wave-divider svg {
   position: relative;
-  display: block;
-  width: calc(100% + 1.3px);
-  height: 120px;
+  z-index: 2;
+  width: 100%;
 }
 
-/* الأزرار المخصصة */
-/* الأزرار تتبع Bootstrap (لا نحتاج أصناف مخصصة هنا) */
+.hero-text {
+  max-width: 600px;
+  text-align: center;
+  color: var(--color-text-inverse);
+  margin: 0 auto;
+}
 
-/* العناوين */
+.hero-title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-extra-bold);
+  margin-bottom: var(--space-6);
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-8);
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.hero-actions {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* === Section Headers === */
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-12);
+}
+
 .section-title {
-  font-size: 2.2rem;
-  padding-bottom: 10px;
+  margin: 0 0 var(--space-4) 0;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
 }
 
-.section-title-bg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 4rem;
-  font-weight: 900;
-  color: rgba(var(--bs-primary-rgb), 0.06);
-  white-space: nowrap;
-  z-index: 0;
+.section-subtitle {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* تأثيرات الحركة */
-.transition {
-  transition: all 0.3s ease;
+/* === Categories Section === */
+.categories-section {
+  margin-bottom: var(--space-16);
 }
 
-.hover-shadow:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+.categories-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
 }
 
-.hover-opacity-100:hover {
-  opacity: 1 !important;
+.category-section {
+  background-color: var(--color-bg);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-base);
+  transition: box-shadow var(--transition-base);
 }
 
-/* بطاقات الفئات */
-.category-card {
-  transition: all 0.3s ease;
+.category-section:hover {
+  box-shadow: var(--shadow-lg);
 }
 
-.category-card:hover {
-  transform: translateY(-5px);
+.category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
 }
 
-/* بطاقات المميزات */
+.category-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+/* === Categories Loading === */
+.categories-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.category-section-skeleton {
+  background-color: var(--color-bg);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-base);
+}
+
+.category-title-skeleton {
+  height: 32px;
+  width: 200px;
+  margin-bottom: var(--space-6);
+  border-radius: var(--radius-base);
+}
+
+/* === Features Section === */
+.features-section {
+  background-color: var(--color-bg-light);
+  border-radius: var(--radius-xl);
+  padding: var(--space-12) var(--space-6);
+  margin-bottom: var(--space-16);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+}
+
 .feature-card {
-  transition: all 0.3s ease;
+  background-color: var(--color-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  border: 1px solid var(--color-border);
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  border-color: var(--color-primary);
 }
 
-/* العروض الخاصة */
-.special-offer {
-  position: relative;
-  overflow: hidden;
+.feature-icon {
+  margin-bottom: var(--space-4);
+  color: var(--color-primary);
+  font-size: 3rem;
 }
 
-.special-offer::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 100%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-  z-index: 1;
+.feature-title {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
 }
 
-/* التقييمات */
-.rating i {
-  font-size: 1.2rem;
+.feature-description {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  line-height: 1.6;
 }
 
-/* القوائم */
-.brand-logo img {
-  max-height: 50px;
-  width: auto;
-  filter: grayscale(100%);
-  transition: all 0.3s ease;
+/* === التجاوب === */
+@media (max-width: 1199.98px) {
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.brand-logo:hover img {
-  filter: grayscale(0%);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .hero-content {
-    text-align: center !important;
+@media (max-width: 991.98px) {
+  .hero-title {
+    font-size: var(--font-size-3xl);
+  }
+  
+  .hero-subtitle {
+    font-size: var(--font-size-base);
   }
   
   .section-title {
-    font-size: 1.8rem;
+    font-size: var(--font-size-2xl);
   }
   
-  .section-title-bg {
-    font-size: 3rem;
+  .category-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .hero-section {
+    min-height: 60vh;
+    padding: var(--space-8) 0;
+  }
+  
+  .hero-title {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--space-4);
+  }
+  
+  .hero-subtitle {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-6);
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  
+  .hero-actions .btn {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .section-header {
+    margin-bottom: var(--space-8);
+  }
+  
+  .section-title {
+    font-size: var(--font-size-xl);
+  }
+  
+  .section-subtitle {
+    font-size: var(--font-size-base);
+  }
+  
+  .categories-grid {
+    gap: var(--space-8);
+  }
+  
+  .category-section {
+    padding: var(--space-4);
+  }
+  
+  .category-title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .features-section {
+    padding: var(--space-8) var(--space-4);
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  
+  .feature-card {
+    padding: var(--space-4);
+  }
+  
+  .feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-3);
+  }
+  
+  .feature-title {
+    font-size: var(--font-size-base);
+  }
+  
+  .feature-description {
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: 479.98px) {
+  .hero-section {
+    min-height: 50vh;
+  }
+  
+  .hero-title {
+    font-size: var(--font-size-xl);
+  }
+  
+  .section-title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .categories-section .container {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+}
+
+/* === الوضع الداكن === */
+:root.dark .hero-section {
+  background: linear-gradient(135deg, #4a6cf7 0%, #4ade80 100%);
+}
+
+:root.dark .category-section {
+  background-color: var(--color-bg-dark);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+:root.dark .features-section {
+  background-color: var(--color-bg-dark);
+}
+
+:root.dark .feature-card {
+  background-color: var(--color-bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* === تحسينات الأداء === */
+.hero-section {
+  contain: layout style paint;
+}
+
+.category-section {
+  contain: layout style paint;
+}
+
+/* === تأثيرات الحركة === */
+@media (prefers-reduced-motion: reduce) {
+  .feature-card,
+  .category-section {
+    transition: none;
+  }
+  
+  .feature-card:hover,
+  .category-section:hover {
+    transform: none;
   }
 }
