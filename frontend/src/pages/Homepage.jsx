@@ -3,7 +3,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getProducts } from '../api/products';
 import { getCategories } from '../api/categories';
-import ProductCard from '../components/ProductCard';
+import { useCart } from '../contexts/CartContext';
+import { useToast } from '../components/common/Toast';
+import ProductGrid, { FeaturedProductGrid } from '../components/product/ProductGrid';
+import { ProductGridSkeleton } from '../components/common/Skeleton';
+import EmptyState from '../components/common/EmptyState';
+import Button from '../components/common/Button';
 import './../styles/homepage.css';
 
 const Homepage = () => {
@@ -11,6 +16,9 @@ const Homepage = () => {
   const [categoriesWithProducts, setCategoriesWithProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  const { addToCart } = useCart();
+  const toast = useToast();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -69,23 +77,27 @@ const Homepage = () => {
     fetchData();
   }, [fetchData]);
 
-  if (loading) {
-    return (
-      <div className="container text-center my-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">جاري تحميل الصفحة الرئيسية...</span>
-        </div>
-        <p className="mt-3 text-muted">جاري تحميل الصفحة الرئيسية...</p>
-      </div>
-    );
-  }
+  // معالجة إضافة للسلة
+  const handleAddToCart = async (product) => {
+    try {
+      await addToCart(product, 1);
+      toast.success(`تمت إضافة ${product.name} للسلة`);
+    } catch (error) {
+      console.error('خطأ في إضافة المنتج للسلة:', error);
+      toast.error('فشل في إضافة المنتج للسلة');
+    }
+  };
 
   if (error) {
     return (
-      <div className="container text-center my-5">
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
+      <div className="container my-5">
+        <EmptyState
+          variant="error"
+          title="خطأ في تحميل الصفحة الرئيسية"
+          description={error}
+          actionText="إعادة المحاولة"
+          onAction={() => window.location.reload()}
+        />
       </div>
     );
   }
@@ -93,102 +105,163 @@ const Homepage = () => {
   return (
     <div className="homepage-container">
       {/* قسم البطل (Hero Section) */}
-      <section className="hero-section text-white text-center py-5 mb-5">
-        <div className="container py-5">
-          <h1 className="display-4 fw-bold mb-3">اكتشف جمالك مع لمسة روز</h1>
-          <p className="lead mb-4">أفضل المنتجات التجميلية والعناية بالبشرة في مكان واحد.</p>
-          <Link to="/products" className="btn btn-primary btn-lg fw-bold shadow-sm">
-            تسوق الآن <i className="bi bi-arrow-right"></i>
-          </Link>
-        </div>
-      </section>
-
-      {/* قسم المنتجات المميزة */}
-      <section className="featured-products-section container my-5">
-        <h2 className="text-center mb-5 fw-bold text-dark">منتجات مميزة</h2>
-        {featuredProducts.length === 0 ? (
-          <p className="text-center text-muted">لا توجد منتجات مميزة لعرضها حالياً.</p>
-        ) : (
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-            {featuredProducts.map((product) => (
-              <div className="col" key={product.product_id}> {/* ****** تأكد من key={product.product_id} ****** */}
-                <ProductCard product={product} />
+      <section className="hero-section">
+        <div className="hero-content">
+          <div className="container">
+            <div className="hero-text">
+              <h1 className="hero-title">اكتشف جمالك مع لمسة روز</h1>
+              <p className="hero-subtitle">
+                أفضل المنتجات التجميلية والعناية بالبشرة في مكان واحد.
+                تألقي بجمالك الطبيعي مع مجموعتنا المميزة.
+              </p>
+              <div className="hero-actions">
+                <Button
+                  as={Link}
+                  to="/products"
+                  variant="primary"
+                  size="lg"
+                  icon="bi bi-bag-heart"
+                >
+                  تسوقي الآن
+                </Button>
+                <Button
+                  as={Link}
+                  to="/products?category=bestsellers"
+                  variant="outline"
+                  size="lg"
+                  icon="bi bi-star"
+                >
+                  الأكثر مبيعاً
+                </Button>
               </div>
-            ))}
+            </div>
           </div>
-        )}
-        <div className="text-center mt-5">
-          <Link to="/products" className="btn btn-outline-primary btn-lg">
-            عرض جميع المنتجات <i className="bi bi-arrow-right"></i>
-          </Link>
         </div>
       </section>
 
-      {/* قسم التسوق حسب الفئة - يعرض 5 منتجات لكل فئة */}
-      <section className="shop-by-category-section container my-5">
-        <h2 className="text-center mb-5 fw-bold text-dark">تسوق حسب الفئة</h2>
-        {categoriesWithProducts.length === 0 ? (
-          <p className="text-center text-muted">لا توجد فئات لعرضها حالياً.</p>
-        ) : (
-          <div className="row g-5">
-            {categoriesWithProducts.map((category) => (
-              <div className="col-12" key={category.category_id}> {/* ****** تأكد من key={category.category_id} ****** */}
-                <div className="card shadow-sm border-0 rounded-lg mb-4">
-                  <div className="card-header bg-light py-3 d-flex justify-content-between align-items-center">
-                    <h4 className="mb-0 fw-bold text-dark">{category.name}</h4>
-                    <Link to={`/products?category_id=${category.category_id}`} className="btn btn-sm btn-outline-primary">
-                      عرض المزيد <i className="bi bi-arrow-right"></i>
-                    </Link>
-                  </div>
-                  <div className="card-body">
-                    {category.products.length === 0 ? (
-                      <p className="text-center text-muted py-3 mb-0">لا توجد منتجات في هذه الفئة حالياً.</p>
-                    ) : (
-                      <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
-                        {category.products.map((product) => (
-                          <div className="col" key={product.product_id}> {/* ****** تأكد من key={product.product_id} ****** */}
-                            <ProductCard product={product} />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+      <div className="container">
+        {/* قسم المنتجات المميزة */}
+        <FeaturedProductGrid
+          title="منتجات مميزة"
+          subtitle="اكتشفي أحدث المنتجات المختارة بعناية لك"
+          products={featuredProducts}
+          loading={loading}
+          onAddToCart={handleAddToCart}
+          viewAllLink="/products"
+          emptyStateTitle="لا توجد منتجات مميزة"
+          emptyStateDescription="تابعي معنا قريباً لمشاهدة أحدث المنتجات المميزة"
+          columns={4}
+        />
+
+        {/* قسم التسوق حسب الفئة */}
+        <section className="categories-section">
+          <div className="section-header">
+            <h2 className="section-title">تسوقي حسب الفئة</h2>
+            <p className="section-subtitle">
+              اكتشفي مجموعتنا المتنوعة من منتجات الجمال والعناية
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="categories-loading">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="category-section-skeleton">
+                  <div className="skeleton category-title-skeleton"></div>
+                  <ProductGridSkeleton count={5} columns={5} />
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+              ))}
+            </div>
+          ) : categoriesWithProducts.length === 0 ? (
+            <EmptyState
+              title="لا توجد فئات"
+              description="لا توجد فئات منتجات متاحة حالياً"
+              icon="bi bi-grid"
+            />
+          ) : (
+            <div className="categories-grid">
+              {categoriesWithProducts.map((category) => (
+                <div key={category.category_id} className="category-section">
+                  <div className="category-header">
+                    <h3 className="category-title">{category.name}</h3>
+                    <Button
+                      as={Link}
+                      to={`/products?category_id=${category.category_id}`}
+                      variant="ghost"
+                      size="sm"
+                      icon="bi bi-arrow-left"
+                      iconPosition="end"
+                    >
+                      عرض المزيد
+                    </Button>
+                  </div>
+                  
+                  <ProductGrid
+                    products={category.products}
+                    columns={5}
+                    gap="sm"
+                    onAddToCart={handleAddToCart}
+                    emptyStateVariant="search"
+                    emptyStateTitle="لا توجد منتجات"
+                    emptyStateDescription={`لا توجد منتجات في فئة ${category.name} حالياً`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
-      {/* قسم الميزات أو العروض الخاصة (اختياري) */}
-      <section className="features-section bg-light py-5">
-        <div className="container text-center">
-          <h2 className="mb-5 fw-bold text-dark">لماذا تختار متجرنا؟</h2>
-          <div className="row g-4">
-            <div className="col-md-4">
-              <div className="card h-100 shadow-sm border-0 rounded-lg p-4">
-                <i className="bi bi-truck fs-1 text-primary mb-3"></i>
-                <h5 className="fw-bold mb-2">شحن سريع وموثوق</h5>
-                <p className="text-muted small">نضمن وصول طلباتك بأسرع وقت وأمان تام.</p>
+        {/* قسم الميزات */}
+        <section className="features-section">
+          <div className="section-header text-center">
+            <h2 className="section-title">لماذا تختارين متجرنا؟</h2>
+            <p className="section-subtitle">
+              نحن ملتزمون بتقديم أفضل تجربة تسوق لك
+            </p>
+          </div>
+          
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feature-icon">
+                <i className="bi bi-truck" aria-hidden="true"></i>
               </div>
+              <h3 className="feature-title">شحن سريع ومجاني</h3>
+              <p className="feature-description">
+                شحن مجاني للطلبات فوق 200 ريال ووصول سريع لجميع المدن
+              </p>
             </div>
-            <div className="col-md-4">
-              <div className="card h-100 shadow-sm border-0 rounded-lg p-4">
-                <i className="bi bi-shield-check fs-1 text-success mb-3"></i>
-                <h5 className="fw-bold mb-2">منتجات أصلية 100%</h5>
-                <p className="text-muted small">جميع منتجاتنا مضمونة الجودة والأصالة.</p>
+            
+            <div className="feature-card">
+              <div className="feature-icon">
+                <i className="bi bi-shield-check" aria-hidden="true"></i>
               </div>
+              <h3 className="feature-title">منتجات أصلية 100%</h3>
+              <p className="feature-description">
+                جميع منتجاتنا مضمونة الجودة والأصالة من العلامات التجارية الموثوقة
+              </p>
             </div>
-            <div className="col-md-4">
-              <div className="card h-100 shadow-sm border-0 rounded-lg p-4">
-                <i className="bi bi-headset fs-1 text-info mb-3"></i>
-                <h5 className="fw-bold mb-2">دعم عملاء ممتاز</h5>
-                <p className="text-muted small">فريق دعم جاهز لمساعدتك 24/7.</p>
+            
+            <div className="feature-card">
+              <div className="feature-icon">
+                <i className="bi bi-headset" aria-hidden="true"></i>
               </div>
+              <h3 className="feature-title">دعم عملاء مميز</h3>
+              <p className="feature-description">
+                فريق دعم متخصص جاهز لمساعدتك في اختيار المنتجات المناسبة
+              </p>
+            </div>
+            
+            <div className="feature-card">
+              <div className="feature-icon">
+                <i className="bi bi-arrow-return-left" aria-hidden="true"></i>
+              </div>
+              <h3 className="feature-title">سهولة الإرجاع</h3>
+              <p className="feature-description">
+                إمكانية إرجاع أو استبدال المنتجات خلال 14 يوم من تاريخ الشراء
+              </p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 };

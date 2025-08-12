@@ -1,0 +1,302 @@
+/* ===== Drawer Styles ===== */
+/* أنماط الدرج المنزلق (للجوال والتابلت) */
+
+/* Drawer Wrapper - حاوي الدرج */
+.drawer-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1040;
+  pointer-events: none;
+}
+
+.drawer-wrapper * {
+  pointer-events: auto;
+}
+
+/* Backdrop - الخلفية المظللة */
+.drawer-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-bg-overlay);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-base), visibility var(--transition-base);
+}
+
+.drawer-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Drawer Container - حاوي الدرج */
+.drawer {
+  position: absolute;
+  background-color: var(--color-bg);
+  box-shadow: var(--shadow-xl);
+  transition: transform var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* اتجاهات الدرج */
+.drawer-right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  transform: translateX(100%);
+}
+
+.drawer-right.drawer-open {
+  transform: translateX(0);
+}
+
+.drawer-left {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  transform: translateX(-100%);
+}
+
+.drawer-left.drawer-open {
+  transform: translateX(0);
+}
+
+.drawer-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(-100%);
+}
+
+.drawer-top.drawer-open {
+  transform: translateY(0);
+}
+
+.drawer-bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(100%);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.drawer-bottom.drawer-open {
+  transform: translateY(0);
+}
+
+/* أحجام الدرج */
+/* للدرج الجانبي (right/left) */
+.drawer-right.drawer-sm,
+.drawer-left.drawer-sm {
+  width: 280px;
+  max-width: 80vw;
+}
+
+.drawer-right.drawer-md,
+.drawer-left.drawer-md {
+  width: 400px;
+  max-width: 85vw;
+}
+
+.drawer-right.drawer-lg,
+.drawer-left.drawer-lg {
+  width: 500px;
+  max-width: 90vw;
+}
+
+.drawer-right.drawer-full,
+.drawer-left.drawer-full {
+  width: 100vw;
+}
+
+/* للدرج العلوي/السفلي (top/bottom) */
+.drawer-top.drawer-sm,
+.drawer-bottom.drawer-sm {
+  height: 300px;
+  max-height: 50vh;
+}
+
+.drawer-top.drawer-md,
+.drawer-bottom.drawer-md {
+  height: 400px;
+  max-height: 60vh;
+}
+
+.drawer-top.drawer-lg,
+.drawer-bottom.drawer-lg {
+  height: 500px;
+  max-height: 80vh;
+}
+
+.drawer-top.drawer-full,
+.drawer-bottom.drawer-full {
+  height: 100vh;
+}
+
+/* Drawer Content - محتوى الدرج */
+.drawer-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Drawer Header - ترويسة الدرج */
+.drawer-header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background-color: var(--color-bg);
+  position: relative;
+  z-index: 1;
+}
+
+.drawer-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.drawer-close {
+  margin-right: var(--space-2);
+}
+
+/* Drawer Body - جسم الدرج */
+.drawer-body {
+  padding: var(--space-4);
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Drawer Footer - تذييل الدرج */
+.drawer-footer {
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  flex-shrink: 0;
+}
+
+/* مكون خاص لدرج الفلاتر */
+.drawer-filter-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.drawer-filter-actions .btn {
+  flex: 1;
+}
+
+/* تحسينات للجوال */
+@media (max-width: 767.98px) {
+  /* جعل كل الدروج تظهر من الأسفل في الجوال */
+  .drawer-right,
+  .drawer-left,
+  .drawer-top {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    max-height: 90vh;
+    transform: translateY(100%);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .drawer-right.drawer-open,
+  .drawer-left.drawer-open,
+  .drawer-top.drawer-open {
+    transform: translateY(0);
+  }
+
+  .drawer-header,
+  .drawer-body,
+  .drawer-footer {
+    padding: var(--space-3);
+  }
+
+  .drawer-title {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* تحسينات للتابلت */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .drawer-right.drawer-md,
+  .drawer-left.drawer-md {
+    max-width: 50vw;
+  }
+
+  .drawer-right.drawer-lg,
+  .drawer-left.drawer-lg {
+    max-width: 60vw;
+  }
+}
+
+/* إضافة مؤشر السحب للدرج السفلي */
+.drawer-bottom .drawer-header::before {
+  content: '';
+  position: absolute;
+  top: var(--space-2);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 4px;
+  background-color: var(--color-border-dark);
+  border-radius: var(--radius-full);
+}
+
+/* تحسينات إمكانية الوصول */
+.drawer:focus {
+  outline: none;
+}
+
+.drawer[aria-hidden="true"] {
+  display: none;
+}
+
+/* الوضع الداكن */
+:root.dark .drawer {
+  background-color: var(--color-bg-dark);
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* تحسينات الأداء */
+.drawer {
+  will-change: transform;
+}
+
+.drawer-backdrop {
+  will-change: opacity;
+}
+
+/* حالات التحميل */
+.drawer-content.loading {
+  pointer-events: none;
+}
+
+.drawer-content.loading .drawer-body::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}

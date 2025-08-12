@@ -1,0 +1,216 @@
+/* ===== Empty State Styles ===== */
+/* أنماط حالة عدم وجود بيانات */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  min-height: 300px;
+}
+
+/* أحجام Empty State */
+.empty-state-sm {
+  padding: var(--space-8) var(--space-4);
+  min-height: 200px;
+}
+
+.empty-state-md {
+  padding: var(--space-12) var(--space-6);
+  min-height: 300px;
+}
+
+.empty-state-lg {
+  padding: var(--space-16) var(--space-8);
+  min-height: 400px;
+}
+
+/* أيقونة Empty State */
+.empty-state-icon {
+  margin-bottom: var(--space-6);
+  color: var(--color-text-light);
+  font-size: 4rem;
+  opacity: 0.6;
+}
+
+.empty-state-sm .empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+}
+
+.empty-state-lg .empty-state-icon {
+  font-size: 5rem;
+  margin-bottom: var(--space-8);
+}
+
+/* عنوان Empty State */
+.empty-state-title {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.empty-state-sm .empty-state-title {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-lg .empty-state-title {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-4);
+}
+
+/* وصف Empty State */
+.empty-state-description {
+  margin: 0 0 var(--space-6) 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.empty-state-sm .empty-state-description {
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+  max-width: 300px;
+}
+
+.empty-state-lg .empty-state-description {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-8);
+  max-width: 500px;
+}
+
+/* إجراء Empty State */
+.empty-state-action {
+  margin-top: var(--space-2);
+}
+
+/* أنواع Empty State المختلفة */
+
+/* حالة البحث */
+.empty-state-search .empty-state-icon {
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+/* حالة السلة */
+.empty-state-cart .empty-state-icon {
+  color: var(--color-secondary);
+  opacity: 0.8;
+}
+
+/* حالة قائمة الأمنيات */
+.empty-state-wishlist .empty-state-icon {
+  color: #e74c3c;
+  opacity: 0.8;
+}
+
+/* حالة الطلبات */
+.empty-state-orders .empty-state-icon {
+  color: var(--color-info);
+  opacity: 0.8;
+}
+
+/* حالة الخطأ */
+.empty-state-error {
+  background-color: rgba(231, 76, 60, 0.05);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(231, 76, 60, 0.1);
+}
+
+.empty-state-error .empty-state-icon {
+  color: var(--color-danger);
+  opacity: 1;
+}
+
+.empty-state-error .empty-state-title {
+  color: var(--color-danger);
+}
+
+/* التجاوب */
+@media (max-width: 767.98px) {
+  .empty-state {
+    padding: var(--space-8) var(--space-4);
+    min-height: 250px;
+  }
+
+  .empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-4);
+  }
+
+  .empty-state-title {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-2);
+  }
+
+  .empty-state-description {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-4);
+    max-width: 280px;
+  }
+
+  .empty-state-lg {
+    padding: var(--space-10) var(--space-4);
+    min-height: 300px;
+  }
+
+  .empty-state-lg .empty-state-icon {
+    font-size: 3.5rem;
+  }
+
+  .empty-state-lg .empty-state-title {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* حالات خاصة للشبكات */
+.products-grid + .empty-state,
+.empty-state.in-grid {
+  grid-column: 1 / -1;
+  min-height: 200px;
+}
+
+/* تحسينات إمكانية الوصول */
+.empty-state[role="status"] {
+  /* للقارئات الشاشة */
+}
+
+/* حالة التحميل للـ Empty State */
+.empty-state.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* الوضع الداكن */
+:root.dark .empty-state-error {
+  background-color: rgba(231, 76, 60, 0.1);
+  border-color: rgba(231, 76, 60, 0.2);
+}
+
+/* تحسينات الحركة */
+.empty-state {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* إيقاف الحركة للمستخدمين الذين يفضلون ذلك */
+@media (prefers-reduced-motion: reduce) {
+  .empty-state {
+    animation: none;
+  }
+}

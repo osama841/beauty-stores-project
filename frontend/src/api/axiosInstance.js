@@ -24,71 +24,123 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ردود: التعامل مع 401/403
+// ردود: التعامل مع 401/403 والأخطاء العامة مع نظام Toast محسن
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // معالجة الاستجابات الناجحة مع رسائل خاصة
+    if (response.data?.message && response.config?.showSuccessMessage) {
+      window.dispatchEvent(new CustomEvent('api-success', {
+        detail: {
+          type: 'success',
+          message: response.data.message
+        }
+      }));
+    }
+    return response;
+  },
   (error) => {
     const status = error?.response?.status;
-    const message = error?.response?.data?.message || error.message;
+    const data = error?.response?.data;
+    const message = data?.message || error.message;
 
-    if (status === 403) {
-      console.error('Access denied: You do not have permission to perform this action');
-      // إشعار للمستخدم
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('api-error', {
-          detail: {
-            type: 'error',
-            message: 'ليس لديك صلاحية للقيام بهذا الإجراء'
-          }
-        }));
-      }
-    }
-
-    if (status === 401) {
-      console.error('Unauthorized: Please log in again');
-      // تنظيف محلي
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      
-      // إشعار للمستخدم
-      if (typeof window !== 'undefined') {
+    // معالجة أخطاء التحقق من الصحة (422)
+    if (status === 422) {
+      const validationErrors = data?.errors;
+      if (validationErrors) {
+        // عرض أول خطأ في الحقول
+        const firstFieldErrors = Object.values(validationErrors)[0];
+        const firstError = Array.isArray(firstFieldErrors) ? firstFieldErrors[0] : firstFieldErrors;
+        
         window.dispatchEvent(new CustomEvent('api-error', {
           detail: {
             type: 'warning',
-            message: 'انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى'
+            message: firstError || 'بيانات غير صحيحة'
           }
         }));
       }
+      return Promise.reject(error);
+    }
+
+    // عدم وجود صلاحية (403)
+    if (status === 403) {
+      console.error('Access denied:', message);
+      window.dispatchEvent(new CustomEvent('api-error', {
+        detail: {
+          type: 'error',
+          message: message || 'ليس لديك صلاحية للقيام بهذا الإجراء'
+        }
+      }));
+      return Promise.reject(error);
+    }
+
+    // انتهاء الجلسة (401)
+    if (status === 401) {
+      console.error('Unauthorized:', message);
       
-      // إعادة توجيه لصفحة الدخول
+      // تنظيف البيانات المحلية
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      
+      // إشعار المستخدم
+      window.dispatchEvent(new CustomEvent('api-error', {
+        detail: {
+          type: 'warning',
+          message: 'انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى'
+        }
+      }));
+      
+      // إعادة توجيه بعد وقت قصير
       setTimeout(() => {
-        window.location.href = '/login';
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
       }, 2000);
+      
+      return Promise.reject(error);
     }
 
-    // أخطاء الخادم العامة
+    // عدم العثور على المورد (404)
+    if (status === 404) {
+      window.dispatchEvent(new CustomEvent('api-error', {
+        detail: {
+          type: 'warning',
+          message: message || 'المورد المطلوب غير موجود'
+        }
+      }));
+      return Promise.reject(error);
+    }
+
+    // أخطاء الخادم (500+)
     if (status >= 500) {
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('api-error', {
-          detail: {
-            type: 'error',
-            message: 'خطأ في الخادم. يرجى المحاولة لاحقاً'
-          }
-        }));
-      }
+      console.error('Server error:', message);
+      window.dispatchEvent(new CustomEvent('api-error', {
+        detail: {
+          type: 'error',
+          message: 'خطأ في الخادم. يرجى المحاولة لاحقاً'
+        }
+      }));
+      return Promise.reject(error);
     }
 
-    // أخطاء الشبكة
+    // أخطاء الشبكة (لا توجد استجابة)
     if (!status) {
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('api-error', {
-          detail: {
-            type: 'error',
-            message: 'تحقق من اتصال الإنترنت وحاول مرة أخرى'
-          }
-        }));
-      }
+      console.error('Network error:', error.message);
+      window.dispatchEvent(new CustomEvent('api-error', {
+        detail: {
+          type: 'error',
+          message: 'تحقق من اتصال الإنترنت وحاول مرة أخرى'
+        }
+      }));
+      return Promise.reject(error);
     }
+
+    // أخطاء أخرى
+    window.dispatchEvent(new CustomEvent('api-error', {
+      detail: {
+        type: 'error',
+        message: message || 'حدث خطأ غير متوقع'
+      }
+    }));
 
     return Promise.reject(error);
   }

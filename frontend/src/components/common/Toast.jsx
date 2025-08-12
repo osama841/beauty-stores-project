@@ -54,10 +54,17 @@ export const ToastProvider = ({ children }) => {
       addToast(message, type);
     };
 
+    const handleApiSuccess = (event) => {
+      const { type, message } = event.detail;
+      addToast(message, type);
+    };
+
     window.addEventListener('api-error', handleApiError);
+    window.addEventListener('api-success', handleApiSuccess);
     
     return () => {
       window.removeEventListener('api-error', handleApiError);
+      window.removeEventListener('api-success', handleApiSuccess);
     };
   }, []);
 
@@ -85,6 +92,12 @@ export const ToastProvider = ({ children }) => {
     warning,
     info
   };
+
+  // تعيين المرجع العام للاستخدام خارج السياق
+  useEffect(() => {
+    setGlobalToastRef(value);
+    return () => setGlobalToastRef(null);
+  }, [value]);
 
   return (
     <ToastContext.Provider value={value}>
