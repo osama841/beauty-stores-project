@@ -1,0 +1,423 @@
+/* ===== Skeleton Loading Components ===== */
+/* أنماط هيكل التحميل */
+
+/* === الهيكل الأساسي === */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-light) 25%,
+    rgba(255, 255, 255, 0.5) 50%,
+    var(--color-bg-light) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* === أشكال مختلفة === */
+.skeleton-text {
+  height: 1em;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-text:last-child {
+  margin-bottom: 0;
+}
+
+.skeleton-text.line-1 {
+  width: 100%;
+}
+
+.skeleton-text.line-2 {
+  width: 85%;
+}
+
+.skeleton-text.line-3 {
+  width: 70%;
+}
+
+.skeleton-title {
+  height: 1.5em;
+  width: 60%;
+  margin-bottom: var(--space-3);
+}
+
+.skeleton-paragraph {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-circle {
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+.skeleton-rounded {
+  border-radius: var(--radius-md);
+}
+
+.skeleton-rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+/* === أحجام مختلفة === */
+.skeleton-sm {
+  height: 1rem;
+}
+
+.skeleton-md {
+  height: 1.5rem;
+}
+
+.skeleton-lg {
+  height: 2rem;
+}
+
+.skeleton-xl {
+  height: 3rem;
+}
+
+/* === هيكل بطاقة المنتج === */
+.skeleton-product-card {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-border-radius);
+  padding: 0;
+  overflow: hidden;
+}
+
+.skeleton-product-image {
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-light) 25%,
+    rgba(255, 255, 255, 0.3) 50%,
+    var(--color-bg-light) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-product-content {
+  padding: var(--space-4);
+}
+
+.skeleton-product-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-product-stars {
+  width: 80px;
+  height: 16px;
+}
+
+.skeleton-product-rating-count {
+  width: 40px;
+  height: 14px;
+}
+
+.skeleton-product-title {
+  height: 1.2em;
+  margin-bottom: var(--space-1);
+}
+
+.skeleton-product-title:last-of-type {
+  width: 70%;
+  margin-bottom: var(--space-3);
+}
+
+.skeleton-product-brand {
+  width: 60px;
+  height: 14px;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-product-price {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.skeleton-product-price-current {
+  width: 80px;
+  height: 20px;
+}
+
+.skeleton-product-price-original {
+  width: 60px;
+  height: 16px;
+}
+
+.skeleton-product-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.skeleton-product-button {
+  flex: 1;
+  height: 40px;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-product-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+}
+
+/* === شبكة هياكل المنتجات === */
+.skeleton-products-grid {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+@media (max-width: 991.98px) {
+  .skeleton-products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .skeleton-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+  
+  .skeleton-product-content {
+    padding: var(--space-3);
+  }
+}
+
+/* === هيكل قائمة === */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.skeleton-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.skeleton-list-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton-list-content {
+  flex: 1;
+}
+
+.skeleton-list-title {
+  width: 70%;
+  height: 1.2em;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-list-subtitle {
+  width: 50%;
+  height: 1em;
+}
+
+/* === هيكل جدول === */
+.skeleton-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.skeleton-table th,
+.skeleton-table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: right;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.skeleton-table-cell {
+  height: 1.2em;
+  width: 80%;
+}
+
+.skeleton-table-cell.short {
+  width: 40%;
+}
+
+.skeleton-table-cell.long {
+  width: 100%;
+}
+
+/* === هيكل نص طويل === */
+.skeleton-article {
+  max-width: 800px;
+}
+
+.skeleton-article-title {
+  width: 80%;
+  height: 2.5em;
+  margin-bottom: var(--space-6);
+}
+
+.skeleton-article-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.skeleton-article-author {
+  width: 100px;
+  height: 1em;
+}
+
+.skeleton-article-date {
+  width: 80px;
+  height: 1em;
+}
+
+.skeleton-article-image {
+  width: 100%;
+  height: 300px;
+  margin-bottom: var(--space-6);
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-article-paragraph {
+  margin-bottom: var(--space-4);
+}
+
+/* === هيكل نموذج === */
+.skeleton-form {
+  max-width: 500px;
+}
+
+.skeleton-form-group {
+  margin-bottom: var(--space-4);
+}
+
+.skeleton-form-label {
+  width: 120px;
+  height: 1em;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-form-input {
+  width: 100%;
+  height: 44px;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-form-textarea {
+  width: 100%;
+  height: 100px;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-form-button {
+  width: 120px;
+  height: 44px;
+  border-radius: var(--radius-md);
+}
+
+/* === حالات خاصة === */
+.skeleton-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+}
+
+.skeleton-empty-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: var(--space-4);
+}
+
+.skeleton-empty-title {
+  width: 200px;
+  height: 1.5em;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-empty-subtitle {
+  width: 160px;
+  height: 1em;
+}
+
+/* === تحسينات الوصولية === */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .skeleton-product-image {
+    animation: none;
+    background: var(--color-bg-light);
+  }
+}
+
+/* === أوضاع مخصصة === */
+.skeleton-pulse {
+  animation: skeleton-pulse 1.5s infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.skeleton-wave {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-wave::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: skeleton-wave 1.5s infinite;
+}
+
+@keyframes skeleton-wave {
+  100% {
+    transform: translateX(100%);
+  }
+}

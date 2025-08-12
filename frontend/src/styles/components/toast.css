@@ -1,0 +1,405 @@
+/* ===== Toast Notification Components ===== */
+/* نظام الإشعارات */
+
+/* === حاوي الإشعارات === */
+.toast-container {
+  position: fixed;
+  top: var(--space-6);
+  right: var(--space-6);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 400px;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* موضع بديل للجوال */
+@media (max-width: 767.98px) {
+  .toast-container {
+    top: var(--space-4);
+    right: var(--space-4);
+    left: var(--space-4);
+    max-width: none;
+  }
+}
+
+/* === الإشعار الأساسي === */
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all var(--transition-base);
+  pointer-events: auto;
+  min-height: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* === إظهار الإشعار === */
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* === إخفاء الإشعار === */
+.toast.hide {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+/* === أيقونة الإشعار === */
+.toast-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+/* === محتوى الإشعار === */
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin: 0 0 var(--space-1) 0;
+  line-height: 1.4;
+}
+
+.toast-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* === زر الإغلاق === */
+.toast-close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.toast-close:hover {
+  background-color: var(--color-bg-light);
+  color: var(--color-text);
+}
+
+/* === أنواع الإشعارات === */
+.toast.success {
+  border-color: var(--color-success);
+}
+
+.toast.success .toast-icon {
+  background-color: var(--color-success);
+  color: var(--color-text-inverse);
+}
+
+.toast.success .toast-title {
+  color: var(--color-success);
+}
+
+.toast.error {
+  border-color: var(--color-danger);
+}
+
+.toast.error .toast-icon {
+  background-color: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+.toast.error .toast-title {
+  color: var(--color-danger);
+}
+
+.toast.warning {
+  border-color: var(--color-warning);
+}
+
+.toast.warning .toast-icon {
+  background-color: var(--color-warning);
+  color: var(--color-text);
+}
+
+.toast.warning .toast-title {
+  color: #d97706; /* لون أغمق للتحذير */
+}
+
+.toast.info {
+  border-color: var(--color-info);
+}
+
+.toast.info .toast-icon {
+  background-color: var(--color-info);
+  color: var(--color-text-inverse);
+}
+
+.toast.info .toast-title {
+  color: var(--color-info);
+}
+
+/* === شريط التقدم === */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: currentColor;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  opacity: 0.3;
+  transition: width linear;
+}
+
+.toast.success .toast-progress {
+  background-color: var(--color-success);
+}
+
+.toast.error .toast-progress {
+  background-color: var(--color-danger);
+}
+
+.toast.warning .toast-progress {
+  background-color: var(--color-warning);
+}
+
+.toast.info .toast-progress {
+  background-color: var(--color-info);
+}
+
+/* === أحجام مختلفة === */
+.toast.compact {
+  padding: var(--space-3);
+  min-height: 50px;
+}
+
+.toast.compact .toast-title {
+  font-size: var(--font-size-xs);
+}
+
+.toast.compact .toast-message {
+  font-size: var(--font-size-xs);
+}
+
+.toast.large {
+  padding: var(--space-6);
+  min-height: 80px;
+}
+
+.toast.large .toast-title {
+  font-size: var(--font-size-base);
+}
+
+.toast.large .toast-message {
+  font-size: var(--font-size-base);
+}
+
+.toast.large .toast-icon {
+  width: 32px;
+  height: 32px;
+}
+
+/* === إشعارات بدون عنوان === */
+.toast.no-title .toast-title {
+  display: none;
+}
+
+.toast.no-title .toast-message {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+/* === إشعارات مع أزرار === */
+.toast-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.toast-action {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toast-action:hover {
+  background-color: var(--color-bg-light);
+}
+
+.toast-action.primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.toast-action.primary:hover {
+  background-color: var(--color-primary);
+  filter: brightness(0.9);
+}
+
+/* === تأثيرات الدخول والخروج === */
+.toast-enter {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.toast-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all var(--transition-base);
+}
+
+.toast-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-exit-active {
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all var(--transition-base);
+}
+
+/* === موضع بديل (أعلى الوسط) === */
+.toast-container.top-center {
+  top: var(--space-6);
+  right: 50%;
+  transform: translateX(50%);
+  left: auto;
+}
+
+.toast-container.top-center .toast {
+  transform: translateY(-100%);
+}
+
+.toast-container.top-center .toast.show {
+  transform: translateY(0);
+}
+
+.toast-container.top-center .toast.hide {
+  transform: translateY(-100%);
+}
+
+/* === موضع بديل (أسفل) === */
+.toast-container.bottom-right {
+  top: auto;
+  bottom: var(--space-6);
+}
+
+.toast-container.bottom-right .toast {
+  transform: translateY(100%);
+}
+
+.toast-container.bottom-right .toast.show {
+  transform: translateY(0);
+}
+
+.toast-container.bottom-right .toast.hide {
+  transform: translateY(100%);
+}
+
+/* === تحسينات الوصولية === */
+.toast[role="alert"] {
+  /* إعلام قارئات الشاشة */
+}
+
+.toast[aria-live="polite"] {
+  /* للإشعارات غير العاجلة */
+}
+
+.toast[aria-live="assertive"] {
+  /* للإشعارات العاجلة */
+}
+
+/* === تقليل الحركة === */
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast-enter-active,
+  .toast-exit-active {
+    transition: opacity var(--transition-fast);
+  }
+  
+  .toast {
+    transform: none;
+  }
+  
+  .toast.show {
+    transform: none;
+  }
+  
+  .toast.hide {
+    transform: none;
+  }
+}
+
+/* === استجابة للشاشات الصغيرة === */
+@media (max-width: 575.98px) {
+  .toast {
+    padding: var(--space-3);
+    min-height: 50px;
+  }
+  
+  .toast-title {
+    font-size: var(--font-size-xs);
+  }
+  
+  .toast-message {
+    font-size: var(--font-size-xs);
+  }
+  
+  .toast-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .toast-close {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* === شكل مبسط للجوال === */
+@media (max-width: 767.98px) {
+  .toast-container {
+    bottom: var(--space-4);
+    top: auto;
+  }
+  
+  .toast {
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+  }
+}

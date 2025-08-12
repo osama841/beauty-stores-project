@@ -1,0 +1,277 @@
+/* ===== Button Components ===== */
+/* أنماط الأزرار الموحدة */
+
+/* === الزر الأساسي === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--btn-border-radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+  white-space: nowrap;
+  min-height: 44px; /* لضمان سهولة النقر على الجوال */
+}
+
+.btn:focus {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* === أزرار الألوان المختلفة === */
+.btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  filter: brightness(0.95);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-text-inverse);
+  filter: brightness(0.95);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-outline-primary:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline-secondary {
+  background-color: transparent;
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
+}
+
+.btn-outline-secondary:hover:not(:disabled) {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-danger {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--color-text-inverse);
+  filter: brightness(0.9);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-success {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-text-inverse);
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-text-inverse);
+  filter: brightness(0.9);
+  box-shadow: var(--shadow-md);
+}
+
+/* === أحجام الأزرار === */
+.btn-sm {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  min-height: 36px;
+}
+
+.btn-lg {
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--font-size-lg);
+  min-height: 52px;
+}
+
+/* === أزرار خاصة === */
+.btn-icon {
+  padding: var(--space-3);
+  min-width: 44px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+}
+
+.btn-icon-sm {
+  padding: var(--space-2);
+  min-width: 36px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-text);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--color-bg-light);
+  border-color: transparent;
+  color: var(--color-text);
+}
+
+.btn-link {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-primary);
+  text-decoration: underline;
+  padding: var(--space-1) var(--space-2);
+  min-height: auto;
+}
+
+.btn-link:hover:not(:disabled) {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-primary);
+  filter: brightness(0.9);
+  text-decoration: none;
+}
+
+/* === زر مع لودر === */
+.btn-loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: btn-spin 1s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* === أزرار ثابتة (CTA للجوال) === */
+.btn-fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  border-radius: 0;
+  padding: var(--space-4) var(--space-6);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+@media (min-width: 992px) {
+  .btn-fixed-bottom {
+    position: static;
+    border-radius: var(--btn-border-radius);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: none;
+  }
+}
+
+/* === مجموعة أزرار === */
+.btn-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.btn-group .btn:not(:last-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.btn-group .btn:not(:first-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 0;
+}
+
+/* === تحسينات الوصولية === */
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+  
+  .btn:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* === تحسينات الاستجابة === */
+@media (max-width: 767.98px) {
+  .btn {
+    min-height: 48px; /* أكبر قليلاً على الجوال */
+    padding: var(--space-3) var(--space-4);
+  }
+  
+  .btn-sm {
+    min-height: 40px;
+  }
+  
+  .btn-lg {
+    min-height: 56px;
+  }
+  
+  /* أزرار بعرض كامل على الجوال */
+  .btn-mobile-full {
+    width: 100%;
+  }
+}

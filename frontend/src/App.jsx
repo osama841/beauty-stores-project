@@ -44,6 +44,9 @@ import UserWishlist from './pages/MyAccount/UserWishlist';
 // السلة (المزوّد الجديد)
 import { CartProvider } from './contexts/CartContext';
 
+// نظام الإشعارات
+import { ToastProvider } from './components/common/Toast';
+
 // حمايات المسارات
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -168,10 +171,12 @@ const AppContent = () => {
 function App() {
   return (
     <Router>
-      {/* ✅ Auth أولاً، ثم Cart عشان السلة تعتمد على حالة الدخول */}
+      {/* ✅ Auth أولاً، ثم Cart، ثم Toast */}
       <AuthProvider>
         <CartProvider>
-          <AppContent />
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
         </CartProvider>
       </AuthProvider>
     </Router>

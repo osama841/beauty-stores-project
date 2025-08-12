@@ -29,10 +29,19 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status;
+    const message = error?.response?.data?.message || error.message;
 
     if (status === 403) {
       console.error('Access denied: You do not have permission to perform this action');
-      // TODO: تقدر تعرض Toast هنا لو تحب
+      // إشعار للمستخدم
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('api-error', {
+          detail: {
+            type: 'error',
+            message: 'ليس لديك صلاحية للقيام بهذا الإجراء'
+          }
+        }));
+      }
     }
 
     if (status === 401) {
@@ -40,10 +49,45 @@ api.interceptors.response.use(
       // تنظيف محلي
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
+      
+      // إشعار للمستخدم
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('api-error', {
+          detail: {
+            type: 'warning',
+            message: 'انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى'
+          }
+        }));
+      }
+      
       // إعادة توجيه لصفحة الدخول
-      window.location.href = '/login';
-      // لو تبغى بدون إعادة تحميل الصفحة:
-      // window.dispatchEvent(new CustomEvent('auth-unauthorized'));
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    }
+
+    // أخطاء الخادم العامة
+    if (status >= 500) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('api-error', {
+          detail: {
+            type: 'error',
+            message: 'خطأ في الخادم. يرجى المحاولة لاحقاً'
+          }
+        }));
+      }
+    }
+
+    // أخطاء الشبكة
+    if (!status) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('api-error', {
+          detail: {
+            type: 'error',
+            message: 'تحقق من اتصال الإنترنت وحاول مرة أخرى'
+          }
+        }));
+      }
     }
 
     return Promise.reject(error);
