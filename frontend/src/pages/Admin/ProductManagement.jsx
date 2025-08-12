@@ -3,244 +3,244 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { getProducts, createProduct, updateProduct, deleteProduct } from '../../api/products';
 import { getCategories } from '../../api/categories';
 import { getBrands } from '../../api/brands';
-import '../../styles/admin/ProductManagement.css'; // تأكد من تحديث هذا الملف إذا لزم الأمر
 import { FaPlusCircle, FaPencilAlt, FaTrashAlt } from 'react-icons/fa';
 
 const ProductManagement = () => {
+  // === Data ===
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+
+  // === UI state ===
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
-  const [newProductName, setNewProductName] = useState('');
-  const [newProductSlug, setNewProductSlug] = useState('');
-  const [newProductDescription, setNewProductDescription] = useState('');
-  const [newProductShortDescription, setNewProductShortDescription] = useState('');
-  const [newProductPrice, setNewProductPrice] = useState('');
-  const [newProductCompareAtPrice, setNewProductCompareAtPrice] = useState('');
-  const [newProductCostPrice, setNewProductCostPrice] = useState('');
-  const [newProductStockQuantity, setNewProductStockQuantity] = useState('');
-  const [newProductLowStockThreshold, setNewProductLowStockThreshold] = useState('');
-  const [newProductSKU, setNewProductSKU] = useState('');
-  const [newProductWeight, setNewProductWeight] = useState('');
-  const [newProductLength, setNewProductLength] = useState('');
-  const [newProductWidth, setNewProductWidth] = useState('');
-  const [newProductHeight, setNewProductHeight] = useState('');
-  const [newProductCategoryId, setNewProductCategoryId] = useState('');
-  const [newProductBrandId, setNewProductBrandId] = useState('');
-  const [newProductMainImageFile, setNewProductMainImageFile] = useState(null);
-  const [newProductMainImagePreview, setNewProductMainImagePreview] = useState(null);
-  const [newProductAdditionalImageFiles, setNewProductAdditionalImageFiles] = useState([]);
-  const [newProductAdditionalImagePreviews, setNewProductAdditionalImagePreviews] = useState([]);
+  // === Form state ===
+  const [name, setName] = useState('');
+  const [slug, setSlug] = useState('');
+  const [description, setDescription] = useState('');
+  const [shortDescription, setShortDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [compareAtPrice, setCompareAtPrice] = useState('');
+  const [costPrice, setCostPrice] = useState('');
+  const [stockQuantity, setStockQuantity] = useState('');
+  const [lowStockThreshold, setLowStockThreshold] = useState('');
+  const [sku, setSku] = useState('');                  // ✅ SKU إلزامي
+  const [weight, setWeight] = useState('');
+  const [length, setLength] = useState('');
+  const [width, setWidth] = useState('');
+  const [height, setHeight] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [brandId, setBrandId] = useState('');
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [status, setStatus] = useState('active');
+
+  // Images
+  const [mainImageFile, setMainImageFile] = useState(null);
+  const [mainImagePreview, setMainImagePreview] = useState(null);
+  const [additionalImageFiles, setAdditionalImageFiles] = useState([]);
+  const [additionalImagePreviews, setAdditionalImagePreviews] = useState([]);
   const [existingAdditionalImages, setExistingAdditionalImages] = useState([]);
   const [removedAdditionalImageIds, setRemovedAdditionalImageIds] = useState([]);
-
-  const [newProductIsFeatured, setNewProductIsFeatured] = useState(false);
-  const [newProductStatus, setNewProductStatus] = useState('active');
   const [mainImageRemoved, setMainImageRemoved] = useState(false);
 
-  const [editingProduct, setEditingProduct] = useState(null);
+  // Errors
   const [formError, setFormError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
 
+  // Refs
   const mainFileInputRef = useRef(null);
   const additionalFileInputRef = useRef(null);
-  const [showModal, setShowModal] = useState(false);
 
-  const generateSlug = (name) => {
-    return name
-      .toString()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]+/g, '')
+  // === Helpers ===
+  const generateSlug = (val) =>
+    val.toString()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase().trim()
+      .replace(/\s+/g, '-').replace(/[^\w-]+/g, '')
       .replace(/--+/g, '-');
-  };
 
   const handleNameChange = (e) => {
-    const name = e.target.value;
-    setNewProductName(name);
-    if (!editingProduct) {
-      setNewProductSlug(generateSlug(name));
-    }
+    const v = e.target.value;
+    setName(v);
+    if (!editingProduct) setSlug(generateSlug(v));
   };
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const resetForm = () => {
+    setName(''); setSlug(''); setDescription(''); setShortDescription('');
+    setPrice(''); setCompareAtPrice(''); setCostPrice('');
+    setStockQuantity(''); setLowStockThreshold('');
+    setSku(''); setWeight(''); setLength(''); setWidth(''); setHeight('');
+    setCategoryId(''); setBrandId('');
+    setIsFeatured(false); setStatus('active');
+
+    setMainImageFile(null); setMainImagePreview(null);
+    setAdditionalImageFiles([]); setAdditionalImagePreviews([]);
+    setExistingAdditionalImages([]); setRemovedAdditionalImageIds([]);
+    setMainImageRemoved(false);
+
+    setEditingProduct(null);
+    setFormError(null);
+    setValidationErrors({});
+
+    if (mainFileInputRef.current) mainFileInputRef.current.value = '';
+    if (additionalFileInputRef.current) additionalFileInputRef.current.value = '';
+  };
+
+  const openAddModal = () => { resetForm(); setShowModal(true); };
+
+  const openEditModal = (p) => {
+    setEditingProduct(p);
+    setName(p.name);
+    setSlug(p.slug || '');
+    setDescription(p.description || '');
+    setShortDescription(p.short_description || '');
+    setPrice(p.price);
+    setCompareAtPrice(p.compare_at_price || '');
+    setCostPrice(p.cost_price || '');
+    setStockQuantity(p.stock_quantity);
+    setLowStockThreshold(p.low_stock_threshold);
+    setSku(p.sku || '');               // ✅ تحميل SKU
+    setWeight(p.weight || '');
+    setLength(p.length || '');
+    setWidth(p.width || '');
+    setHeight(p.height || '');
+    setCategoryId(p.category_id);
+    setBrandId(p.brand_id || '');
+    setIsFeatured(!!p.is_featured);
+    setStatus(p.status);
+
+    setMainImageFile(null);
+    setMainImagePreview(p.main_image_url || null);
+    setAdditionalImageFiles([]);
+    setAdditionalImagePreviews([]);
+    setExistingAdditionalImages(p.images || []);
+    setRemovedAdditionalImageIds([]);
+    setMainImageRemoved(false);
+
+    setFormError(null); setValidationErrors({});
+    if (mainFileInputRef.current) mainFileInputRef.current.value = '';
+    if (additionalFileInputRef.current) additionalFileInputRef.current.value = '';
+
+    setShowModal(true);
+  };
+
+  const closeModal = () => { setShowModal(false); resetForm(); };
+
+  // === Fetch ===
+  const fetchAll = useCallback(async () => {
+    setLoading(true); setError(null);
     try {
-      const productsData = await getProducts();
-      const processedProducts = productsData.data.map(product => ({
-        ...product,
-        price: parseFloat(product.price),
-        compare_at_price: product.compare_at_price ? parseFloat(product.compare_at_price) : null,
-        cost_price: product.cost_price ? parseFloat(product.cost_price) : null,
-        stock_quantity: parseInt(product.stock_quantity),
-        low_stock_threshold: parseInt(product.low_stock_threshold),
-        weight: product.weight ? parseFloat(product.weight) : null,
-        length: product.length ? parseFloat(product.length) : null,
-        width: product.width ? parseFloat(product.width) : null,
-        height: product.height ? parseFloat(product.height) : null,
+      const productsRes = await getProducts();
+      const processed = (productsRes?.data || []).map(p => ({
+        ...p,
+        price: parseFloat(p.price),
+        compare_at_price: p.compare_at_price ? parseFloat(p.compare_at_price) : null,
+        cost_price: p.cost_price ? parseFloat(p.cost_price) : null,
+        stock_quantity: parseInt(p.stock_quantity),
+        low_stock_threshold: parseInt(p.low_stock_threshold),
+        weight: p.weight ? parseFloat(p.weight) : null,
+        length: p.length ? parseFloat(p.length) : null,
+        width: p.width ? parseFloat(p.width) : null,
+        height: p.height ? parseFloat(p.height) : null,
       }));
-      setProducts(processedProducts);
-      const categoriesData = await getCategories();
-      setCategories(categoriesData);
-      const brandsData = await getBrands();
-      setBrands(brandsData);
+      setProducts(processed);
+
+      const cats = await getCategories();
+      setCategories(cats || []);
+
+      const brs = await getBrands();
+      setBrands(brs || []);
     } catch (err) {
-      console.error('فشل تحميل البيانات. الرجاء المحاولة لاحقاً:', err);
-      let errorMessage = 'حدث خطأ غير متوقع أثناء تحميل البيانات.';
-      if (err && typeof err === 'object') {
-          if (err.message) {
-              errorMessage = err.message;
-          }
-          if (err.errors) {
-              errorMessage = Object.values(err.errors).flat().join(' ');
-          } else if (err.error) {
-              errorMessage = err.error;
-          }
-      }
-      setError(errorMessage);
+      console.error('فشل تحميل البيانات:', err);
+      let msg = 'حدث خطأ أثناء تحميل البيانات.';
+      if (err?.message) msg = err.message;
+      if (err?.errors) msg = Object.values(err.errors).flat().join(' ');
+      else if (err?.error) msg = err.error;
+      setError(msg);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  const resetForm = () => {
-    setNewProductName('');
-    setNewProductSlug('');
-    setNewProductDescription('');
-    setNewProductShortDescription('');
-    setNewProductPrice('');
-    setNewProductCompareAtPrice('');
-    setNewProductCostPrice('');
-    setNewProductStockQuantity('');
-    setNewProductLowStockThreshold('');
-    setNewProductSKU('');
-    setNewProductWeight('');
-    setNewProductLength('');
-    setNewProductWidth('');
-    setNewProductHeight('');
-    setNewProductCategoryId('');
-    setNewProductBrandId('');
-    setNewProductMainImageFile(null);
-    setNewProductMainImagePreview(null);
-    setNewProductAdditionalImageFiles([]);
-    setNewProductAdditionalImagePreviews([]);
-    setExistingAdditionalImages([]);
-    setRemovedAdditionalImageIds([]);
-    setNewProductIsFeatured(false);
-    setNewProductStatus('active');
-    setMainImageRemoved(false);
-    setEditingProduct(null);
-    setFormError(null);
-    setValidationErrors({});
-    if (mainFileInputRef.current) {
-      mainFileInputRef.current.value = '';
-    }
-    if (additionalFileInputRef.current) {
-      additionalFileInputRef.current.value = '';
+  // === Image handlers ===
+  const onMainImageChange = (e) => {
+    const f = e.target.files?.[0];
+    if (f) {
+      setMainImageFile(f);
+      setMainImagePreview(URL.createObjectURL(f));
+      setMainImageRemoved(false);
+    } else {
+      setMainImageFile(null);
+      setMainImagePreview(null);
     }
   };
-
-  const handleAddProductClick = () => {
-    resetForm();
-    setShowModal(true);
+  const removeMainImage = () => {
+    setMainImageFile(null); setMainImagePreview(null);
+    setMainImageRemoved(true);
+    if (mainFileInputRef.current) mainFileInputRef.current.value = '';
+  };
+  const onAdditionalImagesChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    setAdditionalImageFiles(prev => [...prev, ...files]);
+    setAdditionalImagePreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
+  };
+  const removeNewAdditionalImage = (idx) => {
+    setAdditionalImageFiles(prev => prev.filter((_, i) => i !== idx));
+    setAdditionalImagePreviews(prev => prev.filter((_, i) => i !== idx));
+  };
+  const removeExistingAdditionalImage = (imageId) => {
+    setRemovedAdditionalImageIds(prev => [...prev, imageId]);
+    setExistingAdditionalImages(prev => prev.filter(img => img.image_id !== imageId));
   };
 
-  const handleEditClick = (product) => {
-    setEditingProduct(product);
-    setNewProductName(product.name);
-    setNewProductSlug(product.slug);
-    setNewProductDescription(product.description);
-    setNewProductShortDescription(product.short_description || '');
-    setNewProductPrice(product.price);
-    setNewProductCompareAtPrice(product.compare_at_price || '');
-    setNewProductCostPrice(product.cost_price || '');
-    setNewProductStockQuantity(product.stock_quantity);
-    setNewProductLowStockThreshold(product.low_stock_threshold);
-    setNewProductSKU(product.sku || '');
-    setNewProductWeight(product.weight || '');
-    setNewProductLength(product.length || '');
-    setNewProductWidth(product.width || '');
-    setNewProductHeight(product.height || '');
-    setNewProductCategoryId(product.category_id);
-    setNewProductBrandId(product.brand_id || '');
-    setNewProductMainImageFile(null);
-    setNewProductMainImagePreview(product.main_image_url || null);
-    setNewProductAdditionalImageFiles([]);
-    setNewProductAdditionalImagePreviews([]);
-    setExistingAdditionalImages(product.images || []);
-    setRemovedAdditionalImageIds([]);
-    setNewProductIsFeatured(product.is_featured);
-    setNewProductStatus(product.status);
-    setMainImageRemoved(false);
-    if (mainFileInputRef.current) {
-      mainFileInputRef.current.value = '';
-    }
-    if (additionalFileInputRef.current) {
-      additionalFileInputRef.current.value = '';
-    }
-    setFormError(null);
-    setValidationErrors({});
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    resetForm();
-  };
-
+  // === Submit ===
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setFormError(null);
-    setValidationErrors({});
+    setFormError(null); setValidationErrors({});
 
-    const productData = {
-      name: newProductName,
-      slug: newProductSlug,
-      description: newProductDescription,
-      short_description: newProductShortDescription,
-      price: parseFloat(newProductPrice),
-      compare_at_price: newProductCompareAtPrice ? parseFloat(newProductCompareAtPrice) : null,
-      cost_price: newProductCostPrice ? parseFloat(newProductCostPrice) : null,
-      stock_quantity: parseInt(newProductStockQuantity),
-      low_stock_threshold: parseInt(newProductLowStockThreshold),
-      sku: newProductSKU,
-      weight: newProductWeight ? parseFloat(newProductWeight) : null,
-      length: newProductLength ? parseFloat(newProductLength) : null,
-      width: newProductWidth ? parseFloat(newProductWidth) : null,
-      height: newProductHeight ? parseFloat(newProductHeight) : null,
-      category_id: newProductCategoryId,
-      brand_id: newProductBrandId,
-      is_featured: newProductIsFeatured,
-      status: newProductStatus,
+    const payload = {
+      name,
+      slug,
+      description,
+      short_description: shortDescription,
+      price: price ? parseFloat(price) : null,
+      compare_at_price: compareAtPrice ? parseFloat(compareAtPrice) : null,
+      cost_price: costPrice ? parseFloat(costPrice) : null,
+      stock_quantity: stockQuantity ? parseInt(stockQuantity) : 0,
+      low_stock_threshold: lowStockThreshold ? parseInt(lowStockThreshold) : 0,
+      sku, // ✅ إرسال SKU
+      weight: weight ? parseFloat(weight) : null,
+      length: length ? parseFloat(length) : null,
+      width: width ? parseFloat(width) : null,
+      height: height ? parseFloat(height) : null,
+      category_id: categoryId,
+      brand_id: brandId,
+      is_featured: !!isFeatured,
+      status,
     };
 
     try {
       if (editingProduct) {
         await updateProduct(
           editingProduct.product_id,
-          productData,
-          newProductMainImageFile,
+          payload,
+          mainImageFile,
           mainImageRemoved,
-          newProductAdditionalImageFiles,
+          additionalImageFiles,
           removedAdditionalImageIds
         );
         alert('تم تحديث المنتج بنجاح!');
       } else {
-        await createProduct(productData, newProductMainImageFile, newProductAdditionalImageFiles);
+        await createProduct(payload, mainImageFile, additionalImageFiles);
         alert('تم إضافة المنتج بنجاح!');
       }
-      handleCloseModal();
-      fetchData();
+      closeModal();
+      fetchAll();
     } catch (err) {
       console.error('خطأ في العملية:', err);
       if (err && typeof err === 'object' && err.errors) {
@@ -252,166 +252,110 @@ const ProductManagement = () => {
     }
   };
 
+  // === Delete ===
   const handleDelete = async (id) => {
-    if (window.confirm('هل أنت متأكد أنك تريد حذف هذا المنتج؟')) {
-      try {
-        await deleteProduct(id);
-        alert('تم حذف المنتج بنجاح!');
-        fetchData();
-      } catch (err) {
-        console.error('خطأ في حذف المنتج:', err);
-        alert('فشل حذف المنتج: ' + (err.message || JSON.stringify(err)));
-      }
+    if (!window.confirm('هل أنت متأكد أنك تريد حذف هذا المنتج؟')) return;
+    try {
+      await deleteProduct(id);
+      alert('تم حذف المنتج بنجاح!');
+      fetchAll();
+    } catch (err) {
+      console.error('خطأ في حذف المنتج:', err);
+      alert('فشل حذف المنتج: ' + (err?.message || JSON.stringify(err)));
     }
   };
 
-  const handleMainImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setNewProductMainImageFile(file);
-      setNewProductMainImagePreview(URL.createObjectURL(file));
-      setMainImageRemoved(false);
-    } else {
-      setNewProductMainImageFile(null);
-      setNewProductMainImagePreview(null);
-    }
-  };
-
-  const handleRemoveMainImage = () => {
-    setNewProductMainImageFile(null);
-    setNewProductMainImagePreview(null);
-    setMainImageRemoved(true);
-    if (mainFileInputRef.current) {
-      mainFileInputRef.current.value = '';
-    }
-  };
-
-  const handleAdditionalImagesChange = (e) => {
-    const files = Array.from(e.target.files);
-    setNewProductAdditionalImageFiles((prevFiles) => [...prevFiles, ...files]);
-    const newPreviews = files.map(file => URL.createObjectURL(file));
-    setNewProductAdditionalImagePreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
-  };
-
-  const handleRemoveNewAdditionalImage = (indexToRemove) => {
-    setNewProductAdditionalImageFiles((prevFiles) =>
-      prevFiles.filter((_, index) => index !== indexToRemove)
-    );
-    setNewProductAdditionalImagePreviews((prevPreviews) =>
-      prevPreviews.filter((_, index) => index !== indexToRemove)
-    );
-  };
-
-  const handleRemoveExistingAdditionalImage = (imageId) => {
-    setRemovedAdditionalImageIds((prevIds) => [...prevIds, imageId]);
-    setExistingAdditionalImages((prevImages) =>
-      prevImages.filter((img) => img.image_id !== imageId)
-    );
-  };
-
+  // === UI ===
   if (loading) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">جاري تحميل المنتجات...</span>
-        </div>
+      <div className="container-fluid text-center my-5">
+        <div className="spinner-border text-primary" role="status" />
         <p className="mt-3 text-muted">جاري تحميل المنتجات...</p>
       </div>
     );
   }
-
   if (error) {
     return (
-      <div className="container-fluid text-center my-5" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
+      <div className="container-fluid text-center my-5">
+        <div className="alert alert-danger" role="alert">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="container-fluid py-4" style={{ fontFamily: 'Tajawal, Cairo, sans-serif', backgroundColor: '#f8f9fa' }}>
-      <h1 className="mb-4 fw-bold text-primary text-center text-md-start" style={{ color: '#6a8eec' }}>إدارة المنتجات</h1>
-
-      <div className="d-flex justify-content-center justify-content-md-start">
-        <button className="btn btn-primary mb-4 shadow-sm" onClick={handleAddProductClick} style={{ backgroundColor: '#6a8eec', borderColor: '#6a8eec' }}>
-          <FaPlusCircle className="me-2" /> إضافة منتج جديد
+    <div className="container-fluid py-4">
+      <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+        <h1 className="fw-bold m-0">إدارة المنتجات</h1>
+        <button className="btn btn-primary" onClick={openAddModal}>
+          <FaPlusCircle className="ms-2" /> إضافة منتج جديد
         </button>
       </div>
-      
-      <div className="card shadow-lg border-0 rounded-lg">
-        <div className="card-header bg-primary text-white fw-bold py-3 text-center" style={{ backgroundColor: '#6a8eec' }}>
+
+      <div className="card border-0 shadow-sm">
+        <div className="card-header bg-primary text-white text-center fw-bold">
           المنتجات الحالية
         </div>
         <div className="card-body p-0">
           {products.length === 0 ? (
-            <p className="text-center text-muted py-4 mb-0">لا توجد منتجات حتى الآن.</p>
+            <p className="text-center text-muted py-4 m-0">لا توجد منتجات حتى الآن.</p>
           ) : (
             <>
-              {/* عرض الجدول للشاشات الكبيرة */}
+              {/* Desktop table */}
               <div className="d-none d-lg-block">
                 <div className="table-responsive">
-                  <table className="table table-hover mb-0">
-                    <thead>
+                  <table className="table table-hover align-middle m-0">
+                    <thead className="table-light">
                       <tr>
                         <th>الصورة</th>
                         <th>الاسم</th>
+                        <th>SKU</th>
                         <th>الفئة</th>
                         <th>المخزون/الحد</th>
                         <th>السعر</th>
                         <th>الحالة</th>
                         <th>مميز؟</th>
-                        <th>الإجراءات</th>
+                        <th>إجراءات</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {products.map((product) => (
-                        <tr key={product.product_id}>
-                          <td>
-                            {product.main_image_url ? (
+                      {products.map(p => (
+                        <tr key={p.product_id}>
+                          <td style={{ width: 64 }}>
+                            {p.main_image_url ? (
                               <img
-                                src={product.main_image_url}
-                                alt={product.name}
-                                className="img-thumbnail rounded"
-                                style={{ width: '50px', height: '50px', objectFit: 'cover', border: '1px solid #dee2e6' }}
-                                onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/50x50/cccccc/333333?text=خطأ"; }}
+                                src={p.main_image_url}
+                                alt={p.name}
+                                className="img-thumbnail"
+                                style={{ width: 50, height: 50, objectFit: 'cover' }}
+                                onError={(e) => { e.currentTarget.src = 'https://placehold.co/50x50?text=%F0%9F%93%B7'; }}
                               />
-                            ) : (
-                              <span className="text-muted small">لا توجد صورة</span>
-                            )}
+                            ) : <span className="text-muted small">لا صورة</span>}
                           </td>
                           <td>
-                            <h6 className="mb-0 fw-bold" style={{ color: '#343a40' }}>{product.name}</h6>
-                            <span className="badge bg-light text-dark" style={{ backgroundColor: '#e9ecef', color: '#495057' }}>{product.slug}</span>
+                            <div className="fw-semibold">{p.name}</div>
+                            <div className="small text-muted">{p.slug}</div>
                           </td>
-                          <td><span className="text-muted small">{product.category ? product.category.name : 'غير محدد'}</span></td>
-                          <td className={product.stock_quantity <= product.low_stock_threshold ? 'text-danger fw-bold' : ''} style={{ color: product.stock_quantity <= product.low_stock_threshold ? '#e74c3c' : '#343a40' }}>
-                            {product.stock_quantity}/{product.low_stock_threshold}
-                            {product.stock_quantity <= product.low_stock_threshold && (
-                              <span className="badge bg-danger text-white ms-2" style={{ backgroundColor: '#e74c3c' }}>مخزون منخفض!</span>
-                            )}
+                          <td><span className="badge text-bg-secondary">{p.sku || '-'}</span></td>
+                          <td className="small text-muted">{p.category ? p.category.name : 'غير محدد'}</td>
+                          <td className={p.stock_quantity <= p.low_stock_threshold ? 'text-danger fw-bold' : ''}>
+                            {p.stock_quantity}/{p.low_stock_threshold}
                           </td>
-                          <td><span className="fw-bold" style={{ color: '#60c78c' }}>${product.price.toFixed(2)}</span></td>
+                          <td className="fw-bold">${Number(p.price).toFixed(2)}</td>
                           <td>
-                            <span className={`badge ${product.status === 'active' ? 'bg-success' : product.status === 'draft' ? 'bg-secondary' : 'bg-danger'}`} style={{ backgroundColor: product.status === 'active' ? '#60c78c' : product.status === 'draft' ? '#6c757d' : '#e74c3c' }}>
-                              {product.status === 'active' ? 'نشط' : product.status === 'draft' ? 'مسودة' : 'مؤرشف'}
+                            <span className={`badge ${p.status === 'active' ? 'text-bg-success' : p.status === 'draft' ? 'text-bg-secondary' : 'text-bg-danger'}`}>
+                              {p.status === 'active' ? 'نشط' : p.status === 'draft' ? 'مسودة' : 'مؤرشف'}
                             </span>
                           </td>
+                          <td>{p.is_featured ? <i className="bi bi-check-circle-fill text-success" /> : <i className="bi bi-x-circle-fill text-danger" />}</td>
                           <td>
-                            {product.is_featured ? (
-                              <i className="bi bi-check-circle-fill text-success" style={{ color: '#60c78c' }}></i>
-                            ) : (
-                              <i className="bi bi-x-circle-fill text-danger" style={{ color: '#e74c3c' }}></i>
-                            )}
-                          </td>
-                          <td>
-                            <button className="btn btn-sm btn-info text-white me-2 shadow-sm" onClick={() => handleEditClick(product)} style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}>
-                              <FaPencilAlt /> تعديل
-                            </button>
-                            <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(product.product_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
-                              <FaTrashAlt /> حذف
-                            </button>
+                            <div className="d-flex gap-2">
+                              <button className="btn btn-sm btn-outline-primary" onClick={() => openEditModal(p)}>
+                                <FaPencilAlt /> تعديل
+                              </button>
+                              <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p.product_id)}>
+                                <FaTrashAlt /> حذف
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -420,49 +364,48 @@ const ProductManagement = () => {
                 </div>
               </div>
 
-              {/* عرض البطاقات للشاشات الصغيرة */}
+              {/* Mobile cards */}
               <div className="d-lg-none p-3">
-                {products.map((product) => (
-                  <div key={product.product_id} className="card mb-3 shadow-sm border-0 rounded-lg">
+                {products.map(p => (
+                  <div key={p.product_id} className="card mb-3 shadow-sm">
                     <div className="card-body">
-                      <div className="d-flex align-items-center mb-3">
-                        {product.main_image_url ? (
+                      <div className="d-flex align-items-start gap-3">
+                        {p.main_image_url ? (
                           <img
-                            src={product.main_image_url}
-                            alt={product.name}
-                            className="img-thumbnail me-3 rounded"
-                            style={{ width: '80px', height: '80px', objectFit: 'cover', border: '1px solid #dee2e6' }}
-                            onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
+                            src={p.main_image_url}
+                            alt={p.name}
+                            className="rounded"
+                            style={{ width: 80, height: 80, objectFit: 'cover' }}
+                            onError={(e) => { e.currentTarget.src = 'https://placehold.co/80x80?text=%F0%9F%93%B7'; }}
                           />
                         ) : (
-                          <div className="me-3 p-3 bg-light rounded d-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px', backgroundColor: '#e9ecef' }}>
-                            <span className="text-muted small text-center">لا توجد صورة</span>
+                          <div className="rounded bg-light d-flex align-items-center justify-content-center" style={{ width: 80, height: 80 }}>
+                            <span className="small text-muted">لا صورة</span>
                           </div>
                         )}
                         <div className="flex-grow-1">
-                          <h5 className="card-title fw-bold mb-1" style={{ color: '#343a40' }}>{product.name}</h5>
-                          <p className="card-text text-muted small mb-1">
-                            الفئة: <span style={{ color: '#495057' }}>{product.category ? product.category.name : 'غير محدد'}</span>
-                          </p>
-                          <h6 className="fw-bold mb-0" style={{ color: '#60c78c' }}>${product.price.toFixed(2)}</h6>
-                        </div>
-                      </div>
-                      <div className="d-flex justify-content-between align-items-center mt-3">
-                        <div>
-                          <span className={`badge ${product.stock_quantity <= product.low_stock_threshold ? 'bg-danger' : 'bg-secondary'} me-2`} style={{ backgroundColor: product.stock_quantity <= product.low_stock_threshold ? '#e74c3c' : '#6c757d' }}>
-                            المخزون: {product.stock_quantity}
-                          </span>
-                          <span className={`badge ${product.status === 'active' ? 'bg-success' : 'bg-secondary'}`} style={{ backgroundColor: product.status === 'active' ? '#60c78c' : '#6c757d' }}>
-                            {product.status === 'active' ? 'نشط' : product.status === 'draft' ? 'مسودة' : 'مؤرشف'}
-                          </span>
-                        </div>
-                        <div className="d-flex gap-2">
-                          <button className="btn btn-sm btn-info text-white shadow-sm" onClick={() => handleEditClick(product)} style={{ backgroundColor: '#81c784', borderColor: '#81c784' }}>
-                            <FaPencilAlt />
-                          </button>
-                          <button className="btn btn-sm btn-danger shadow-sm" onClick={() => handleDelete(product.product_id)} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>
-                            <FaTrashAlt />
-                          </button>
+                          <div className="d-flex align-items-center justify-content-between">
+                            <h6 className="fw-bold m-0">{p.name}</h6>
+                            <span className="badge text-bg-secondary">{p.sku || '-'}</span>
+                          </div>
+                          <div className="small text-muted mt-1">{p.category ? p.category.name : 'غير محدد'}</div>
+                          <div className="mt-2 d-flex align-items-center justify-content-between">
+                            <span className={`badge ${p.status === 'active' ? 'text-bg-success' : 'text-bg-secondary'}`}>
+                              {p.status === 'active' ? 'نشط' : 'مسودة/مؤرشف'}
+                            </span>
+                            <span className={`badge ${p.stock_quantity <= p.low_stock_threshold ? 'text-bg-danger' : 'text-bg-light text-dark'}`}>
+                              مخزون: {p.stock_quantity}/{p.low_stock_threshold}
+                            </span>
+                          </div>
+                          <div className="mt-2 fw-bold">${Number(p.price).toFixed(2)}</div>
+                          <div className="mt-3 d-flex gap-2">
+                            <button className="btn btn-sm btn-outline-primary w-50" onClick={() => openEditModal(p)}>
+                              <FaPencilAlt /> تعديل
+                            </button>
+                            <button className="btn btn-sm btn-outline-danger w-50" onClick={() => handleDelete(p.product_id)}>
+                              <FaTrashAlt /> حذف
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -474,325 +417,330 @@ const ProductManagement = () => {
         </div>
       </div>
 
-      {/* Modal لإضافة/تعديل المنتجات */}
-      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showModal ? 'rgba(0,0,0,0.5)' : '' }} aria-modal="true" role="dialog">
-        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div className="modal-content rounded-lg shadow-lg" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
-            <div className="modal-header bg-primary text-white py-3" style={{ backgroundColor: '#6a8eec' }}>
-              <h5 className="modal-title fw-bold" style={{ fontSize: '1.25rem' }}>{editingProduct ? 'تعديل منتج' : 'إضافة منتج'}</h5>
-              <button type="button" className="btn-close btn-close-white" aria-label="Close" onClick={handleCloseModal}></button>
+      {/* Modal (add/edit) */}
+      <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" aria-modal="true">
+        {showModal && <div className="modal-backdrop fade show" />}
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+          <div className="modal-content">
+            <div className="modal-header bg-primary text-white">
+              <h5 className="modal-title">{editingProduct ? 'تعديل منتج' : 'إضافة منتج'}</h5>
+              <button type="button" className="btn-close btn-close-white" onClick={closeModal} />
             </div>
-            <div className="modal-body p-4">
+            <div className="modal-body">
               <form onSubmit={handleSubmit}>
-                <h6 className="text-secondary fw-bold mb-3" style={{ color: '#6c757d' }}>معلومات أساسية</h6>
-                <div className="mb-3">
-                  <label htmlFor="productName" className="form-label small text-muted">اسم المنتج:</label>
-                  <input
-                    type="text"
-                    id="productName"
-                    className={`form-control form-control-sm ${validationErrors.name ? 'is-invalid' : ''}`}
-                    value={newProductName}
-                    onChange={handleNameChange}
-                    required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
-                  />
-                  {validationErrors.name && <div className="invalid-feedback">{validationErrors.name[0]}</div>}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="productSlug" className="form-label small text-muted">الرابط النظيف (Slug):</label>
-                  <input
-                    type="text"
-                    id="productSlug"
-                    className={`form-control form-control-sm ${validationErrors.slug ? 'is-invalid' : ''}`}
-                    value={newProductSlug}
-                    onChange={(e) => setNewProductSlug(e.target.value)}
-                    required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
-                  />
-                  {validationErrors.slug && <div className="invalid-feedback">{validationErrors.slug[0]}</div>}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="productDescription" className="form-label small text-muted">الوصف التفصيلي:</label>
-                  <textarea
-                    id="productDescription"
-                    className={`form-control form-control-sm ${validationErrors.description ? 'is-invalid' : ''}`}
-                    value={newProductDescription}
-                    onChange={(e) => setNewProductDescription(e.target.value)}
-                    rows="4"
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
-                  ></textarea>
-                  {validationErrors.description && <div className="invalid-feedback">{validationErrors.description[0]}</div>}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="productShortDescription" className="form-label small text-muted">وصف موجز:</label>
-                  <input
-                    type="text"
-                    id="productShortDescription"
-                    className={`form-control form-control-sm ${validationErrors.short_description ? 'is-invalid' : ''}`}
-                    value={newProductShortDescription}
-                    onChange={(e) => setNewProductShortDescription(e.target.value)}
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
-                  />
-                  {validationErrors.short_description && <div className="invalid-feedback">{validationErrors.short_description[0]}</div>}
-                </div>
+                {/* Basic info */}
+                <div className="row g-3">
+                  <div className="col-md-8">
+                    <label className="form-label">اسم المنتج</label>
+                    <input
+                      type="text"
+                      className={`form-control ${validationErrors?.name ? 'is-invalid' : ''}`}
+                      value={name}
+                      onChange={handleNameChange}
+                      required
+                    />
+                    {validationErrors?.name && <div className="invalid-feedback">{validationErrors.name[0]}</div>}
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label">الرابط (Slug)</label>
+                    <input
+                      type="text"
+                      className={`form-control ${validationErrors?.slug ? 'is-invalid' : ''}`}
+                      value={slug}
+                      onChange={(e) => setSlug(e.target.value)}
+                      required
+                    />
+                    {validationErrors?.slug && <div className="invalid-feedback">{validationErrors.slug[0]}</div>}
+                  </div>
 
-                <hr className="my-4" style={{ borderColor: '#e9ecef' }} />
-                <h6 className="text-secondary fw-bold mb-3" style={{ color: '#6c757d' }}>التسعير والمخزون</h6>
-                <div className="row g-2 mb-3">
-                  <div className="col-md-6">
-                    <label htmlFor="productPrice" className="form-label small text-muted">السعر:</label>
-                    <input
-                      type="number"
-                      id="productPrice"
-                      className={`form-control form-control-sm ${validationErrors.price ? 'is-invalid' : ''}`}
-                      value={newProductPrice}
-                      onChange={(e) => setNewProductPrice(e.target.value)}
-                      step="0.01"
-                      required
-                      style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
+                  <div className="col-md-8">
+                    <label className="form-label">الوصف التفصيلي</label>
+                    <textarea
+                      rows="3"
+                      className={`form-control ${validationErrors?.description ? 'is-invalid' : ''}`}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
                     />
-                    {validationErrors.price && <div className="invalid-feedback">{validationErrors.price[0]}</div>}
+                    {validationErrors?.description && <div className="invalid-feedback">{validationErrors.description[0]}</div>}
                   </div>
-                  <div className="col-md-6">
-                    <label htmlFor="productCompareAtPrice" className="form-label small text-muted">سعر المقارنة (اختياري):</label>
+                  <div className="col-md-4">
+                    <label className="form-label">وصف موجز</label>
                     <input
-                      type="number"
-                      id="productCompareAtPrice"
-                      className={`form-control form-control-sm ${validationErrors.compare_at_price ? 'is-invalid' : ''}`}
-                      value={newProductCompareAtPrice}
-                      onChange={(e) => setNewProductCompareAtPrice(e.target.value)}
-                      step="0.01"
-                      style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
+                      type="text"
+                      className={`form-control ${validationErrors?.short_description ? 'is-invalid' : ''}`}
+                      value={shortDescription}
+                      onChange={(e) => setShortDescription(e.target.value)}
                     />
-                    {validationErrors.compare_at_price && <div className="invalid-feedback">{validationErrors.compare_at_price[0]}</div>}
-                  </div>
-                </div>
-                <div className="row g-2 mb-3">
-                  <div className="col-md-6">
-                    <label htmlFor="productStockQuantity" className="form-label small text-muted">الكمية المتوفرة:</label>
-                    <input
-                      type="number"
-                      id="productStockQuantity"
-                      className={`form-control form-control-sm ${validationErrors.stock_quantity ? 'is-invalid' : ''}`}
-                      value={newProductStockQuantity}
-                      onChange={(e) => setNewProductStockQuantity(e.target.value)}
-                      required
-                      style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
-                    />
-                    {validationErrors.stock_quantity && <div className="invalid-feedback">{validationErrors.stock_quantity[0]}</div>}
-                  </div>
-                  <div className="col-md-6">
-                    <label htmlFor="productLowStockThreshold" className="form-label small text-muted">حد المخزون المنخفض:</label>
-                    <input
-                      type="number"
-                      id="productLowStockThreshold"
-                      className={`form-control form-control-sm ${validationErrors.low_stock_threshold ? 'is-invalid' : ''}`}
-                      value={newProductLowStockThreshold}
-                      onChange={(e) => setNewProductLowStockThreshold(e.target.value)}
-                      required
-                      style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
-                    />
-                    {validationErrors.low_stock_threshold && <div className="invalid-feedback">{validationErrors.low_stock_threshold[0]}</div>}
+                    {validationErrors?.short_description && <div className="invalid-feedback">{validationErrors.short_description[0]}</div>}
                   </div>
                 </div>
 
-                <hr className="my-4" style={{ borderColor: '#e9ecef' }} />
-                <h6 className="text-secondary fw-bold mb-3" style={{ color: '#6c757d' }}>الفئات والعلامات التجارية</h6>
-                <div className="row g-2 mb-3">
+                <hr className="my-3" />
+
+                {/* Pricing & stock */}
+                <div className="row g-3">
+                  <div className="col-6 col-md-3">
+                    <label className="form-label">السعر</label>
+                    <input
+                      type="number" step="0.01"
+                      className={`form-control ${validationErrors?.price ? 'is-invalid' : ''}`}
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      required
+                    />
+                    {validationErrors?.price && <div className="invalid-feedback">{validationErrors.price[0]}</div>}
+                  </div>
+                  <div className="col-6 col-md-3">
+                    <label className="form-label">سعر المقارنة</label>
+                    <input
+                      type="number" step="0.01"
+                      className={`form-control ${validationErrors?.compare_at_price ? 'is-invalid' : ''}`}
+                      value={compareAtPrice}
+                      onChange={(e) => setCompareAtPrice(e.target.value)}
+                    />
+                    {validationErrors?.compare_at_price && <div className="invalid-feedback">{validationErrors.compare_at_price[0]}</div>}
+                  </div>
+                  <div className="col-6 col-md-3">
+                    <label className="form-label">سعر التكلفة</label>
+                    <input
+                      type="number" step="0.01"
+                      className="form-control"
+                      value={costPrice}
+                      onChange={(e) => setCostPrice(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-6 col-md-3">
+                    <label className="form-label">SKU (رمز المنتج) <span className="text-danger">*</span></label>
+                    <input
+                      type="text"
+                      className={`form-control ${validationErrors?.sku ? 'is-invalid' : ''}`}
+                      value={sku}
+                      onChange={(e) => setSku(e.target.value)}
+                      required
+                    />
+                    {validationErrors?.sku && <div className="invalid-feedback">{validationErrors.sku[0]}</div>}
+                  </div>
+
+                  <div className="col-6 col-md-3">
+                    <label className="form-label">الكمية المتوفرة</label>
+                    <input
+                      type="number"
+                      className={`form-control ${validationErrors?.stock_quantity ? 'is-invalid' : ''}`}
+                      value={stockQuantity}
+                      onChange={(e) => setStockQuantity(e.target.value)}
+                      required
+                    />
+                    {validationErrors?.stock_quantity && <div className="invalid-feedback">{validationErrors.stock_quantity[0]}</div>}
+                  </div>
+                  <div className="col-6 col-md-3">
+                    <label className="form-label">حد المخزون المنخفض</label>
+                    <input
+                      type="number"
+                      className={`form-control ${validationErrors?.low_stock_threshold ? 'is-invalid' : ''}`}
+                      value={lowStockThreshold}
+                      onChange={(e) => setLowStockThreshold(e.target.value)}
+                      required
+                    />
+                    {validationErrors?.low_stock_threshold && <div className="invalid-feedback">{validationErrors.low_stock_threshold[0]}</div>}
+                  </div>
+                </div>
+
+                <hr className="my-3" />
+
+                {/* Attributes */}
+                <div className="row g-3">
+                  <div className="col-6 col-md-3">
+                    <label className="form-label">الوزن</label>
+                    <input type="number" step="0.01" className="form-control" value={weight} onChange={(e) => setWeight(e.target.value)} />
+                  </div>
+                  <div className="col-6 col-md-3">
+                    <label className="form-label">الطول</label>
+                    <input type="number" step="0.01" className="form-control" value={length} onChange={(e) => setLength(e.target.value)} />
+                  </div>
+                  <div className="col-6 col-md-3">
+                    <label className="form-label">العرض</label>
+                    <input type="number" step="0.01" className="form-control" value={width} onChange={(e) => setWidth(e.target.value)} />
+                  </div>
+                  <div className="col-6 col-md-3">
+                    <label className="form-label">الارتفاع</label>
+                    <input type="number" step="0.01" className="form-control" value={height} onChange={(e) => setHeight(e.target.value)} />
+                  </div>
+                </div>
+
+                <hr className="my-3" />
+
+                {/* Category/Brand */}
+                <div className="row g-3">
                   <div className="col-md-6">
-                    <label htmlFor="productCategory" className="form-label small text-muted">الفئة:</label>
+                    <label className="form-label">الفئة</label>
                     <select
-                      id="productCategory"
-                      className={`form-select form-select-sm ${validationErrors.category_id ? 'is-invalid' : ''}`}
-                      value={newProductCategoryId}
-                      onChange={(e) => setNewProductCategoryId(e.target.value)}
+                      className={`form-select ${validationErrors?.category_id ? 'is-invalid' : ''}`}
+                      value={categoryId}
+                      onChange={(e) => setCategoryId(e.target.value)}
                       required
-                      style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                     >
                       <option value="">اختر فئة...</option>
-                      {categories.map((cat) => (
-                        <option key={cat.category_id} value={cat.category_id}>
-                          {cat.name}
-                        </option>
+                      {categories.map(c => (
+                        <option key={c.category_id} value={c.category_id}>{c.name}</option>
                       ))}
                     </select>
-                    {validationErrors.category_id && <div className="invalid-feedback">{validationErrors.category_id[0]}</div>}
+                    {validationErrors?.category_id && <div className="invalid-feedback">{validationErrors.category_id[0]}</div>}
                   </div>
                   <div className="col-md-6">
-                    <label htmlFor="productBrand" className="form-label small text-muted">العلامة التجارية:</label>
+                    <label className="form-label">العلامة التجارية</label>
                     <select
-                      id="productBrand"
-                      className={`form-select form-select-sm ${validationErrors.brand_id ? 'is-invalid' : ''}`}
-                      value={newProductBrandId}
-                      onChange={(e) => setNewProductBrandId(e.target.value)}
+                      className={`form-select ${validationErrors?.brand_id ? 'is-invalid' : ''}`}
+                      value={brandId}
+                      onChange={(e) => setBrandId(e.target.value)}
                       required
-                      style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
                     >
                       <option value="">اختر علامة تجارية...</option>
-                      {brands.map((brand) => (
-                        <option key={brand.brand_id} value={brand.brand_id}>
-                          {brand.name}
-                        </option>
+                      {brands.map(b => (
+                        <option key={b.brand_id} value={b.brand_id}>{b.name}</option>
                       ))}
                     </select>
-                    {validationErrors.brand_id && <div className="invalid-feedback">{validationErrors.brand_id[0]}</div>}
+                    {validationErrors?.brand_id && <div className="invalid-feedback">{validationErrors.brand_id[0]}</div>}
                   </div>
                 </div>
 
-                <hr className="my-4" style={{ borderColor: '#e9ecef' }} />
-                <h6 className="text-secondary fw-bold mb-3" style={{ color: '#6c757d' }}>إدارة الصور</h6>
-                <div className="mb-3">
-                  <label htmlFor="productMainImageFile" className="form-label small text-muted">الصورة الرئيسية:</label>
-                  <input
-                    type="file"
-                    id="productMainImageFile"
-                    className={`form-control form-control-sm ${validationErrors.main_image ? 'is-invalid' : ''}`}
-                    onChange={handleMainImageChange}
-                    ref={mainFileInputRef}
-                    accept="image/*"
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
-                  />
-                  {validationErrors.main_image && <div className="invalid-feedback">{validationErrors.main_image[0]}</div>}
-                  {(newProductMainImagePreview || (editingProduct && editingProduct.main_image_url && !mainImageRemoved)) && (
-                    <div className="mt-2 text-center border p-2 rounded bg-light" style={{ borderColor: '#e9ecef', backgroundColor: '#f8f9fa' }}>
-                      <img
-                        src={newProductMainImagePreview || (editingProduct && editingProduct.main_image_url)}
-                        alt="معاينة الصورة الرئيسية"
-                        className="img-thumbnail"
-                        style={{ maxWidth: '150px', maxHeight: '150px', objectFit: 'cover', border: '1px solid #dee2e6' }}
-                        onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/150x150/cccccc/333333?text=خطأ"; }}
-                      />
-                      <p className="small text-muted mt-1">معاينة الصورة الرئيسية</p>
-                      {(newProductMainImagePreview || (editingProduct && editingProduct.main_image_url)) && (
-                          <button type="button" className="btn btn-sm btn-outline-danger mt-1" onClick={handleRemoveMainImage} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
-                              إزالة الصورة
+                <hr className="my-3" />
+
+                {/* Images */}
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <label className="form-label">الصورة الرئيسية</label>
+                    <input
+                      type="file"
+                      ref={mainFileInputRef}
+                      className={`form-control ${validationErrors?.main_image ? 'is-invalid' : ''}`}
+                      accept="image/*"
+                      onChange={onMainImageChange}
+                    />
+                    {validationErrors?.main_image && <div className="invalid-feedback">{validationErrors.main_image[0]}</div>}
+
+                    {(mainImagePreview || (editingProduct && editingProduct.main_image_url && !mainImageRemoved)) && (
+                      <div className="mt-2 text-center p-2 border rounded">
+                        <img
+                          src={mainImagePreview || editingProduct?.main_image_url}
+                          alt="preview"
+                          className="img-thumbnail"
+                          style={{ maxWidth: 160, maxHeight: 160, objectFit: 'cover' }}
+                          onError={(e) => { e.currentTarget.src = 'https://placehold.co/160x160?text=%F0%9F%93%B7'; }}
+                        />
+                        <div className="mt-2">
+                          <button type="button" className="btn btn-sm btn-outline-danger" onClick={removeMainImage}>
+                            إزالة الصورة
                           </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mb-3">
-                  <label htmlFor="productAdditionalImages" className="form-label small text-muted">صور إضافية:</label>
-                  <input
-                    type="file"
-                    id="productAdditionalImages"
-                    className={`form-control form-control-sm ${validationErrors.additional_images ? 'is-invalid' : ''}`}
-                    onChange={handleAdditionalImagesChange}
-                    ref={additionalFileInputRef}
-                    accept="image/*"
-                    multiple
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
-                  />
-                  {validationErrors.additional_images && <div className="invalid-feedback">{validationErrors.additional_images[0]}</div>}
-                  {validationErrors['additional_images.0'] && <div className="invalid-feedback">{validationErrors['additional_images.0']}</div>}
-
-                  {(newProductAdditionalImagePreviews.length > 0 || existingAdditionalImages.length > 0) && (
-                    <div className="mt-2 border p-2 rounded bg-light" style={{ borderColor: '#e9ecef', backgroundColor: '#f8f9fa' }}>
-                      {newProductAdditionalImagePreviews.length > 0 && (
-                        <div className="mb-2">
-                          <p className="small text-muted mb-2">صور إضافية جديدة:</p>
-                          <div className="d-flex flex-wrap gap-2">
-                            {newProductAdditionalImagePreviews.map((previewUrl, index) => (
-                              <div key={index} className="position-relative">
-                                <img
-                                  src={previewUrl}
-                                  alt={`صورة إضافية ${index + 1}`}
-                                  className="img-thumbnail"
-                                  style={{ width: '80px', height: '80px', objectFit: 'cover', border: '1px solid #dee2e6' }}
-                                  onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
-                                />
-                                <button
-                                  type="button"
-                                  className="btn btn-sm btn-danger position-absolute top-0 end-0 translate-middle"
-                                  style={{ borderRadius: '50%', width: '20px', height: '20px', padding: '0', fontSize: '0.6rem', lineHeight: '1', backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}
-                                  onClick={() => handleRemoveNewAdditionalImage(index)}
-                                >
-                                  &times;
-                                </button>
-                              </div>
-                            ))}
-                          </div>
                         </div>
-                      )}
-                      {existingAdditionalImages.length > 0 && (
-                        <div>
-                          <p className="small text-muted mb-2">صور إضافية حالية:</p>
-                          <div className="d-flex flex-wrap gap-2">
-                            {existingAdditionalImages.map((image) => (
-                              <div key={image.image_id} className="position-relative">
-                                <img
-                                  src={image.image_url}
-                                  alt={image.alt_text || `صورة المنتج ${image.image_id}`}
-                                  className="img-thumbnail"
-                                  style={{ width: '80px', height: '80px', objectFit: 'cover', border: '1px solid #dee2e6' }}
-                                  onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
-                                />
-                                <button
-                                  type="button"
-                                  className="btn btn-sm btn-danger position-absolute top-0 end-0 translate-middle"
-                                  style={{ borderRadius: '50%', width: '20px', height: '20px', padding: '0', fontSize: '0.6rem', lineHeight: '1', backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}
-                                  onClick={() => handleRemoveExistingAdditionalImage(image.image_id)}
-                                >
-                                  &times;
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="form-label">صور إضافية</label>
+                    <input
+                      type="file"
+                      ref={additionalFileInputRef}
+                      className={`form-control ${validationErrors?.additional_images ? 'is-invalid' : ''}`}
+                      accept="image/*"
+                      multiple
+                      onChange={onAdditionalImagesChange}
+                    />
+                    {validationErrors?.additional_images && <div className="invalid-feedback">{validationErrors.additional_images[0]}</div>}
+                    {validationErrors?.['additional_images.0'] && <div className="invalid-feedback">{validationErrors['additional_images.0']}</div>}
+
+                    {(additionalImagePreviews.length > 0 || existingAdditionalImages.length > 0) && (
+                      <div className="mt-2 p-2 border rounded">
+                        {additionalImagePreviews.length > 0 && (
+                          <>
+                            <p className="small text-muted mb-2">صور جديدة:</p>
+                            <div className="d-flex flex-wrap gap-2">
+                              {additionalImagePreviews.map((url, idx) => (
+                                <div key={idx} className="position-relative">
+                                  <img
+                                    src={url}
+                                    alt={`new-${idx}`}
+                                    className="img-thumbnail"
+                                    style={{ width: 80, height: 80, objectFit: 'cover' }}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="btn btn-sm btn-danger position-absolute top-0 end-0 translate-middle"
+                                    style={{ borderRadius: '50%', width: 20, height: 20, padding: 0 }}
+                                    onClick={() => removeNewAdditionalImage(idx)}
+                                  >
+                                    &times;
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+
+                        {existingAdditionalImages.length > 0 && (
+                          <>
+                            <p className="small text-muted mt-2 mb-2">صور حالية:</p>
+                            <div className="d-flex flex-wrap gap-2">
+                              {existingAdditionalImages.map(img => (
+                                <div key={img.image_id} className="position-relative">
+                                  <img
+                                    src={img.image_url}
+                                    alt={img.alt_text || `img-${img.image_id}`}
+                                    className="img-thumbnail"
+                                    style={{ width: 80, height: 80, objectFit: 'cover' }}
+                                    onError={(e) => { e.currentTarget.src = 'https://placehold.co/80x80?text=%F0%9F%93%B7'; }}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="btn btn-sm btn-danger position-absolute top-0 end-0 translate-middle"
+                                    style={{ borderRadius: '50%', width: 20, height: 20, padding: 0 }}
+                                    onClick={() => removeExistingAdditionalImage(img.image_id)}
+                                  >
+                                    &times;
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <hr className="my-3" />
+
+                {/* Flags */}
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <div className="form-check form-switch">
+                      <input className="form-check-input" type="checkbox" id="isFeatured" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} />
+                      <label className="form-check-label" htmlFor="isFeatured">منتج مميز؟</label>
                     </div>
-                  )}
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">الحالة</label>
+                    <select className={`form-select ${validationErrors?.status ? 'is-invalid' : ''}`} value={status} onChange={(e) => setStatus(e.target.value)} required>
+                      <option value="active">نشط</option>
+                      <option value="draft">مسودة</option>
+                      <option value="archived">مؤرشف</option>
+                    </select>
+                    {validationErrors?.status && <div className="invalid-feedback">{validationErrors.status[0]}</div>}
+                  </div>
                 </div>
 
-                <hr className="my-4" style={{ borderColor: '#e9ecef' }} />
-                <h6 className="text-secondary fw-bold mb-3" style={{ color: '#6c757d' }}>حالة المنتج</h6>
-                <div className="form-check form-switch mb-3">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="productIsFeatured"
-                    checked={newProductIsFeatured}
-                    onChange={(e) => setNewProductIsFeatured(e.target.checked)}
-                    style={{ fontSize: '1.2rem' }}
-                  />
-                  <label className="form-check-label small text-muted" htmlFor="productIsFeatured">
-                    هل المنتج مميز؟ (يظهر في الصفحة الرئيسية)
-                  </label>
-                </div>
+                {formError && <div className="alert alert-danger mt-3 small">{String(formError)}</div>}
 
-                <div className="mb-3">
-                  <label htmlFor="productStatus" className="form-label small text-muted">الحالة:</label>
-                  <select
-                    id="productStatus"
-                    className={`form-select form-select-sm ${validationErrors.status ? 'is-invalid' : ''}`}
-                    value={newProductStatus}
-                    onChange={(e) => setNewProductStatus(e.target.value)}
-                    required
-                    style={{ borderColor: '#ced4da', fontSize: '0.9rem' }}
-                  >
-                    <option value="active">نشط</option>
-                    <option value="draft">مسودة</option>
-                    <option value="archived">مؤرشف</option>
-                  </select>
-                  {validationErrors.status && <div className="invalid-feedback">{validationErrors.status[0]}</div>}
-                </div>
-
-                {formError && <div className="alert alert-danger small">{formError}</div>}
-                
                 <div className="d-flex justify-content-between mt-4">
-                  <button type="submit" className="btn btn-primary btn-sm shadow-sm" style={{ backgroundColor: '#6a8eec', borderColor: '#6a8eec' }}>
-                    {editingProduct ? 'تحديث' : 'إضافة'}
-                  </button>
-                  <button type="button" className="btn btn-secondary btn-sm shadow-sm" onClick={handleCloseModal} style={{ backgroundColor: '#6c757d', borderColor: '#6c757d' }}>
-                    إغلاق
-                  </button>
+                  <button type="submit" className="btn btn-primary">{editingProduct ? 'تحديث' : 'إضافة'}</button>
+                  <button type="button" className="btn btn-secondary" onClick={closeModal}>إغلاق</button>
                 </div>
               </form>
             </div>
           </div>
         </div>
       </div>
+      {/* /Modal */}
     </div>
   );
 };

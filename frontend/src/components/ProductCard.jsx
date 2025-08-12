@@ -1,36 +1,57 @@
 // src/components/ProductCard.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../contexts/CartContext'; // ← السياق
+ // لو عندك ستايل للبطاقة
 
-const ProductCard = ({ product }) => {
+export default function ProductCard({ product }) {
+  const { add } = useCart();
+
+  const onAdd = () => {
+    // كمية افتراضية = 1 (لو عندك اختيار كمية داخل البطاقة، مرّرها هنا)
+    add(product.product_id ?? product.id, 1);
+  };
+
   return (
-    <div className="card h-100 shadow-sm border-0 rounded-4 product-card">
-      <Link to={`/products/${product.product_id}`} className="text-decoration-none text-dark">
+    <div className="product-card card h-100 shadow-sm">
+      <Link to={`/products/${product.product_id ?? product.id}`} className="text-decoration-none">
         <img
-          src={product.main_image_url || 'https://placehold.co/300x200/ADD8E6/000000?text=صورة+المنتج'}
+          src={product.main_image_url || product.image_url || 'https://placehold.co/400x300?text=No+Image'}
           alt={product.name}
-          className="card-img-top p-3 rounded-top"
-          loading="lazy" // ****** إضافة Lazy Loading ******
-          onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/300x200/cccccc/333333?text=خطأ"; }}
+          className="card-img-top"
+          loading="lazy"
+          onError={(e) => { e.currentTarget.src = 'https://placehold.co/400x300?text=No+Image'; }}
         />
-        <div className="card-body text-center">
+      </Link>
+
+      <div className="card-body d-flex flex-column">
+        <Link to={`/products/${product.product_id ?? product.id}`} className="text-decoration-none text-dark">
           <h5 className="card-title fw-bold mb-2">{product.name}</h5>
-          <p className="card-text text-primary fs-5 fw-bold mb-3">${product.price ? product.price.toFixed(2) : '0.00'}</p>
+        </Link>
+
+        <div className="mb-3">
+          <span className="text-primary fw-bold">${Number(product.price).toFixed(2)}</span>
           {product.compare_at_price && (
-            <p className="card-text text-muted small">
-              <del>${product.compare_at_price.toFixed(2)}</del>
-              <span className="ms-2 text-success fw-bold">وفر ${(product.compare_at_price - product.price).toFixed(2)}</span>
-            </p>
+            <small className="text-muted ms-2">
+              <del>${Number(product.compare_at_price).toFixed(2)}</del>
+            </small>
           )}
         </div>
-      </Link>
-      <div className="card-footer bg-transparent border-top-0 text-center">
-        <button className="btn btn-primary w-100 fw-bold" disabled={product.stock_quantity === 0}>
-          {product.stock_quantity > 0 ? 'أضف إلى السلة' : 'نفد المخزون'}
-        </button>
+
+        <div className="mt-auto d-flex gap-2">
+          <Link to={`/products/${product.product_id ?? product.id}`} className="btn btn-outline-secondary w-50">
+            التفاصيل
+          </Link>
+          <button
+            type="button"
+            className="btn btn-primary w-50"
+            onClick={onAdd}
+            disabled={Number(product.stock_quantity) === 0}
+          >
+            {Number(product.stock_quantity) === 0 ? 'نفد المخزون' : 'أضف للسلة'}
+          </button>
+        </div>
       </div>
     </div>
   );
-};
-
-export default ProductCard;
+}

@@ -3,15 +3,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProductById } from '../../api/products';
 import { getReviewsByProductId, addReview } from '../../api/reviews';
-import { addProductToCart } from '../../api/cart';
+// ⛔️ حُذف: import { addProductToCart } from '../../api/cart';
 import { addProductToWishlist } from '../../api/wishlist';
 import ReviewForm from '../../components/ReviewForm';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';   // ✅ ربط بسياق السلة
 import '../../styles/products/ProductDetailPage.css';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const { isAuthenticated, user } = useAuth();
+  const { add } = useCart();                           // ✅ دالة الإضافة من السياق
+
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,14 +48,9 @@ const ProductDetailPage = () => {
       console.error('فشل تحميل تفاصيل المنتج. الرجاء المحاولة لاحقاً:', err);
       let errorMessage = 'حدث خطأ غير متوقع أثناء تحميل تفاصيل المنتج.';
       if (err && typeof err === 'object') {
-          if (err.message) {
-              errorMessage = err.message;
-          }
-          if (err.errors) {
-              errorMessage = Object.values(err.errors).flat().join(' ');
-          } else if (err.error) {
-              errorMessage = err.error;
-          }
+        if (err.message) errorMessage = err.message;
+        if (err.errors) errorMessage = Object.values(err.errors).flat().join(' ');
+        else if (err.error) errorMessage = err.error;
       }
       setError(errorMessage);
     } finally {
@@ -79,7 +77,8 @@ const ProductDetailPage = () => {
     }
 
     try {
-      await addProductToCart(product.product_id, quantity);
+      // ✅ عبر سياق السلة — يحدّث العدّاد فورًا
+      await add(product.product_id, quantity);
       alert(`${quantity} من ${product.name} تم إضافتها إلى السلة بنجاح!`);
     } catch (err) {
       console.error('فشل إضافة المنتج إلى السلة:', err);
@@ -163,30 +162,29 @@ const ProductDetailPage = () => {
               loading="lazy"
               onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/600x400/cccccc/333333?text=لا+توجد+صورة"; }}
             />
-            {/* صور إضافية (معرض الصور المصغرة) */}
             {(product.images && product.images.length > 0) && (
               <div className="d-flex flex-wrap justify-content-center gap-2 product-additional-images">
                 {product.main_image_url && (
-                    <img
-                        src={product.main_image_url}
-                        alt={product.name}
-                        className="img-thumbnail"
-                        style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                        onClick={() => setMainDisplayImage(product.main_image_url)}
-                        loading="lazy" // ****** إضافة Lazy Loading ******
-                        onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
-                    />
+                  <img
+                    src={product.main_image_url}
+                    alt={product.name}
+                    className="img-thumbnail"
+                    style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                    onClick={() => setMainDisplayImage(product.main_image_url)}
+                    loading="lazy"
+                    onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
+                  />
                 )}
                 {product.images.map((image) => (
-                      <img
-                        key={image.image_id}
-                        src={image.image_url}
-                        alt={image.alt_text || product.name}
-                        className="img-thumbnail product-thumb"
-                        onClick={() => setMainDisplayImage(image.image_url)}
-                        loading="lazy"
-                        onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
-                      />
+                  <img
+                    key={image.image_id}
+                    src={image.image_url}
+                    alt={image.alt_text || product.name}
+                    className="img-thumbnail product-thumb"
+                    onClick={() => setMainDisplayImage(image.image_url)}
+                    loading="lazy"
+                    onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/80x80/cccccc/333333?text=خطأ"; }}
+                  />
                 ))}
               </div>
             )}
@@ -238,7 +236,6 @@ const ProductDetailPage = () => {
                   <span>{product.sku}</span>
                 </li>
               )}
-              {/* يمكن إضافة سمات المنتج هنا إذا كانت موجودة في product.attributes */}
               {product.attributes && product.attributes.length > 0 && (
                 <li className="list-group-item">
                   <strong>السمات:</strong>

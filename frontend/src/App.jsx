@@ -1,8 +1,8 @@
-// src/App.jsx
-import React from 'react';
+// ===== src/App.jsx =====
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-// استيراد الصفحات الأساسية للمستخدم
+// صفحات المستخدم العامة
 import Homepage from './pages/Homepage';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
@@ -13,14 +13,15 @@ import CheckoutPage from './pages/Checkout/CheckoutPage';
 import OrderConfirmationPage from './pages/Checkout/OrderConfirmationPage';
 import StaticPage from './pages/StaticPage';
 
-// استيراد مكونات الهيكل الأساسي
+// الهيكل العام
 import Header from './components/Header';
 import Footer from './components/Footer';
 
-// استيراد سياق المصادقة
+// المصادقة
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
-// استيراد صفحات ومكونات لوحة تحكم المسؤول
+// لوحة الأدمن
+import AdminLayout from './components/Admin/AdminLayout';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import CategoryManagement from './pages/Admin/CategoryManagement';
 import ProductManagement from './pages/Admin/ProductManagement';
@@ -30,21 +31,22 @@ import UserManagement from './pages/Admin/UserManagement';
 import ReviewManagement from './pages/Admin/ReviewManagement';
 import ContentManagement from './pages/Admin/ContentManagement';
 import DiscountManagement from './pages/Admin/DiscountManagement';
-import AdminLayout from './components/Admin/AdminLayout';
-import AdminSidebar from './pages/Admin/AdminSidebar';
-// استيراد صفحات ومكونات لوحة تحكم المستخدم
+import AdminSidebar from './pages/Admin/AdminSidebar'; // للجوال العالمي فقط
+
+// لوحة حساب المستخدم
+import UserLayout from './components/User/UserLayout';
 import UserDashboard from './pages/MyAccount/UserDashboard';
 import UserProfile from './pages/MyAccount/UserProfile';
 import UserAddresses from './pages/MyAccount/UserAddresses';
 import UserOrders from './pages/MyAccount/UserOrders';
 import UserWishlist from './pages/MyAccount/UserWishlist';
-import UserLayout from './components/User/UserLayout';
 
+// السلة (المزوّد الجديد)
+import { CartProvider } from './contexts/CartContext';
 
-// مكون لحماية المسارات العامة التي تتطلب مصادقة
+// حمايات المسارات
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
@@ -55,14 +57,11 @@ const PrivateRoute = ({ children }) => {
       </div>
     );
   }
-
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
-// مكون لحماية المسارات الإدارية (يتطلب مصادقة وأن يكون المستخدم مسؤولاً)
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, user, loading } = useAuth();
-
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
@@ -73,92 +72,94 @@ const AdminRoute = ({ children }) => {
       </div>
     );
   }
-
-  if (!isAuthenticated || !user?.is_admin) {
-    return <Navigate to="/" replace />;
-  }
-
+  if (!isAuthenticated || !user?.is_admin) return <Navigate to="/" replace />;
   return children;
 };
 
-// هذا المكون يحتوي على جميع المسارات ومكونات الهيكل الرئيسية
+// محتوى التطبيق
 const AppContent = () => {
-  const { user } = useAuth();
-
   return (
     <div className="d-flex flex-column min-vh-100 bg-light">
       <Header />
+
+      {/* ✅ نسخة الجوال من سايدبار الأدمن، متاحة بكل الصفحات وتفتح عبر حدث open-admin-overlay */}
       <AdminSidebar mode="mobile" />
 
       <main className="flex-grow-1 py-4">
-        <Routes>
-          {/* مسارات المستخدم العامة */}
-          <Route path="/" element={<Homepage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/products" element={<ProductListingPage />} />
-          <Route path="/products/:id" element={<ProductDetailPage />} />
+        <Suspense fallback={
+          <div className="container text-center py-5">
+            <div className="spinner-border text-primary" role="status" />
+          </div>
+        }>
+          <Routes>
+            {/* عامة */}
+            <Route path="/" element={<Homepage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/products" element={<ProductListingPage />} />
+            <Route path="/products/:id" element={<ProductDetailPage />} />
 
-          {/* مسارات لوحة تحكم المستخدم المحمية */}
-          <Route
-            path="/my-account/*"
-            element={
-              <PrivateRoute>
-                <UserLayout>
-                  <Routes>
-                    <Route index element={<UserDashboard />} />
-                    <Route path="profile" element={<UserProfile />} />
-                    <Route path="orders" element={<UserOrders />} />
-                    <Route path="addresses" element={<UserAddresses />} />
-                    <Route path="wishlist" element={<UserWishlist />} />
-                  </Routes>
-                </UserLayout>
-              </PrivateRoute>
-            }
-          />
+            {/* حسابي (خاص) */}
+            <Route
+              path="/my-account/*"
+              element={
+                <PrivateRoute>
+                  <UserLayout>
+                    <Routes>
+                      <Route index element={<UserDashboard />} />
+                      <Route path="profile" element={<UserProfile />} />
+                      <Route path="orders" element={<UserOrders />} />
+                      <Route path="addresses" element={<UserAddresses />} />
+                      <Route path="wishlist" element={<UserWishlist />} />
+                    </Routes>
+                  </UserLayout>
+                </PrivateRoute>
+              }
+            />
 
-          {/* مسارات لوحة تحكم المسؤول المحمية */}
-          <Route
-            path="/admin/*"
-            element={
-              <AdminRoute>
-                <AdminLayout>
-                  <Routes>
-                    <Route index element={<AdminDashboard />} />
-                    <Route path="categories" element={<CategoryManagement />} />
-                    <Route path="products" element={<ProductManagement />} />
-                    <Route path="brands" element={<BrandManagement />} />
-                    <Route path="orders" element={<OrderManagement />} />
-                    <Route path="users" element={<UserManagement />} />
-                    <Route path="reviews" element={<ReviewManagement />} />
-                    <Route path="content" element={<ContentManagement />} />
-                    <Route path="discounts" element={<DiscountManagement />} />
-                    {/* أضف مسارات لوحة تحكم المسؤول الأخرى هنا: */}
-                    {/* <Route path="settings" element={<StoreSettings />} /> */}
-                  </Routes>
-                </AdminLayout>
-              </AdminRoute>
-            }
-          />
+            {/* الأدمن (خاص) + نسخة الديسكتوب داخل الـLayout فقط */}
+            <Route
+              path="/admin/*"
+              element={
+                <AdminRoute>
+                  <AdminLayout>
+                    <Routes>
+                      <Route index element={<AdminDashboard />} />
+                      <Route path="categories" element={<CategoryManagement />} />
+                      <Route path="products" element={<ProductManagement />} />
+                      <Route path="brands" element={<BrandManagement />} />
+                      <Route path="orders" element={<OrderManagement />} />
+                      <Route path="users" element={<UserManagement />} />
+                      <Route path="reviews" element={<ReviewManagement />} />
+                      <Route path="content" element={<ContentManagement />} />
+                      <Route path="discounts" element={<DiscountManagement />} />
+                    </Routes>
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
 
-          {/* مسارات الصفحات الأخرى (Checkout Flow) */}
-          <Route path="/cart" element={<ShoppingCartPage />} />
-          <Route path="/checkout" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
-          <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
-          {/* ****** مسارات الصفحات الثابتة (عامة) ****** */}
-          {/* هنا نستخدم مسارًا ديناميكيًا واحدًا لجميع الصفحات الثابتة */}
-          <Route path="/pages/:slug" element={<StaticPage />} /> {/* هذا المسار سيتطابق مع /pages/about-us, /pages/privacy-policy, إلخ. */}
-          
-          {/* مسارات الفوتر القديمة التي كانت تستخدم /about-us مباشرة */}
-          {/* يجب أن يتم تحديث روابط الفوتر لاستخدام /pages/about-us */}
-          <Route path="/about-us" element={<Navigate to="/pages/about-us" replace />} /> {/* إعادة توجيه */}
-          <Route path="/privacy-policy" element={<Navigate to="/pages/privacy-policy" replace />} /> {/* إعادة توجيه */}
-          <Route path="/terms-of-service" element={<Navigate to="/pages/terms-of-service" replace />} /> {/* إعادة توجيه */}
-          <Route path="/contact-us" element={<Navigate to="/pages/contact-us" replace />} /> {/* إعادة توجيه */}
+            {/* السلة والتشيك أوت */}
+            <Route path="/cart" element={<ShoppingCartPage />} />
+            <Route path="/checkout" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
+            <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
 
-          <Route path="/forgot-password" element={<div className="container text-center mt-5"><p className="text-muted">صفحة نسيت كلمة المرور (قريباً)</p></div>} />
-        </Routes>
+            {/* الصفحات الثابتة */}
+            <Route path="/pages/:slug" element={<StaticPage />} />
+            <Route path="/about-us" element={<Navigate to="/pages/about-us" replace />} />
+            <Route path="/privacy-policy" element={<Navigate to="/pages/privacy-policy" replace />} />
+            <Route path="/terms-of-service" element={<Navigate to="/pages/terms-of-service" replace />} />
+            <Route path="/contact-us" element={<Navigate to="/pages/contact-us" replace />} />
+
+            <Route path="/forgot-password" element={
+              <div className="container text-center mt-5">
+                <p className="text-muted">صفحة نسيت كلمة المرور (قريباً)</p>
+              </div>
+            } />
+          </Routes>
+        </Suspense>
       </main>
+
       <Footer />
     </div>
   );
@@ -167,8 +168,11 @@ const AppContent = () => {
 function App() {
   return (
     <Router>
+      {/* ✅ Auth أولاً، ثم Cart عشان السلة تعتمد على حالة الدخول */}
       <AuthProvider>
-        <AppContent />
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
       </AuthProvider>
     </Router>
   );

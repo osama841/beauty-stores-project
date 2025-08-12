@@ -479,3 +479,49 @@
 main, .page-content {
   padding-top: 72px; /* تباعد أعلى للمحتوى لتجنب التداخل مع الهيدر */
 }
+/* ==== REQUIRED OVERRIDES (minimal) ==== */
+
+/* الهيدر فوق كل شيء وما يقصّ القوائم */
+.site-header{ z-index: 1100; overflow: visible; }
+.header-nav{ overflow: visible; }
+
+/* القائمة المنسدلة للحساب */
+.nav-item-dropdown{ position: relative; z-index: 1101; }
+.dropdown-content{ z-index: 1102; margin-top: 8px; }
+
+/* الميجا منيو فوق السايدبار وتحت الهيدر */
+.mega-menu{ z-index: 1103; }
+
+/* شريط الأقسام ثابت تحت الهيدر مباشرة
+   لو عندك بانل بحث يفتح تحت الهيدر استخدم الـ calc:
+   top: calc(var(--header-height) + (var(--search-open, 0) * 56px));
+   وإلا استخدم السطر التالي:
+*/
+.category-nav{
+  position: sticky;
+  top: var(--header-height);
+  z-index: 1095;
+  overflow: visible;
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* drawer الموبايل فوق الكل */
+@media (max-width: 991.98px){
+  .nav-menu{ z-index: 1200; }
+  /* لتجنب تراكب، خلّي شريط الأقسام غير sticky على الموبايل */
+  .category-nav{ position: static; top: auto; z-index: 1; }
+}
+
+/* قلّل فراغ أعلى المحتوى */
+.main-content,
+.admin-content-wrapper,
+.page-content{
+  padding-top: 12px;
+}
+
+/* لو أي container داخل الهيدر كان يقصّ العناصر */
+.site-header .container,
+.site-header .container-lg,
+.site-header .container-fluid{
+  overflow: visible;
+}

@@ -1,9 +1,15 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
 
-export default defineConfig({
-  base: '/beauty-stores-project/',   // 👈 مهم جدًا
-  plugins: [react()],
+  // لو ما حددت قيمة في .env بيصير '/' تلقائيًا
+  const base = env.VITE_BASE_PATH || '/'
+
+  return {
+    base,
+    plugins: [react()],
+  }
 })
