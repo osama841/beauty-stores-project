@@ -1,32 +1,21 @@
-/* ===== src/styles/header.css (IMPROVED + SEARCH + LARGER HEADER) ===== */
-:root {
-  /* لوحة الألوان الموحدة */
-  --primary-color: #6a8eec; /* أزرق هادئ ومريح */
-  --success-color: #60c78c; /* أخضر لطيف وودي */
-  --info-color: #81c784;   /* أخضر/أزرق فاتح مكمل */
-  --warning-color: #ffc107; /* أصفر */
-  --danger-color: #e74c3c; /* أحمر */
-  --dark-color: #343a40;   /* رمادي داكن للنصوص والخلفيات الغامقة */
-  --light-background: #f8f9fa; /* خلفية فاتحة جدًا */
-  --white-background: #ffffff; /* خلفية بيضاء */
-  --text-main: #343a40; /* لون النص الأساسي */
-  --text-muted: #6c757d; /* لون النص الثانوي */
-  --border-light: #e9ecef; /* لون حدود فاتح */
+/* ========================================================================
+   Final & Polished Header CSS - v3
+   ======================================================================== */
 
-  --header-height: 84px; /* أكبر شوية */
-}
-
-/* Header */
+/* 1. General Header & Variables
+------------------------------------------------------------------------ */
 .site-header {
-  background: var(--white-background);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
-  height: var(--header-height);
-  z-index: 1000;
+  background: var(--color-bg, white);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+  height: var(--header-height, 72px);
   position: sticky;
   top: 0;
-  inset-inline: 0;
-  width: 100%;
-  padding-top: max(0px, env(safe-area-inset-top));
+  z-index: 1050; /* Z-index أساسي مرتفع */
+  border-bottom: 1px solid var(--color-border, #e9ecef);
+}
+/* لمنع قص القوائم المنسدلة */
+.site-header, .site-header .container, .site-header .container-lg {
+  overflow: visible;
 }
 .header-nav {
   height: 100%;
@@ -34,207 +23,113 @@
   justify-content: space-between;
   align-items: center;
 }
-.brand-logo {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--dark-color); /* استخدام اللون الداكن الجديد */
-  text-decoration: none;
-  font-family: 'Tajawal', 'Cairo', sans-serif; /* تطبيق الخط */
-}
-.brand-logo:hover {
-  color: var(--primary-color); /* استخدام اللون الأساسي الجديد */
-}
-
-/* Right actions */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4, 1rem);
 }
-.cart-icon, .search-toggle {
-  position: relative;
-  color: var(--text-main); /* استخدام لون النص الأساسي */
+
+/* 2. Shared Components (Buttons, Icons, Logo)
+------------------------------------------------------------------------ */
+.brand-logo {
+  font-size: var(--font-size-2xl, 1.5rem);
+  font-weight: var(--font-weight-extra-bold, 800);
+  color: var(--color-text, #212529);
+  text-decoration: none;
+  transition: color var(--transition-fast, 0.2s);
 }
-.icon-btn {
+.brand-logo:hover {
+  color: var(--color-primary, #0d6efd);
+}
+
+.icon-btn, .menu-toggle, .close-menu-btn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: var(--space-2, 0.5rem);
+  color: var(--color-text, #343a40);
+  border-radius: var(--radius-md, 0.375rem);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-main); /* لون الأيقونات */
-  transition: color 0.2s ease;
+  min-height: 44px;
+  min-width: 44px;
+  transition: all var(--transition-fast, 0.2s);
 }
-.icon-btn:hover {
-  color: var(--primary-color); /* لون الأيقونات عند التحويم */
+.icon-btn:hover, .menu-toggle:hover, .close-menu-btn:hover {
+  color: var(--color-primary, #0d6efd);
+  background-color: var(--color-bg-light, #f8f9fa);
 }
+
+.cart-icon { position: relative; }
 .cart-badge {
   position: absolute;
-  top: -5px;
-  right: -10px;
-  background: var(--primary-color); /* استخدام اللون الأساسي الجديد */
-  color: #fff;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  top: 4px; right: 4px;
+  background: var(--color-primary, #0d6efd);
+  color: var(--color-text-inverse, white);
+  border-radius: var(--radius-full, 999px);
+  width: 20px; height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: .75rem;
-  font-weight: 700;
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: var(--font-weight-bold, 700);
 }
 
-/* Nav links (main menu) */
-.nav-links {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: 2rem;
-}
-.nav-link {
-  color: var(--text-muted); /* استخدام لون النص الثانوي */
-  text-decoration: none;
-  font-weight: 600;
-  padding: 6px 0;
-  position: relative;
-  transition: color .3s;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: 'Tajawal', 'Cairo', sans-serif; /* تطبيق الخط */
-}
-.nav-link.active {
-  color: var(--primary-color); /* استخدام اللون الأساسي الجديد */
-}
-.nav-link::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--primary-color); /* استخدام اللون الأساسي الجديد */
-  transition: width .3s;
-}
-.nav-link:hover::after {
-  width: 100%;
-}
-
-/* Action buttons (Login/Register/Account) */
 .btn-action-main, .btn-action-secondary, .btn-admin {
-  padding: 10px 16px;
-  border-radius: 22px; /* حواف أكثر دائرية */
+  padding: var(--btn-padding-y, 0.5rem) var(--btn-padding-x, 1rem);
+  border-radius: var(--btn-border-radius, 0.375rem);
   text-decoration: none;
-  font-weight: 600;
-  transition: all .3s;
+  font-weight: var(--font-weight-medium, 500);
+  transition: all var(--transition-fast, 0.2s);
   display: flex;
   align-items: center;
-  gap: 8px;
-  border: 1px solid var(--primary-color); /* استخدام اللون الأساسي الجديد للحدود */
-  font-family: 'Tajawal', 'Cairo', sans-serif; /* تطبيق الخط */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* إضافة ظل خفيف */
+  gap: var(--space-2, 0.5rem);
+  border: 1px solid transparent;
+  font-size: var(--font-size-sm, 0.875rem);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+  cursor: pointer;
 }
 .btn-action-main {
-  background: var(--primary-color); /* استخدام اللون الأساسي الجديد */
-  color: #fff;
-}
-.btn-action-main:hover {
-  filter: brightness(.95);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  background: var(--color-primary, #0d6efd);
+  color: var(--color-text-inverse, white);
+  border-color: var(--color-primary, #0d6efd);
 }
 .btn-action-secondary {
   background: transparent;
-  color: var(--primary-color); /* استخدام اللون الأساسي الجديد */
-}
-.btn-action-secondary:hover {
-  background: var(--primary-color); /* استخدام اللون الأساسي الجديد */
-  color: #fff;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  color: var(--color-primary, #0d6efd);
+  border-color: var(--color-primary, #0d6efd);
 }
 .btn-admin {
-  background: var(--dark-color); /* استخدام اللون الداكن الجديد */
-  color: #fff;
-  border: 1px solid var(--dark-color); /* استخدام اللون الداكن الجديد للحدود */
+  background: var(--color-bg-dark, #343a40);
+  color: var(--color-text-inverse, white);
 }
-.btn-admin:hover {
-  background: #333;
-  border-color: #333;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+.btn-action-main:hover, .btn-action-secondary:hover, .btn-admin:hover {
+  filter: brightness(0.9);
+  box-shadow: var(--shadow-md, 0 4px 6px rgba(0,0,0,0.1));
+  transform: translateY(-2px);
+}
+.btn-action-secondary:hover {
+  background: var(--color-primary, #0d6efd);
+  color: var(--color-text-inverse, white);
 }
 
-/* User dropdown */
-.nav-item-dropdown {
-  position: relative;
-}
-.dropdown-content {
-  display: none;
+/* 3. Search Bar Panel - POLISHED
+------------------------------------------------------------------------ */
+.search-panel {
   position: absolute;
   top: 100%;
-  left: 0;
-  background: var(--white-background); /* استخدام الخلفية البيضاء الجديدة */
-  min-width: 200px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, .1);
-  border-radius: 8px;
-  padding: 10px 0;
-  list-style: none;
-  margin-top: 10px;
+  left: 0; right: 0;
+  background: var(--color-bg, white);
+  border-bottom: 1px solid var(--color-border, #e9ecef);
+  box-shadow: var(--shadow-md, 0 4px 6px rgba(0,0,0,0.1));
+  z-index: 1040;
+  transform: translateY(-150%);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px);
-  transition: all .2s;
-  z-index: 1001;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s;
 }
-.nav-item-dropdown:hover > .dropdown-content,
-.nav-item-dropdown:focus-within > .dropdown-content {
-  display: block;
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-  transition-delay: 0s;
-}
-.user-dropdown .dropdown-content {
-  left: auto;
-  right: 0;
-}
-.dropdown-content li a, .dropdown-content button {
-  color: var(--text-main); /* استخدام لون النص الأساسي */
-  padding: 10px 20px;
-  text-decoration: none;
-  display: block;
-  width: 100%;
-  text-align: right; /* محاذاة لليمين لـ RTL */
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: 'Tajawal', 'Cairo', sans-serif; /* تطبيق الخط */
-  font-size: 0.95rem; /* تصغير حجم الخط قليلاً */
-}
-.dropdown-content li a:hover, .dropdown-content button:hover {
-  background: var(--light-background); /* استخدام لون الخلفية الفاتحة الجديدة */
-  color: var(--primary-color); /* استخدام اللون الأساسي الجديد */
-}
-.dropdown-content hr {
-  border: 0;
-  border-top: 1px solid var(--border-light); /* استخدام لون الحدود الفاتح الجديد */
-  margin: 8px 0;
-}
-
-/* Search panel */
-.search-panel {
-  position: sticky;
-  top: var(--header-height);
-  background: var(--white-background); /* استخدام الخلفية البيضاء الجديدة */
-  border-bottom: 1px solid var(--border-light); /* استخدام لون الحدود الفاتح الجديد */
-  transform: translateY(-100%);
-  opacity: 0;
-  visibility: hidden;
-  transition: transform .25s ease, opacity .2s ease, visibility 0s linear .2s;
-  z-index: 1001;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* ظل خفيف */
-}
-.search-panel.open {
+.search-panel.is-open {
   transform: translateY(0);
   opacity: 1;
   visibility: visible;
@@ -242,286 +137,477 @@
 }
 .search-form {
   display: flex;
-  gap: .5rem;
+  gap: 0.75rem;
   align-items: center;
-  padding: .75rem 0;
+  padding: 1rem;
+  max-width: 720px;
+  margin: auto;
 }
 .search-input {
-  flex: 1 1 auto;
-  height: 44px;
-  border: 1px solid var(--border-light); /* استخدام لون الحدود الفاتح الجديد */
-  border-radius: 999px;
-  padding: 0 14px;
+  flex-grow: 1;
+  height: 48px;
+  border: 1px solid var(--color-border, #ced4da);
+  border-radius: var(--radius-full, 999px);
+  padding: 0 1.25rem;
   font-size: 1rem;
-  font-family: 'Tajawal', 'Cairo', sans-serif; /* تطبيق الخط */
-  color: var(--text-main);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.search-input::placeholder {
-  color: var(--text-muted);
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #0d6efd);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
 }
 .search-submit {
-  height: 44px;
-  border-radius: 999px;
-  padding: 0 16px;
-  border: 1px solid var(--primary-color); /* استخدام اللون الأساسي الجديد */
-  background: var(--primary-color); /* استخدام اللون الأساسي الجديد */
-  color: #fff;
-  font-weight: 700;
-  font-family: 'Tajawal', 'Cairo', sans-serif; /* تطبيق الخط */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  transition: filter 0.2s ease, box-shadow 0.2s ease;
-}
-.search-submit:hover {
-  filter: brightness(.95);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  height: 48px;
+  border-radius: var(--radius-full, 999px);
+  padding: 0 2rem;
+  border: none;
+  background: var(--color-primary, #0d6efd);
+  color: var(--color-text-inverse, white);
+  font-weight: bold;
+  cursor: pointer;
 }
 
-/* Categories navigation bar */
+/* 4. Categories Navigation & Mega Menu - ADDED
+------------------------------------------------------------------------ */
 .category-nav {
   position: sticky;
-  top: calc(var(--header-height) + (var(--search-open, 0) * 56px)); /* يتم التحكم به بواسطة JS لـ search-open */
-  z-index: 999;
-  background: var(--white-background); /* استخدام الخلفية البيضاء الجديدة */
-  border-top: 1px solid var(--border-light); /* استخدام لون الحدود الفاتح الجديد */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.03); /* ظل خفيف جدًا */
+  top: var(--header-height, 72px);
+  background: var(--color-bg, white);
+  z-index: 1000;
+  border-bottom: 1px solid var(--color-border, #e9ecef);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.02));
 }
 .category-list {
-  list-style: none;
   display: flex;
-  gap: 1rem;
+  list-style: none;
   margin: 0;
-  padding: .6rem 0;
+  padding: 0.5rem 0;
+  gap: 0.5rem;
 }
 .category-item {
-  position: relative;
+  position: relative; /* ضروري لعمل القائمة المنسدلة */
 }
 .category-link {
-  color: var(--text-main); /* استخدام لون النص الأساسي */
+  display: block;
+  color: var(--color-text-secondary, #6c757d);
   text-decoration: none;
   font-weight: 600;
-  font-family: 'Tajawal', 'Cairo', sans-serif; /* تطبيق الخط */
-  padding: 0.4rem 0.8rem; /* تباعد أفضل للروابط */
-  border-radius: 6px; /* حواف دائرية للروابط */
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md, 0.375rem);
   transition: all 0.2s ease;
 }
 .category-link:hover {
-  color: var(--primary-color); /* استخدام اللون الأساسي الجديد */
-  background-color: var(--light-background); /* خلفية خفيفة عند التحويم */
+  color: var(--color-primary, #0d6efd);
+  background-color: var(--color-bg-light, #f8f9fa);
+}
+.category-link.active {
+  background-color: var(--color-primary, #0d6efd);
+  color: var(--color-text-inverse, white);
 }
 
-/* Mega menu (desktop) */
+/* 5. Desktop-Only Styles
+------------------------------------------------------------------------ */
 @media (min-width: 992px) {
-  .category-nav { z-index: 1050; overflow: visible; }
-  .site-header { overflow: visible; }
+  /* Desktop Main Navigation Links */
+  .nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0; padding: 0;
+    gap: 2rem;
+  }
+  .nav-link {
+    color: var(--text-muted, #6c757d);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 6px 0;
+    position: relative;
+    transition: color .3s;
+  }
+  .nav-link.active {
+    color: var(--primary-color, #0d6efd);
+  }
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0; height: 2px;
+    background: var(--primary-color, #0d6efd);
+    transition: width .3s;
+  }
+  .nav-link:hover {
+    color: var(--primary-color, #0d6efd);
+  }
+  .nav-link:hover::after {
+    width: 100%;
+  }
 
-  .mega-menu {
-    display: block; opacity: 0; visibility: hidden; transform: translateY(8px);
-    transition: opacity .15s ease, transform .15s ease, visibility 0s linear .15s;
-    position: absolute; inset-block-start: 100%; inset-inline-start: auto; inset-inline-end: 0;
-    min-width: 320px; max-width: min(92vw, 720px);
-    background: var(--white-background); /* استخدام الخلفية البيضاء الجديدة */
-    border-radius: 8px;
-    box-shadow: 0 12px 24px rgba(0,0,0,.10);
-    padding: 1rem;
+  /* Desktop User Account Dropdown */
+  .user-dropdown {
+    position: relative;
+  }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    background: var(--color-bg, white);
+    min-width: 220px;
+    box-shadow: var(--shadow-lg, 0 8px 24px rgba(0,0,0,0.12));
+    border-radius: var(--radius-lg, 0.5rem);
+    padding: var(--space-2, 0.5rem) 0;
+    list-style: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all .2s;
     z-index: 1060;
+  }
+  .user-dropdown:hover > .dropdown-content {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .dropdown-content a, .dropdown-content button {
+    color: var(--color-text, #212529);
+    padding: var(--space-2, 0.5rem) var(--space-4, 1rem);
+    text-decoration: none;
+    display: block;
+    width: 100%; text-align: right;
+    background: none; border: none; cursor: pointer;
+  }
+  .dropdown-content a:hover, .dropdown-content button:hover {
+    background: var(--color-bg-light, #f8f9fa);
+    color: var(--color-primary, #0d6efd);
+  }
+
+  /* Desktop Mega Menu */
+  .mega-menu {
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(15px);
+    transition: opacity .2s ease, transform .2s ease, visibility 0s .2s;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 500px;
+    background: var(--color-bg, white);
+    border-radius: var(--radius-lg, 0.5rem);
+    box-shadow: var(--shadow-xl, 0 10px 30px rgba(0,0,0,0.1));
+    padding: 1.5rem;
+    z-index: 1055;
     pointer-events: none;
   }
-  .category-item:hover > .mega-menu, .category-item:focus-within > .mega-menu {
-    opacity: 1; visibility: visible; transform: translateY(12px); transition-delay: 0s; pointer-events: auto;
-  }
-  .mega-link {
-    color: var(--text-main);
-    text-decoration: none;
-    font-weight: 500;
-    font-family: 'Tajawal', 'Cairo', sans-serif;
-    display: block;
-    padding: 0.4rem 0.6rem;
-    border-radius: 4px;
-    transition: background-color 0.2s ease, color 0.2s ease;
-  }
-  .mega-link:hover {
-    background-color: var(--light-background);
-    color: var(--primary-color);
+  .category-item:hover > .mega-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(5px);
+    transition-delay: 0s;
+    pointer-events: auto;
   }
 }
 
-/* Mobile */
-.menu-toggle, .close-menu-btn {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-main); /* لون الأيقونات */
-}
-.nav-actions-mobile {
-  display: none;
-}
+/* 6. Mobile-Only Styles
+------------------------------------------------------------------------ */
+@media (max-width: 991.98px) {
+  /* Hide desktop nav */
+  .header-nav .d-none.d-lg-block {
+    display: none !important;
+  }
+  /* Show mobile menu toggle button */
+  .menu-toggle.d-lg-none {
+    display: inline-flex !important;
+  }
 
-@media(max-width:991.98px) {
-  .site-header { height: auto; }
-  .brand-logo { font-size: 1.6rem; }
-  .menu-toggle { display: block; }
-
-  .nav-menu {
+  /* Mobile Menu Backdrop */
+  .nav-menu-backdrop {
     position: fixed;
-    top: 0;
-    right: 0;
-    width: 300px; /* عرض أقل قليلاً للجوال */
-    height: 100%;
-    background: var(--white-background); /* استخدام الخلفية البيضاء الجديدة */
-    box-shadow: -4px 0 15px rgba(0, 0, 0, .1);
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1190;
+    animation: fadeIn 0.3s;
+  }
+
+  /* Mobile Menu Panel */
+  .nav-menu.d-lg-none {
+    position: fixed;
+    top: 0; right: 0;
+    width: 300px; max-width: 80vw;
+    height: 100vh;
+    background-color: var(--color-bg, white);
+    box-shadow: var(--shadow-2xl, -8px 0 24px rgba(0,0,0,0.15));
+    padding: 1rem;
+    z-index: 1200;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    padding: 22px;
-    transition: transform .35s ease-in-out;
-    z-index: 1002;
-    overflow-y: auto;
     transform: translateX(100%);
-    font-family: 'Tajawal', 'Cairo', sans-serif; /* تطبيق الخط */
+    transition: transform 0.3s ease-in-out;
   }
   .nav-menu.is-open {
     transform: translateX(0);
   }
+
   .close-menu-btn {
-    display: block;
-    margin-bottom: 2rem;
-    color: var(--dark-color); /* لون أيقونة الإغلاق */
+    align-self: flex-end;
   }
-  .nav-links {
-    flex-direction: column;
-    gap: 1.5rem;
-    width: 100%;
+  
+  .nav-menu .header-nav-list {
+    
+    display: flex; flex-direction: column;
+    list-style: none; padding: 0; margin: 1rem 0;
+    gap: 0.5rem;
   }
-  .nav-link {
-    padding: 10px 0; /* تباعد أكبر لروابط الجوال */
-    font-size: 1.1rem; /* حجم خط أكبر لروابط الجوال */
+  .nav-menu .header-nav-list a {
+    padding: 0.75rem; display: block;
+    text-decoration: none; color: #212529;
+    font-weight: 500; border-radius: 0.25rem;
   }
-  .nav-link::after { /* إزالة الخط السفلي من روابط الجوال */
-    display: none;
-  }
-  .nav-item-dropdown:hover > .dropdown-content {
-    display: none; /* إخفاء القائمة المنسدلة عند التحويم على الجوال */
+  .nav-menu .header-nav-list a:hover {
+    background-color: #f8f9fa;
   }
 
-  .nav-menu.is-open .nav-actions-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border-light); /* استخدام لون الحدود الفاتح الجديد */
-    width: 100%;
+  .nav-actions-mobile {
+    margin-top: auto; padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+    display: flex; flex-direction: column;
+    gap: 0.75rem;
   }
   .nav-actions-mobile .btn-action-main,
   .nav-actions-mobile .btn-action-secondary,
   .nav-actions-mobile .btn-admin {
-    width: 100%; /* الأزرار تأخذ عرضًا كاملاً */
-    justify-content: center; /* توسيط المحتوى داخل الأزرار */
-    font-size: 1.05rem; /* حجم خط أكبر قليلاً للأزرار */
+    width: 100%;
+    justify-content: center;
   }
-
-  /* على الجوال: شريط الأقسام الأفقي */
+  
+  /* Horizontal Scrolling for Category Nav */
   .category-list {
-    gap: 0.75rem; /* تقليل الفجوة بين العناصر */
     overflow-x: auto;
+    padding-bottom: 1rem; /* مسافة للتمرير */
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* إخفاء شريط التمرير لـ Firefox */
-    -ms-overflow-style: none;  /* إخفاء شريط التمرير لـ IE/Edge */
-    padding: .55rem .25rem;
+    scrollbar-width: none; /* Firefox */
   }
-  /* إخفاء شريط التمرير لـ Webkit (Chrome, Safari) */
   .category-list::-webkit-scrollbar {
-    display: none;
+    display: none; /* Chrome, Safari */
   }
   .category-item {
-    flex: 0 0 auto;
-  }
-  .category-link {
-    white-space: nowrap;
-    display: inline-block;
-    padding: .4rem .9rem;
-    border-radius: 999px;
-    background: var(--light-background); /* خلفية خفيفة */
-    border: 1px solid var(--border-light); /* حدود ناعمة */
-    color: var(--text-main); /* لون النص */
-    font-weight: 500;
-    font-size: 0.9rem;
-  }
-  .category-link:hover, .category-link.active { /* حالة النشط والتحويم على الجوال */
-    background: var(--primary-color);
-    color: var(--white-background);
-    border-color: var(--primary-color);
-  }
-
-  /* اجعل شريط الأقسام غير sticky لمنع التراكب */
-  .category-nav {
-    position: static;
-    top: auto;
-  }
-
-  /* البحث: اجعله يأخذ العرض كاملاً تحت الهيدر عند الفتح */
-  .search-panel {
-    position: sticky;
-    top: var(--header-height);
+    flex-shrink: 0; /* تمنع العناصر من الانكماش */
   }
 }
 
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .mega-menu { transition: none; }
-  .nav-menu { transition: none; }
-  .search-panel { transition: none; }
+/* 7. Keyframes
+------------------------------------------------------------------------ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* ===========================
+   (A) زر البحث Search Toggle
+   موحّد مع زر القائمة والسلة
+   =========================== */
+.search-toggle{
+  background: var(--white-background);
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  width: 40px; height: 40px; min-width: 40px; min-height: 40px;
+  padding: 0; line-height: 1;
+  display: inline-flex !important; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm);
+  transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease;
+}
+.search-toggle:hover,
+.search-toggle:focus{
+  background: var(--color-bg-light);
+  color: var(--color-primary) !important;
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.search-toggle svg{ width: 22px; height: 22px; }
+
+/* ========================================
+   (B) شريط البحث — polish مع نفس النظام
+   (يحترم .search-panel.open الموجود عندك)
+   ======================================== */
+.search-panel{
+  /* موجودة عندك؛ نضيف تحسينات طفيفة فقط */
+  backdrop-filter: saturate(140%) blur(3px);
+}
+.search-form{
+  max-width: 760px;          /* وسط الشاشة وأنيق */
+  margin-inline: auto;
+  padding-block: .75rem;
+  padding-inline: .5rem;
+}
+.search-input{
+  border-radius: 999px;
+  border: 1px solid var(--border-light);
+  background: var(--white-background);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03) inset;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.search-input:focus{
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+.search-submit{
+  border-radius: 999px;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 700;
+  padding-inline: 1rem;
+  transition: filter .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+.search-submit:hover{
+  filter: brightness(.95);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
-/* Content spacing */
-/* هذا قد يحتاج إلى تعديل في ملفات الـ Page Components نفسها */
-main, .page-content {
-  padding-top: 72px; /* تباعد أعلى للمحتوى لتجنب التداخل مع الهيدر */
-}
-/* ==== REQUIRED OVERRIDES (minimal) ==== */
-
-/* الهيدر فوق كل شيء وما يقصّ القوائم */
-.site-header{ z-index: 1100; overflow: visible; }
-.header-nav{ overflow: visible; }
-
-/* القائمة المنسدلة للحساب */
-.nav-item-dropdown{ position: relative; z-index: 1101; }
-.dropdown-content{ z-index: 1102; margin-top: 8px; }
-
-/* الميجا منيو فوق السايدبار وتحت الهيدر */
-.mega-menu{ z-index: 1103; }
-
-/* شريط الأقسام ثابت تحت الهيدر مباشرة
-   لو عندك بانل بحث يفتح تحت الهيدر استخدم الـ calc:
-   top: calc(var(--header-height) + (var(--search-open, 0) * 56px));
-   وإلا استخدم السطر التالي:
-*/
-.category-nav{
-  position: sticky;
-  top: var(--header-height);
-  z-index: 1095;
-  overflow: visible;
-  border-bottom: 1px solid var(--border-light);
-}
-
-/* drawer الموبايل فوق الكل */
+/* على الجوال: الشريط يلتصق تحت الهيدر (موجود عندك) مع لمسات بسيطة */
 @media (max-width: 991.98px){
-  .nav-menu{ z-index: 1200; }
-  /* لتجنب تراكب، خلّي شريط الأقسام غير sticky على الموبايل */
-  .category-nav{ position: static; top: auto; z-index: 1; }
+  .search-panel{
+    top: var(--header-height);
+    z-index: 1205; /* فوق الهيدر وتحت السايدبار */
+  }
 }
 
-/* قلّل فراغ أعلى المحتوى */
-.main-content,
-.admin-content-wrapper,
-.page-content{
-  padding-top: 12px;
+/* ======================================================
+   (C) قائمة الروابط داخل السايدبار (الموبايل) — HeaderNav
+   تحويل nav-links إلى عمود + حالات hover/active موحّدة
+   ====================================================== */
+@media (max-width: 991.98px){
+  .nav-menu .nav-links{
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  .nav-menu .nav-link{
+    width: 100%;
+    display: block;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-main);
+    padding: .75rem .9rem;
+    border-radius: var(--radius-md);
+    transition: background-color .2s ease, color .2s ease, transform .12s ease;
+  }
+  .nav-menu .nav-link:hover{
+    background: var(--color-bg-light);
+    color: var(--color-primary);
+    transform: translateX(-2px); /* لمسة حركة خفيفة على RTL */
+  }
+  .nav-menu .nav-link.active{
+    background: var(--light-background);
+    color: var(--primary-color);
+    border: 1px solid var(--border-light);
+  }
+}
+.search-panel {
+  position: absolute; /* بدلاً من sticky */
+  top: 100%; /* تحت الهيدر مباشرة */
+  right: 0; /* على يمين الهيدر */
+  width: 320px; /* عرض مخصص بدل ملء الصفحة */
+  background: var(--white-background);
+  border: 1px solid var(--border-light);
+  transform: translateY(-150%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform .25s ease, opacity .2s ease, visibility 0s linear .2s;
+  z-index: 1200;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 0 0 8px 8px; /* حواف أسفل ناعمة */
 }
 
-/* لو أي container داخل الهيدر كان يقصّ العناصر */
-.site-header .container,
-.site-header .container-lg,
-.site-header .container-fluid{
-  overflow: visible;
+/* حالة الفتح */
+.search-panel.open {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
 }
+
+/* الحقول داخل الشريط */
+.search-form {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  padding: .75rem;
+}
+/* ===== FIX: Mobile sidebar bullets & unify selectors ===== */
+
+/* 1) توحيد التسمية: استبدال أي استخدام قديم لـ .header-nav-list */
+.nav-menu .header-nav-list { all: unset; } /* إلغاء أي تنسيقات قديمة إن وُجدت */
+.nav-menu .nav-links{
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, .75rem);
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+/* 2) إزالة النقاط تمامًا */
+.nav-links,
+.nav-menu .nav-links,
+.nav-menu .nav-links li{
+  list-style: none;
+}
+.nav-menu .nav-links li::marker{ content: none; } /* تأكيد إزالة المؤشر */
+
+/* 3) شكل الروابط داخل السايدبار (أنيق وبدون نقاط) */
+.nav-menu .nav-link{
+  width: 100%;
+  display: block;
+  font-size: var(--font-size-lg, 1rem);
+  font-weight: var(--font-weight-medium, 600);
+  color: var(--text-main, #212529);
+  padding: .8rem 1rem;
+  border-radius: var(--radius-md, .375rem);
+  transition: background-color .2s ease, color .2s ease, transform .12s ease;
+}
+.nav-menu .nav-link:hover{
+  background: var(--color-bg-light, #f8f9fa);
+  color: var(--color-primary, #0d6efd);
+  transform: translateX(-2px);
+}
+.nav-menu .nav-link.active{
+  background: var(--light-background, #eef3ff);
+  color: var(--primary-color, #0d6efd);
+  border: 1px solid var(--border-light, #e9ecef);
+}
+
+/* 4) فاصلة ناعمة أعلى أزرار الحساب أسفل السايدبار */
+.nav-actions-mobile{
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-light, #e9ecef);
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+@media (min-width: 992px) {
+  .search-panel {
+    position: absolute;
+    top: 100%;
+    left: 50%; /* نقطة البداية في الوسط */
+    transform: translate(-50%, 0); /* إزاحة نصف العرض للوسط */
+    width: 800px; /* عرض مناسب */
+    max-width: 90vw; /* لا يتجاوز الشاشة */
+    border-radius: 0.375rem;
+  }
+
+  /* عند الفتح نحافظ على نفس الإزاحة */
+  .search-panel.open {
+    transform: translate(-50%, 0);
+  }
+}
+
+

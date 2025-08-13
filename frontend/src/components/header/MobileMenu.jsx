@@ -31,11 +31,21 @@ const MobileMenu = ({
   };
 
   return (
-    <div
-      id="mobileMenu"
-      className={`nav-menu d-lg-none ${isOpen ? "is-open" : ""}`}
-      aria-hidden={!isOpen}
-    >
+    <>
+      {/* Backdrop/Overlay */}
+      {isOpen && (
+        <div 
+          className="nav-menu-backdrop"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+      
+      <div
+        id="mobileMenu"
+        className={`nav-menu d-lg-none ${isOpen ? "is-open" : ""}`}
+        aria-hidden={!isOpen}
+      >
       {/* زر الإغلاق */}
       <button
         className="close-menu-btn"
@@ -99,6 +109,7 @@ const MobileMenu = ({
         )}
       </div>
     </div>
+    </>
   );
 };
 

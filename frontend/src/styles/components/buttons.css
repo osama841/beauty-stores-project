@@ -92,6 +92,24 @@
   box-shadow: var(--shadow-md);
 }
 
+/* === زر شفاف (Ghost) === */
+.btn-ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-text);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--color-bg-light);
+  border-color: var(--color-border);
+  color: var(--color-primary);
+}
+
+.btn-ghost:focus {
+  background-color: var(--color-bg-light);
+  border-color: var(--color-border-focus);
+}
+
 .btn-danger {
   background-color: var(--color-danger);
   border-color: var(--color-danger);

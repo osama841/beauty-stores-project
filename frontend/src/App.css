@@ -1,31 +1,29 @@
 /* ===== App Specific Styles ===== */
 /* أنماط خاصة بالتطبيق - تم تنظيفها */
 
-/* إزالة الأنماط غير المستخدمة واستبدالها بنظام التصميم الجديد */
-
-<<<<<<< Current (Your changes)
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* App container */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.main-content {
+  flex: 1;
 }
 
-.card {
-  padding: 2em;
+/* تحسينات عامة للتطبيق */
+.app-loading {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .read-the-docs {
   color: #888;
 }
-=======
-/* أي أنماط خاصة إضافية يمكن إضافتها هنا */
->>>>>>> Incoming (Background Agent changes)
+
+/* أنماط إضافية خاصة بالتطبيق حسب الحاجة */
+/* >>>>>>> Incoming (Background Agent changes)
+ */

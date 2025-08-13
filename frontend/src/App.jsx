@@ -52,11 +52,11 @@ const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="app-loading">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">جاري التحقق من المصادقة...</span>
         </div>
-        <p className="ms-3 text-secondary">جاري التحقق من المصادقة...</p>
+        <p className="mt-3 text-muted">جاري التحقق من المصادقة...</p>
       </div>
     );
   }
@@ -67,11 +67,11 @@ const AdminRoute = ({ children }) => {
   const { isAuthenticated, user, loading } = useAuth();
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="app-loading">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">جاري التحقق من الصلاحيات...</span>
         </div>
-        <p className="ms-3 text-secondary">جاري التحقق من الصلاحيات...</p>
+        <p className="mt-3 text-muted">جاري التحقق من الصلاحيات...</p>
       </div>
     );
   }
@@ -82,16 +82,18 @@ const AdminRoute = ({ children }) => {
 // محتوى التطبيق
 const AppContent = () => {
   return (
-    <div className="d-flex flex-column min-vh-100 bg-light">
+    <div className="app-container">
       <Header />
 
       {/* ✅ نسخة الجوال من سايدبار الأدمن، متاحة بكل الصفحات وتفتح عبر حدث open-admin-overlay */}
       <AdminSidebar mode="mobile" />
 
-      <main className="flex-grow-1 py-4">
+      <main className="main-content">
         <Suspense fallback={
-          <div className="container text-center py-5">
-            <div className="spinner-border text-primary" role="status" />
+          <div className="app-loading">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">جاري التحميل...</span>
+            </div>
           </div>
         }>
           <Routes>

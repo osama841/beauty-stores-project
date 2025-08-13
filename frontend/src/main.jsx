@@ -1,26 +1,28 @@
+/* <<<<<<< Current (Your changes)
   // src/main.jsx
   // هذا هو ملف نقطة الدخول الرئيسي لتطبيق React عند استخدام Vite.
-
-  import React from 'react';
-  import ReactDOM from 'react-dom/client';
-
-/* <<<<<<< Current (Your changes) */
-  // استيراد ملفات نظام التصميم الأساسية
-  import './styles/tokens.css';
-  import './styles/base.css';
-
-  // استيراد نظام التصميم
-  import './styles/tokens.css';
-  import './styles/base.css';
-  import './styles/components/buttons.css';
-  import './styles/components/forms.css';
-  import './styles/components/product-card.css';
-  import './styles/components/skeleton.css';
-  import './styles/components/toast.css';
-  
-  import './styles/global.css';
+=======
+// src/main.jsx */
+// نقطة الدخول الرئيسي لتطبيق React مع Vite
 /* >>>>>>> Incoming (Background Agent changes) */
-  import App from './App'; // استيراد المكون الرئيسي App
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+// استيراد نظام التصميم بالترتيب الصحيح
+import './styles/tokens.css';      // المتغيرات الأساسية
+import './styles/base.css';        // الأنماط الأساسية  
+import './styles/overrides.css';   // تجاوزات Bootstrap
+import './styles/global.css';      // الأنماط العامة
+
+// استيراد مكونات النظام
+import './styles/components/buttons.css';
+import './styles/components/forms.css';
+import './styles/components/product-card.css';
+import './styles/components/skeleton.css';
+import './styles/components/toast.css';
+
+import App from './App';
 
   // إنشاء جذر React لتطبيقك
   const root = ReactDOM.createRoot(document.getElementById('root'));

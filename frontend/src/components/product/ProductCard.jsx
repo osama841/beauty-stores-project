@@ -3,12 +3,10 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   BiHeart, 
-  BiHeartFill, 
   BiShoppingBag,
-  BiStar,
-  BiStarFill,
-  BiStarHalf 
+  BiStar
 } from 'react-icons/bi';
+import { BsStarFill, BsStarHalf, BsHeartFill } from 'react-icons/bs';
 import { useToast } from '../common/Toast';
 
 const ProductCard = ({ 
@@ -61,11 +59,11 @@ const ProductCard = ({
     const hasHalfStar = rating % 1 !== 0;
     
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<BiStarFill key={i} />);
+      stars.push(<BsStarFill key={i} />);
     }
     
     if (hasHalfStar) {
-      stars.push(<BiStarHalf key="half" />);
+      stars.push(<BsStarHalf key="half" />);
     }
     
     const emptyStars = 5 - Math.ceil(rating);
@@ -131,22 +129,26 @@ const ProductCard = ({
     <div className={cardClasses}>
       {/* صورة المنتج */}
       <div className="product-card-image">
-        <Link to={`/products/${product_id}`}>
+        <Link 
+          to={`/products/${product_id ?? product.id}`}
+          aria-label={`عرض تفاصيل المنتج ${name}`}
+        >
           {imageLoading && !imageError && (
-            <div className="skeleton skeleton-product-image" />
+            <div className="skeleton skeleton-product-image" aria-label="جاري تحميل صورة المنتج" />
           )}
           
           {!imageError ? (
             <img
-              src={image_url || '/placeholder-product.jpg'}
-              alt={name}
+            src={product.main_image_url || image_url || '/placeholder-product.jpg'}
+              alt={`صورة المنتج ${name} من ${brand_name || 'متجر الجمال'}`}
               loading="lazy"
+              decoding="async"
               onLoad={handleImageLoad}
               onError={handleImageError}
               style={{ display: imageLoading ? 'none' : 'block' }}
             />
           ) : (
-            <div className="product-image-placeholder">
+            <div className="product-image-placeholder" role="img" aria-label={`لا توجد صورة متاحة للمنتج ${name}`}>
               <span>لا توجد صورة</span>
             </div>
           )}
@@ -195,7 +197,10 @@ const ProductCard = ({
 
         {/* عنوان المنتج */}
         <h3 className="product-card-title">
-          <Link to={`/products/${product_id}`}>
+          <Link 
+            to={`/products/${product_id}`}
+            aria-label={`عرض تفاصيل المنتج ${name}${brand_name ? ` من ${brand_name}` : ''}`}
+          >
             {name}
           </Link>
         </h3>
@@ -241,7 +246,7 @@ const ProductCard = ({
                   : `إضافة ${name} لقائمة الرغبات`
               }
             >
-              {isInWishlist ? <BiHeartFill /> : <BiHeart />}
+              {isInWishlist ? <BsHeartFill /> : <BiHeart />}
             </button>
           )}
         </div>

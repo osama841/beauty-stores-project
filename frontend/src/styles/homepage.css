@@ -1,4 +1,5 @@
-/* استخدام ألوان النظام العالمي من global.css (Bootstrap variables) */
+/* ===== Homepage Styles ===== */
+/* الصفحة الرئيسية - توحيد مع نظام التصميم */
 
 /* تنسيقات عامة */
 .homepage-container {
@@ -7,63 +8,158 @@
 
 /* Hero Section */
 .hero-section {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, var(--bs-primary), rgba(var(--bs-primary-rgb), 0.85)), url('https://placehold.co/1200x400/ffe8f2/333?text=متجر+الجمال');
-  background-size: cover;
-  background-position: center;
-}
-
-.hero-content {
-  z-index: 2;
-}
-
-.wave-divider {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
   overflow: hidden;
-  line-height: 0;
-  transform: rotate(180deg);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-8);
 }
 
-.wave-divider svg {
-  position: relative;
-  display: block;
-  width: calc(100% + 1.3px);
-  height: 120px;
-}
-
-/* الأزرار المخصصة */
-/* الأزرار تتبع Bootstrap (لا نحتاج أصناف مخصصة هنا) */
-
-/* العناوين */
-.section-title {
-  font-size: 2.2rem;
-  padding-bottom: 10px;
-}
-
-.section-title-bg {
+.hero-section::before {
+  content: '';
   position: absolute;
-  top: 50%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 50%);
+  opacity: 0.6;
+}
+
+.hero-section .container {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-section h1 {
+  text-shadow: var(--shadow-sm);
+  font-weight: var(--font-weight-extra-bold);
+  font-size: var(--font-size-4xl);
+}
+
+.hero-section p {
+  font-size: var(--font-size-lg);
+  opacity: 0.95;
+  font-weight: var(--font-weight-medium);
+}
+
+.hero-section .btn {
+  box-shadow: var(--shadow-md);
+  transform: translateY(0);
+  transition: all var(--transition-fast);
+  font-weight: var(--font-weight-semibold);
+}
+
+.hero-section .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* قسم العناوين المشتركة */
+.section-title {
+  position: relative;
+  margin-bottom: var(--space-12);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-3xl);
+  color: var(--color-text);
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: calc(-1 * var(--space-3));
   left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 4rem;
-  font-weight: 900;
-  color: rgba(var(--bs-primary-rgb), 0.06);
-  white-space: nowrap;
-  z-index: 0;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  border-radius: var(--radius-full);
+}
+
+/* تحسينات البطاقات */
+.homepage-container .card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow);
+  transition: all var(--transition-fast);
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.homepage-container .card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.homepage-container .card-header {
+  background: var(--color-bg-light);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-4) var(--space-6);
+}
+
+.homepage-container .card-body {
+  padding: var(--space-6);
+}
+
+/* شبكات المنتجات */
+.homepage-container .row {
+  gap: var(--space-4);
+}
+
+.homepage-container .row > .col {
+  margin-bottom: var(--space-4);
+}
+
+/* قسم الميزات */
+.features-section .card {
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+  border: 1px solid var(--color-border);
+  height: 100%;
+}
+
+.features-section .card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.features-section .card i {
+  margin-bottom: var(--space-4);
+  transition: all var(--transition-fast);
+}
+
+.features-section .card:hover i {
+  transform: scale(1.1);
+  color: var(--color-primary);
+}
+
+.features-section h5 {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.features-section p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
 /* تأثيرات الحركة */
 .transition {
-  transition: all 0.3s ease;
+  transition: all var(--transition-fast);
 }
 
 .hover-shadow:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg) !important;
 }
 
 .hover-opacity-100:hover {
@@ -72,26 +168,20 @@
 
 /* بطاقات الفئات */
 .category-card {
-  transition: all 0.3s ease;
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-lg);
 }
 
 .category-card:hover {
-  transform: translateY(-5px);
-}
-
-/* بطاقات المميزات */
-.feature-card {
-  transition: all 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 
 /* العروض الخاصة */
 .special-offer {
   position: relative;
   overflow: hidden;
+  border-radius: var(--radius-lg);
 }
 
 .special-offer::before {
@@ -107,7 +197,8 @@
 
 /* التقييمات */
 .rating i {
-  font-size: 1.2rem;
+  font-size: var(--font-size-lg);
+  color: var(--color-warning);
 }
 
 /* القوائم */
@@ -115,24 +206,133 @@
   max-height: 50px;
   width: auto;
   filter: grayscale(100%);
-  transition: all 0.3s ease;
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-sm);
 }
 
 .brand-logo:hover img {
   filter: grayscale(0%);
+  transform: scale(1.05);
 }
 
-/* Responsive adjustments */
+/* تحسينات الاستجابة */
 @media (max-width: 768px) {
-  .hero-content {
-    text-align: center !important;
+  .hero-section {
+    min-height: 50vh;
+    padding: var(--space-8) 0;
+    margin-bottom: var(--space-6);
+  }
+  
+  .hero-section h1 {
+    font-size: var(--font-size-3xl);
+  }
+  
+  .hero-section p {
+    font-size: var(--font-size-base);
   }
   
   .section-title {
-    font-size: 1.8rem;
+    margin-bottom: var(--space-8);
+    font-size: var(--font-size-2xl);
   }
   
-  .section-title-bg {
-    font-size: 3rem;
+  .homepage-container .row > .col {
+    margin-bottom: var(--space-3);
+  }
+  
+  .homepage-container .card-body {
+    padding: var(--space-4);
+  }
+  
+  .features-section .card {
+    margin-bottom: var(--space-4);
+  }
+}
+
+/* تحسينات RTL */
+[dir="rtl"] .hero-section .btn i {
+  margin-right: 0;
+  margin-left: var(--space-2);
+}
+
+[dir="rtl"] .card-header .btn i {
+  margin-right: 0;
+  margin-left: var(--space-2);
+}
+
+[dir="rtl"] .section-title::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* انيميشن محسن */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-8));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-section .container > * {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-section h1 {
+  animation-delay: 0.1s;
+}
+
+.hero-section p {
+  animation-delay: 0.2s;
+}
+
+.hero-section .btn {
+  animation-delay: 0.3s;
+}
+
+/* تحسينات الأداء */
+.homepage-container img {
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.homepage-container .spinner-border {
+  color: var(--color-primary);
+}
+
+/* حالات التحميل والفراغ */
+.homepage-container .text-muted {
+  color: var(--color-text-muted) !important;
+  font-size: var(--font-size-lg);
+  padding: var(--space-8) 0;
+}
+
+/* تحسينات إضافية */
+.homepage-container .btn {
+  border-radius: var(--btn-border-radius);
+  font-weight: var(--font-weight-medium);
+}
+
+.homepage-container .card-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.homepage-container .lead {
+  font-weight: var(--font-weight-medium);
+  line-height: 1.6;
+}
+
+/* تحسين المسافات */
+.u-section {
+  padding: var(--space-16) 0;
+}
+
+@media (max-width: 768px) {
+  .u-section {
+    padding: var(--space-12) 0;
   }
 }

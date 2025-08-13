@@ -14,18 +14,27 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="product-card card h-100 shadow-sm">
-      <Link to={`/products/${product.product_id ?? product.id}`} className="text-decoration-none">
+      <Link 
+        to={`/products/${product.product_id ?? product.id}`} 
+        className="text-decoration-none"
+        aria-label={`عرض تفاصيل المنتج ${product.name}`}
+      >
         <img
           src={product.main_image_url || product.image_url || 'https://placehold.co/400x300?text=No+Image'}
-          alt={product.name}
+          alt={`صورة المنتج ${product.name}`}
           className="card-img-top"
           loading="lazy"
+          decoding="async"
           onError={(e) => { e.currentTarget.src = 'https://placehold.co/400x300?text=No+Image'; }}
         />
       </Link>
 
       <div className="card-body d-flex flex-column">
-        <Link to={`/products/${product.product_id ?? product.id}`} className="text-decoration-none text-dark">
+        <Link 
+          to={`/products/${product.product_id ?? product.id}`} 
+          className="text-decoration-none text-dark"
+          aria-label={`عرض تفاصيل المنتج ${product.name}`}
+        >
           <h5 className="card-title fw-bold mb-2">{product.name}</h5>
         </Link>
 
@@ -39,7 +48,11 @@ export default function ProductCard({ product }) {
         </div>
 
         <div className="mt-auto d-flex gap-2">
-          <Link to={`/products/${product.product_id ?? product.id}`} className="btn btn-outline-secondary w-50">
+          <Link 
+            to={`/products/${product.product_id ?? product.id}`} 
+            className="btn btn-outline-secondary w-50"
+            aria-label={`عرض تفاصيل المنتج ${product.name}`}
+          >
             التفاصيل
           </Link>
           <button
@@ -47,6 +60,7 @@ export default function ProductCard({ product }) {
             className="btn btn-primary w-50"
             onClick={onAdd}
             disabled={Number(product.stock_quantity) === 0}
+            aria-label={Number(product.stock_quantity) === 0 ? `نفد مخزون ${product.name}` : `أضف ${product.name} للسلة`}
           >
             {Number(product.stock_quantity) === 0 ? 'نفد المخزون' : 'أضف للسلة'}
           </button>

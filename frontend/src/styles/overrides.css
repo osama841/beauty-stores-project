@@ -1,0 +1,383 @@
+/* ===== Bootstrap Overrides ===== */
+/* تجاوزات Bootstrap لتطبيق نظام التصميم الموحد */
+
+/* === الألوان الأساسية === */
+:root {
+  --bs-primary: var(--color-primary);
+  --bs-secondary: var(--color-secondary);
+  --bs-success: var(--color-success);
+  --bs-danger: var(--color-danger);
+  --bs-warning: var(--color-warning);
+  --bs-info: var(--color-info);
+  --bs-light: var(--color-bg-light);
+  --bs-dark: var(--color-bg-dark);
+  
+  /* الحدود */
+  --bs-border-color: var(--color-border);
+  --bs-border-radius: var(--radius-md);
+  --bs-border-radius-sm: var(--radius-sm);
+  --bs-border-radius-lg: var(--radius-lg);
+  
+  /* الخطوط */
+  --bs-font-sans-serif: var(--font-sans);
+  --bs-body-font-family: var(--font-sans);
+  --bs-body-font-size: var(--font-size-base);
+  --bs-body-line-height: 1.6;
+  
+  /* المسافات */
+  --bs-gutter-x: var(--space-6);
+  --bs-gutter-y: var(--space-6);
+}
+
+/* === الأزرار === */
+.btn {
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--btn-border-radius);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.btn:focus {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background-color: transparent;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-text-inverse);
+}
+
+.btn-light {
+  background-color: var(--color-bg-light);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn-rounded {
+  border-radius: var(--radius-full);
+}
+
+.btn-sm {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  min-height: 36px;
+}
+
+.btn-lg {
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--font-size-lg);
+  min-height: 52px;
+}
+
+/* === النماذج === */
+.form-control {
+  font-family: var(--font-sans);
+  border: 1px solid var(--color-border);
+  border-radius: var(--input-border-radius);
+  padding: var(--input-padding-y) var(--input-padding-x);
+  min-height: var(--input-height);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 0.2rem rgba(106, 142, 236, 0.25);
+  outline: none;
+}
+
+.form-label {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.invalid-feedback {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-1);
+}
+
+.form-select {
+  border: 1px solid var(--color-border);
+  border-radius: var(--input-border-radius);
+  padding: var(--input-padding-y) var(--input-padding-x);
+  min-height: var(--input-height);
+}
+
+/* === البطاقات === */
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  background-color: var(--color-bg-light);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-4) var(--card-padding);
+  font-weight: var(--font-weight-medium);
+}
+
+.card-body {
+  padding: var(--card-padding);
+}
+
+.card-footer {
+  background-color: var(--color-bg-light);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-4) var(--card-padding);
+}
+
+/* === التنبيهات === */
+.alert {
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.alert-primary {
+  background-color: rgba(106, 142, 236, 0.1);
+  border-color: rgba(106, 142, 236, 0.2);
+  color: var(--color-primary);
+}
+
+.alert-danger {
+  background-color: rgba(231, 76, 60, 0.1);
+  border-color: rgba(231, 76, 60, 0.2);
+  color: var(--color-danger);
+}
+
+.alert-success {
+  background-color: rgba(40, 167, 69, 0.1);
+  border-color: rgba(40, 167, 69, 0.2);
+  color: var(--color-success);
+}
+
+/* === المودال === */
+.modal-content {
+  border-radius: var(--radius-lg);
+  border: none;
+  box-shadow: var(--shadow-xl);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-6);
+}
+
+.modal-body {
+  padding: var(--space-6);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-6);
+  gap: var(--space-3);
+}
+
+/* === Offcanvas/Drawer === */
+.offcanvas {
+  border: none;
+  box-shadow: var(--shadow-2xl);
+}
+
+.offcanvas-header {
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.offcanvas-body {
+  padding: var(--space-6);
+}
+
+.offcanvas-backdrop {
+  background-color: var(--color-bg-overlay);
+}
+
+/* === Navbar/Header === */
+.navbar {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg) !important;
+  backdrop-filter: blur(10px);
+}
+
+.navbar-brand {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xl);
+  color: var(--color-text) !important;
+}
+
+.navbar-nav .nav-link {
+  color: var(--color-text) !important;
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.navbar-nav .nav-link:hover {
+  background-color: var(--color-bg-light);
+  color: var(--color-primary) !important;
+}
+
+.navbar-toggler {
+  border: none;
+  padding: var(--space-2);
+  color: var(--color-text);
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+  outline: 2px solid var(--color-border-focus);
+}
+
+/* === Pagination === */
+.pagination .page-link {
+  color: var(--color-text);
+  border-color: var(--color-border);
+  padding: var(--space-3) var(--space-4);
+}
+
+.pagination .page-link:hover {
+  background-color: var(--color-bg-light);
+  color: var(--color-primary);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* === Utilities العامة === */
+.text-muted-2 {
+  color: var(--color-text-light) !important;
+}
+
+.bg-light-2 {
+  background-color: var(--color-bg-light) !important;
+}
+
+.border-light-2 {
+  border-color: var(--color-border) !important;
+}
+
+/* مسافات موحدة للأقسام */
+.u-section {
+  padding: var(--space-16) 0;
+}
+
+.u-section-sm {
+  padding: var(--space-12) 0;
+}
+
+.u-section-lg {
+  padding: var(--space-20) 0;
+}
+
+/* فجوات موحدة */
+.u-gap-1 { gap: var(--space-1) !important; }
+.u-gap-2 { gap: var(--space-2) !important; }
+.u-gap-3 { gap: var(--space-3) !important; }
+.u-gap-4 { gap: var(--space-4) !important; }
+.u-gap-5 { gap: var(--space-5) !important; }
+.u-gap-6 { gap: var(--space-6) !important; }
+
+/* تحسينات الاستجابة */
+@media (max-width: 768px) {
+  .btn {
+    min-height: 48px; /* لمسات أسهل في الجوال */
+  }
+  
+  .form-control {
+    min-height: 48px;
+  }
+  
+  .card-body {
+    padding: var(--space-4);
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: var(--space-4);
+  }
+  
+  .offcanvas-header,
+  .offcanvas-body {
+    padding: var(--space-4);
+  }
+}
+
+/* === تحسينات RTL === */
+[dir="rtl"] .navbar-nav {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+[dir="rtl"] .modal-header .btn-close {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+[dir="rtl"] .pagination {
+  direction: rtl;
+}
+
+/* === التركيز الواضح للوصولية === */
+.btn:focus-visible,
+.form-control:focus-visible,
+.nav-link:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* تحسين ألوان التباين */
+.text-muted {
+  color: var(--color-text-muted) !important;
+}
+
+.text-light {
+  color: var(--color-text-light) !important;
+}
